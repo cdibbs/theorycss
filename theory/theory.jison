@@ -21,7 +21,53 @@ tdef
 	| fdl
 	;
 	
+sdl
+	: sdef sdl
+	|
+	;
+	
+fdl
+	: fdef fdl
+	|
+	;
 
+sdef
+	: SETSTART id TYPIFY id SETEND eqdl
+	| SETSTART id SETEND eqdl
+	;
+	
+fdef
+	: FUNCTION id LPAREN plist RPAREN IMPLICATION e
+	;
+	
+eqdl
+	: id ASSIGN e
+	| id CASEASSIGN clist
+	;
+
+clist
+	: cdef clist
+	|
+	;
+
+cdef
+	: id IMPLICATION e
+	;
+
+plist
+	: pdef plist
+	|
+	;
+	
+pdef
+	: id id COMMA
+	| id id ASSIGN lit
+	;
+	
+lit
+	: NATLITERAL
+	| NULL
+	;	
 
 var_list
   : var_list var
@@ -37,7 +83,7 @@ var
 
 e
     : NATLITERAL
-    | NUL
+    | NULL
     | id
     | IF LPAREN e RPAREN LBRACE el RBRACE ELSE LBRACE el RBRACE
     | FOR LPAREN e SEMICOLON e SEMICOLON e RPAREN LBRACE el RBRACE
