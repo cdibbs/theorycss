@@ -3,46 +3,72 @@
 %%
 
 file
-	: tlist ENDOFFILE
-		{ return $tlist; }
+	: theorylist ENDOFFILE
+		{ return $theorylist; }
+	|
 	;
 
-tlist
-	: t tlist
-	|
+theorylist
+	: theory theorylist
+	| theory
 	; 
-t
-	: THEORY id EXTENDS id LBRACE tdef RBRACE
-	| THEORY id LBRACE tdef RBRACE
+	
+theory
+	: THEORY id EXTENDS id LBRACE theorybody RBRACE
+	| THEORY id LBRACE theorybody RBRACE
 	;
 	
-tdef
-	: sdl
-	| fdl
-	;
-	
-sdl
-	: sdef sdl
+theorybody
+	: deflist
 	|
 	;
+
+def
+	: sdef
+	| fdef
+	;
 	
-fdl
-	: fdef fdl
-	|
+deflist
+	: def deflist
+	| def
+	;
+	
+id
+	: ID
+	;
+
+tuplevarlist
+	: id COMMA tuplevarlist
+	| id
+	;
+	
+typedef
+	: id
+	| id LBRACK RBRACK
 	;
 
 sdef
-	: SETSTART id TYPIFY id SETEND eqdl
-	| SETSTART id SETEND eqdl
+	: SETSTART id TYPIFY id SETEND eqdeflist
+	| SETSTART id SETEND eqdeflist
 	;
 	
 fdef
-	: FUNCTION id LPAREN plist RPAREN IMPLICATION e
+	: FUNCTION id LPAREN plist RPAREN TYPIFY typedef IMPLICATION e EOL
 	;
 	
-eqdl
-	: id ASSIGN e
-	| id CASEASSIGN clist
+lside
+	: id
+	| LPAREN tuplevarlist RPAREN
+	;
+	
+eqdef
+	: lside ASSIGN e EOL
+	| lside CASEASSIGN clist EOL
+	;
+	
+eqdeflist
+	: eqdef eqdeflist
+	| eqdef
 	;
 
 clist
@@ -55,39 +81,41 @@ cdef
 	;
 
 plist
-	: pdef plist
-	|
+	: pdef COMMA plist
+	| pdef
 	;
 	
 pdef
-	: id id COMMA
-	| id id ASSIGN lit
+	: typedef id
+	| typedef id ASSIGN lit
 	;
 	
 lit
 	: NATLITERAL
 	| NULL
-	;	
-
-var_list
-  : var_list var
-    { $$ = $var_list; $$.unshift($var); }
-  | var
-    { $$ = [$var]; }
-  ;
-
-var
-  : VAR
-    { $$ = yytext; }
-  ;
+	;
+	
+boollit
+	: TRUE
+		{ $$ = true; }
+	| FALSE
+		{ $$ = false; }
+	;
+	
+elist
+	: e COMMA elist
+	| e
+	;
 
 e
     : NATLITERAL
     | NULL
     | id
+    | id LPAREN elist RPAREN
+    | STRING_LIT
+    ;/*
     | IF LPAREN e RPAREN LBRACE el RBRACE ELSE LBRACE el RBRACE
     | FOR LPAREN e SEMICOLON e SEMICOLON e RPAREN LBRACE el RBRACE
-    | READNAT LPAREN RPAREN
     | PRINTNAT LPAREN e RPAREN
     | e PLUS e
     | e MINUS e
@@ -102,4 +130,4 @@ e
     | id LPAREN e RPAREN
     | e DOT id LPAREN e RPAREN
     | LPAREN e RPAREN
-    ;
+    ;*/

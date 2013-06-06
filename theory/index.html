@@ -1,0 +1,38 @@
+<html>
+	<head>
+		<title>Theory Tests</title>
+		<script type='text/javascript' src='http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js'></script>
+		<script type='text/javascript' src='theory.js'></script>
+		<script type='text/javascript'>
+			$(document).ready(function() {
+				var text = $('#kludge').text();
+				console.log(text);
+				var result = theory.parse(text);
+				console.log(result);
+			});
+		</script>
+		<script type='text/x-theory' id='kludge'>
+			/* my very first theory */
+			theory Bob {
+				[-- Colors --]
+				dominant = rgba(255,255,0,1);
+				(decor1, decor2) = ComplementPair(dominant, 3);
+				scrunched @=
+					desktop -> decor1
+					tablet -> decor2
+					mobile -> rgba(255,0,0,1);
+
+				[-- Media --]
+				desktop = "screen and (width >= 1200px)";
+				tablet = "screen and (width >= 800px)";
+				mobile = "screen and (width >= 400px)";
+				
+				fn Chris(Color variable) :: Color -> 0;
+			}
+		</script>
+	</head>
+	<body>
+		
+		
+	</body>
+</html>
