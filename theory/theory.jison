@@ -10,17 +10,22 @@ file
 
 theorylist
 	: theory theorylist
+		{ $$ = $theorylist; $$.unshift($theory); }
 	| theory
+		{ $$ = [$theory]; }
 	; 
 	
 theory
 	: THEORY id EXTENDS id LBRACE theorybody RBRACE
+		{ $$ = new yy.Theory($id, $theorybody, $4); }
 	| THEORY id LBRACE theorybody RBRACE
+		{ $$ = new yy.Theory($id, $theorybody); }
 	;
 	
 theorybody
 	: deflist
 	|
+		{ $$ = []; }
 	;
 
 def
@@ -30,7 +35,9 @@ def
 	
 deflist
 	: def deflist
+		{ $$ = $deflist; $$.unshift($def); }
 	| def
+		{ $$ = [$def]; }
 	;
 	
 id
@@ -39,60 +46,82 @@ id
 
 tuplevarlist
 	: id COMMA tuplevarlist
+		{ $$ = $tuplevarlist; $$.unshift($id); }
 	| id
+		{ $$ = [ $id ]; }
 	;
 	
 typedef
 	: id
+		{ $$ = new yy.Type($id); }
 	| id LBRACK RBRACK
+		{ $$ = new yy.Type("Array", $id); }
 	;
 
 sdef
 	: SETSTART id TYPIFY id SETEND eqdeflist
+		{ $$ = new yy.SetDef($id, $4, $eqdeflist); }
 	| SETSTART id SETEND eqdeflist
+		{ $$ = new yy.SetDef($id, $id, $eqdeflist); }
 	;
 	
 fdef
-	: FUNCTION id LPAREN plist RPAREN TYPIFY typedef IMPLICATION e EOL
+	: FUNCTION id LPAREN paramlist RPAREN TYPIFY typedef IMPLICATION e EOL
+		{ $$ = new yy.FnDef($id, $paramlist, $typedef, $e); }
 	;
 	
 lside
 	: id
+		{ $$ = [ $id ]; }
 	| LPAREN tuplevarlist RPAREN
+		{ $$ = $tuplevarlist; }
 	;
 	
 eqdef
 	: lside ASSIGN e EOL
-	| lside CASEASSIGN clist EOL
+		{ $$ = new yy.Assignment($lside, $e); }
+	| lside CASEASSIGN caselist EOL
+		{ $$ = new yy.CaseAssignment($lside, $caselist); }
 	;
 	
 eqdeflist
 	: eqdef eqdeflist
+		{ $$ = $eqdeflist; $$.unshift($eqdef); }
 	| eqdef
+		{ $$ = [ $eqdef ]; }
 	;
 
-clist
-	: cdef clist
+caselist
+	: casedef caselist
+		{ $$ = $caselist; $caselist.unshift($casedef); }
 	|
+		{ $$ = []; }
 	;
 
-cdef
+casedef
 	: id IMPLICATION e
+		{ $$ = new yy.CaseDef($id, $e); }
 	;
 
-plist
-	: pdef COMMA plist
-	| pdef
+paramlist
+	: paramdef COMMA paramlist
+		{ $$ = $paramlist; $$.unshift($paramdef); }
+	| paramdef
+		{ $$ = [ $paramdef ]; }
 	;
 	
-pdef
+paramdef
 	: typedef id
+		{ $$ = new yy.ParamDef($typedef, $id); }
 	| typedef id ASSIGN lit
+		{ $$ = new yy.ParamDef($typedef, $id, $lit); }
 	;
 	
 lit
 	: NATLITERAL
+		{ $$ = parseInt($1); }
 	| NULL
+		{ $$ = null; }
 	;
 	
 boollit
@@ -104,7 +133,9 @@ boollit
 	
 elist
 	: e COMMA elist
+		{ $$ = $elist; $$.unshift($e); }
 	| e
+		{ $$ = [ $e ]; }
 	;
 
 e

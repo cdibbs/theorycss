@@ -3,17 +3,17 @@
 		<title>Theory Tests</title>
 		<script type='text/javascript' src='http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js'></script>
 		<script type='text/javascript' src='theory.js'></script>
+		<script type='text/javascript' src='interpreter.js'></script>
 		<script type='text/javascript'>
 			$(document).ready(function() {
-				var text = $('#kludge').text();
-				console.log(text);
-				var result = theory.parse(text);
+				theory.yy = theoryInterpreter;
+				var result = theory.parse($('#kludge').text());
 				console.log(result);
 			});
 		</script>
 		<script type='text/x-theory' id='kludge'>
 			/* my very first theory */
-			theory Bob {
+			theory Main {
 				[-- Colors --]
 				dominant = rgba(255,255,0,1);
 				(decor1, decor2) = ComplementPair(dominant, 3);
@@ -28,6 +28,10 @@
 				mobile = "screen and (width >= 400px)";
 				
 				fn Chris(Color variable) :: Color -> 0;
+			}
+			
+			theory Another extends Bob {
+				
 			}
 		</script>
 	</head>

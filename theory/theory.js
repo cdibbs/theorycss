@@ -74,7 +74,7 @@
 var theory = (function(){
 var parser = {trace: function trace() { },
 yy: {},
-symbols_: {"error":2,"file":3,"theorylist":4,"ENDOFFILE":5,"theory":6,"THEORY":7,"id":8,"EXTENDS":9,"LBRACE":10,"theorybody":11,"RBRACE":12,"deflist":13,"def":14,"sdef":15,"fdef":16,"ID":17,"tuplevarlist":18,"COMMA":19,"typedef":20,"LBRACK":21,"RBRACK":22,"SETSTART":23,"TYPIFY":24,"SETEND":25,"eqdeflist":26,"FUNCTION":27,"LPAREN":28,"plist":29,"RPAREN":30,"IMPLICATION":31,"e":32,"EOL":33,"lside":34,"eqdef":35,"ASSIGN":36,"CASEASSIGN":37,"clist":38,"cdef":39,"pdef":40,"lit":41,"NATLITERAL":42,"NULL":43,"boollit":44,"TRUE":45,"FALSE":46,"elist":47,"STRING_LIT":48,"$accept":0,"$end":1},
+symbols_: {"error":2,"file":3,"theorylist":4,"ENDOFFILE":5,"theory":6,"THEORY":7,"id":8,"EXTENDS":9,"LBRACE":10,"theorybody":11,"RBRACE":12,"deflist":13,"def":14,"sdef":15,"fdef":16,"ID":17,"tuplevarlist":18,"COMMA":19,"typedef":20,"LBRACK":21,"RBRACK":22,"SETSTART":23,"TYPIFY":24,"SETEND":25,"eqdeflist":26,"FUNCTION":27,"LPAREN":28,"paramlist":29,"RPAREN":30,"IMPLICATION":31,"e":32,"EOL":33,"lside":34,"eqdef":35,"ASSIGN":36,"CASEASSIGN":37,"caselist":38,"casedef":39,"paramdef":40,"lit":41,"NATLITERAL":42,"NULL":43,"boollit":44,"TRUE":45,"FALSE":46,"elist":47,"STRING_LIT":48,"$accept":0,"$end":1},
 terminals_: {2:"error",5:"ENDOFFILE",7:"THEORY",9:"EXTENDS",10:"LBRACE",12:"RBRACE",17:"ID",19:"COMMA",21:"LBRACK",22:"RBRACK",23:"SETSTART",24:"TYPIFY",25:"SETEND",27:"FUNCTION",28:"LPAREN",30:"RPAREN",31:"IMPLICATION",33:"EOL",36:"ASSIGN",37:"CASEASSIGN",42:"NATLITERAL",43:"NULL",45:"TRUE",46:"FALSE",48:"STRING_LIT"},
 productions_: [0,[3,2],[3,0],[4,2],[4,1],[6,7],[6,5],[11,1],[11,0],[14,1],[14,1],[13,2],[13,1],[8,1],[18,3],[18,1],[20,1],[20,3],[15,6],[15,4],[16,10],[34,1],[34,3],[35,4],[35,4],[26,2],[26,1],[38,2],[38,0],[39,3],[29,3],[29,1],[40,2],[40,4],[41,1],[41,1],[44,1],[44,1],[47,3],[47,1],[32,1],[32,1],[32,1],[32,4],[32,1]],
 performAction: function anonymous(yytext, yyleng, yylineno, yy, yystate /* action[1] */, $$ /* vstack */, _$ /* lstack */) {
@@ -84,9 +84,71 @@ var $0 = $$.length - 1;
 switch (yystate) {
 case 1: return $$[$0-1]; 
 break;
+case 3: this.$ = $$[$0]; this.$.unshift($$[$0-1]); 
+break;
+case 4: this.$ = [$$[$0]]; 
+break;
+case 5: this.$ = new yy.Theory($$[$0-5], $$[$0-1], $$[$0-3]); 
+break;
+case 6: this.$ = new yy.Theory($$[$0-3], $$[$0-1]); 
+break;
+case 8: this.$ = []; 
+break;
+case 11: this.$ = $$[$0]; this.$.unshift($$[$0-1]); 
+break;
+case 12: this.$ = [$$[$0]]; 
+break;
+case 14: this.$ = $$[$0]; this.$.unshift($$[$0-2]); 
+break;
+case 15: this.$ = [ $$[$0] ]; 
+break;
+case 16: this.$ = new yy.Type($$[$0]); 
+break;
+case 17: this.$ = new yy.Type("Array", $$[$0-2]); 
+break;
+case 18: this.$ = new yy.SetDef($$[$0-4], $$[$0-2], $$[$0]); 
+break;
+case 19: this.$ = new yy.SetDef($$[$0-2], $$[$0-2], $$[$0]); 
+break;
+case 20: this.$ = new yy.FnDef($$[$0-8], $$[$0-6], $$[$0-3], $$[$0-1]); 
+break;
+case 21: this.$ = [ $$[$0] ]; 
+break;
+case 22: this.$ = $$[$0-1]; 
+break;
+case 23: this.$ = new yy.Assignment($$[$0-3], $$[$0-1]); 
+break;
+case 24: this.$ = new yy.CaseAssignment($$[$0-3], $$[$0-1]); 
+break;
+case 25: this.$ = $$[$0]; this.$.unshift($$[$0-1]); 
+break;
+case 26: this.$ = [ $$[$0] ]; 
+break;
+case 27: this.$ = $$[$0]; $$[$0].unshift($$[$0-1]); 
+break;
+case 28: this.$ = []; 
+break;
+case 29: this.$ = new yy.CaseDef($$[$0-2], $$[$0]); 
+break;
+case 30: this.$ = $$[$0]; this.$.unshift($$[$0-2]); 
+break;
+case 31: this.$ = [ $$[$0] ]; 
+break;
+case 32: this.$ = new yy.ParamDef($$[$0-1], $$[$0]); 
+break;
+case 33: this.$ = new yy.ParamDef($$[$0-3], $$[$0-2], $$[$0]); 
+break;
+case 34: this.$ = parseInt($$[$0]); 
+break;
+case 35: this.$ = null; 
+break;
 case 36: this.$ = true; 
 break;
 case 37: this.$ = false; 
+break;
+case 38: this.$ = $$[$0]; this.$.unshift($$[$0-2]); 
+break;
+case 39: this.$ = [ $$[$0] ]; 
 break;
 }
 },
