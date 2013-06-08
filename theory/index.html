@@ -12,11 +12,43 @@
 			});
 		</script>
 		<script type='text/x-theory' id='kludge'>
+			data Number a = long a | int a | float a | double a;
+			data RGBa c = (int r, int g, int b, float a);
+			data HSLa c = (float h, float s, float l, float a);
+			data Color c = RGBa c | HSLa c;
+			
+			
 			/* my very first theory */
 			theory Color {
-				needs int red, int green, int blue, float alpha;				
 				
-				fn rgba(int r, int g, int b, int a) :: Color -> new Color(r, g, b, a);
+				namespace Primary {
+					Red = Color(255, 0, 0, 1),
+					Yellow = RGBa(255, 255, 0, 1),
+					Blue = RGBa(0, 0, 255, 1)
+				};
+				
+				namespace Secondary {
+					... Primary ...
+					Orange = (Red + Yellow) / 2,
+					Purple = (Red + Blue) / 2,
+					Green = (Yellow + Blue) / 2
+				};
+				
+				namespace Tertiary {
+					... Secondary ...
+					Vermilion = (Red + Orange) / 2,
+					Amber = (Yellow + Orange) / 2,
+					Chartreuse = (Yellow + Green) / 2,
+					Viridian = (Blue + Green) / 2,
+					Violet = (Blue + Purple) / 2,
+					Magenta = (Red + Purple) / 2
+				};
+								
+				fn Tuple rgba(int r, int g, int b, int a = 1) -> new Tuple(r, g, b, a);
+				
+				fn Tuple ryba(int r, int y, int b, int a = 1) -> new Tuple(r, (y+b)/2, b, a);
+				
+				fn Tuple hsla(int h, int s, int l, int a = 1) -> new Tuple();
 				
 				/**
 	 			* Darkens a color by a decimal. p = 0.05 means darken L by 5%, in HSL.
@@ -66,7 +98,7 @@
 				tablet = "screen and (width >= 800px)";
 				mobile = "screen and (width >= 400px)";
 				
-				fn Chris(Color variable) :: Color -> 0;
+				fn Color Chris(Color variable) -> 0;
 			}
 			
 			theory Another extends Bob {

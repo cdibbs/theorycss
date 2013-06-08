@@ -14,7 +14,9 @@ id			[a-zA-Z][a-zA-Z0-9]*
 "extends"		return 'EXTENDS';
 "true"			return 'TRUE';
 "false"			return 'FALSE';
-"prefix"		return 'PREFIX';
+"namespace"		return 'PREFIX';
+"data"			return 'DATA';
+"needs"			return 'NEEDS';
 "fn"			return 'FUNCTION';
 "->"			return 'IMPLICATION';
 "map"			return 'MAP';
@@ -41,6 +43,7 @@ id			[a-zA-Z][a-zA-Z0-9]*
 "*"				return 'TIMES';
 "/"				return 'DIVIDE';
 "||"			return 'OR';
+"|"				return 'PIPE';
 "&&"			return 'AND';
 "{"				return 'LBRACE';
 "}"				return 'RBRACE';
