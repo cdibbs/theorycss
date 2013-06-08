@@ -13,6 +13,45 @@
 		</script>
 		<script type='text/x-theory' id='kludge'>
 			/* my very first theory */
+			theory Color {
+				needs int red, int green, int blue, float alpha;				
+				
+				fn rgba(int r, int g, int b, int a) :: Color -> new Color(r, g, b, a);
+				
+				/**
+	 			* Darkens a color by a decimal. p = 0.05 means darken L by 5%, in HSL.
+	 			*/ 
+				fn Color Darken(Color c, Number p) -> c * (1 - p);
+
+				/**
+	 			* Lightens a color by a decimal. p = 0.05 means lighten L by 5%, in HSL.
+	 			*/
+				fn Color Lighten(Color c, Number p) -> c * (1 + p);
+
+				/**
+				 * Sets the lightness of a Color (range 0.0 to 1.0) in HSL
+				 */
+				fn Color SetLightness(Color c, Number p) -> (c.toHSLa() and (-1,-1,0,-1)) or (0,0,-p,0);
+			
+				/**
+				 * 
+				 */
+				fn Color Complement(Color c) -> Rotate(c, 180);
+			
+				fn Color Rotate(Color c, Number degrees) -> 0;
+			
+				/**
+				 * Given a color, find the two colors adjacent to its complement at the given
+				 * division level of the color wheel (1 = primary colors, 2 = secondary, etc),
+				 * where the level indicates 3*2^(level-1) divisions of the wheel. The complement 
+				 * pair on the tertiary wheel (level = 3) would each be +/- 15 degrees from
+				 * the complement.  
+				 */
+				fn Color[] ComplementPair(Color c, Number level)
+					-> [ Rotate(c, 180-360/3*2^(level-1)),
+						 Rotate(c, 180+360/3*2^(level-1)) ];				
+			}
+			
 			theory Main {
 				[-- Colors --]
 				dominant = rgba(255,255,0,1);
