@@ -16,6 +16,19 @@
 			data RGBa c = (int r, int g, int b, float a);
 			data HSLa c = (float h, float s, float l, float a);
 			data Color c = RGBa c | HSLa c;
+			data ImgCtx ctx = (string source, string alt, image img);
+			
+			image OurOffice {
+				source = '/img/stock-photo.jpg';
+				alt = 'Our office'
+				
+				[-- Contexts --]
+				fn ImgCtx Bannerized(Color tint = Tertiary.Veridian)
+					-> filter(tint, trim(scale(self, ...)));
+				
+				fn ImgCtx Taggable()
+					-> doStuffToEnhanceIt();
+			}
 			
 			
 			/* my very first theory */
