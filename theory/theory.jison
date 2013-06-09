@@ -27,6 +27,13 @@ theorybody
 	|
 		{ $$ = []; }
 	;
+	
+data
+	: DATA paramlist = dtypelist EOL
+	;
+	
+dtypelist
+	: 
 
 def
 	: sdef

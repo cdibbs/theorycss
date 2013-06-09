@@ -98,13 +98,17 @@
 			}
 			
 			theory Main {
-				[-- Colors --]
+				[-- Colors :: Color --]
 				dominant = rgba(255,255,0,1);
 				(decor1, decor2) = ComplementPair(dominant, 3);
 				scrunched @=
 					desktop -> decor1
 					tablet -> decor2
 					mobile -> rgba(255,0,0,1);
+					
+				[-- Assertions --]
+				IsTrue(Contrast(Colors.scrunched, Colors.dominant) > 0.5);
+				AreEqual()
 
 				[-- Media --]
 				desktop = "screen and (width >= 1200px)";
@@ -112,6 +116,11 @@
 				mobile = "screen and (width >= 400px)";
 				
 				fn Color Chris(Color variable) -> 0;
+			}
+			
+			test Main {
+				[-- Colors :: Color --]
+				IsTrue(Contrast(scrunched, dominant) > Contrasts.RGColorBlind_EasilyReadable);
 			}
 			
 			theory Another extends Bob {
