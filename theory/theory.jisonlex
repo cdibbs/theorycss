@@ -26,10 +26,15 @@ id			[a-zA-Z][a-zA-Z0-9]*
 {id}			return 'ID';
 "reduce"		return 'REDUCE';
 "if"			return 'IF';
+"int"			return 'INT';
+"long"			return 'LONG';
+"float"			return 'FLOAT';
+"double"		return 'DOUBLE';
 "else"			return 'ELSE';
 "else"\s+"if"	return 'ELSEIF'; 
 "[--"			return 'SETSTART';
 "--]"			return 'SETEND';
+"..."			return 'ELLIPSIS';
 "eq"|"=="		return 'EQUALITY';
 "gt"|">"		return 'GT';
 "lt"|"<"		return 'LT';

@@ -27,6 +27,27 @@ theorybody
 	|
 		{ $$ = []; }
 	;
+	
+data
+	: DATA paramlist = dtypelist EOL
+	;
+	
+dtypelist
+	: paramdef PIPE dtypelist EOL
+		{ $$ = $dtypelist; $$.unshift($paramdef); }
+	| paramdef
+		{ $$ = [$paramdef]; }
+	;
+	
+namespace
+	: NAMESPACE id LBRACK nsbody RBRACK EOL
+	;
+	
+nsbody
+	: spacedef spacedeflist
+		{ $$ = $spacedeflist; $$.unshift($spacedef); }
+	|
+	;
 
 def
 	: sdef
