@@ -161,6 +161,7 @@ elist
 
 e
     : NATLITERAL
+    | HEXCOLOR
     | NULL
     | id
     | id LPAREN elist RPAREN

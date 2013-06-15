@@ -2,6 +2,7 @@ digit                       [0-9]
 esc                         "\\"
 int                         "-"?(?:[0-9]|[1-9][0-9]+)
 exp                         (?:[eE][-+]?[0-9]+)
+hex							[0-9A-Fa-f]
 frac                        (?:\.[0-9]+)
 id			[a-zA-Z][a-zA-Z0-9]*
 
@@ -14,7 +15,9 @@ id			[a-zA-Z][a-zA-Z0-9]*
 "extends"		return 'EXTENDS';
 "true"			return 'TRUE';
 "false"			return 'FALSE';
-"namespace"		return 'PREFIX';
+"ns"			return 'PREFIX';
+"test"			return 'TEST';
+"image"			return 'IMAGE';
 "data"			return 'DATA';
 "needs"			return 'NEEDS';
 "fn"			return 'FUNCTION';
@@ -23,6 +26,7 @@ id			[a-zA-Z][a-zA-Z0-9]*
 "for"			return 'FOR';
 "null"			return 'NULL';
 {digit}+		return 'NATLITERAL';
+"#"{hex}+		return 'HEXCOLOR';
 {id}			return 'ID';
 "reduce"		return 'REDUCE';
 "if"			return 'IF';
@@ -34,6 +38,8 @@ id			[a-zA-Z][a-zA-Z0-9]*
 "else"\s+"if"	return 'ELSEIF'; 
 "[--"			return 'SETSTART';
 "--]"			return 'SETEND';
+"[["			return 'XPATHSTART';
+"]]"			return 'XPATHEND';
 "..."			return 'ELLIPSIS';
 "eq"|"=="		return 'EQUALITY';
 "gt"|">"		return 'GT';

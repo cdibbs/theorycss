@@ -1,7 +1,7 @@
-var theoryInterpreter = (function(){
+var theoryCompiler = (function(){
 	"use strict";
 	
-	var interpreter = {};
+	var compiler = {};
 	var Theory = function(name, body, ext) {
 		this.Name = name;
 		this.Body = body;
@@ -10,7 +10,7 @@ var theoryInterpreter = (function(){
 	Theory.prototype.Name = null;
 	Theory.prototype.Body = null;
 	Theory.prototype.Extends = null;
-	interpreter.Theory = Theory;
+	compiler.Theory = Theory;
 	
 	var Type = function(name, subtype) {
 		this.Name = name;
@@ -18,7 +18,7 @@ var theoryInterpreter = (function(){
 	};
 	Type.prototype.Name = null;
 	Type.prototype.SubType = null;
-	interpreter.Type = Type;
+	compiler.Type = Type;
 	
 	var SetDef = function(name, type, deflist) {
 		this.Name = name;
@@ -28,7 +28,7 @@ var theoryInterpreter = (function(){
 	SetDef.prototype.Name = null;
 	SetDef.prototype.Type = null;
 	SetDef.prototype.DefList = null;
-	interpreter.SetDef = SetDef;
+	compiler.SetDef = SetDef;
 	
 	var FnDef = function(name, paramList, retType, expr) {
 		this.Name = name;
@@ -40,7 +40,7 @@ var theoryInterpreter = (function(){
 	FnDef.prototype.Params = null;
 	FnDef.prototype.RetType = null;
 	FnDef.prototype.Expr = null;
-	interpreter.FnDef = FnDef;
+	compiler.FnDef = FnDef;
 	
 	var Assignment = function(lside, expr) {
 		this.LeftSide = lside;
@@ -48,7 +48,7 @@ var theoryInterpreter = (function(){
 	};
 	Assignment.prototype.LeftSide = null;
 	Assignment.prototype.Expr = null;
-	interpreter.Assignment = Assignment;
+	compiler.Assignment = Assignment;
 	
 	var CaseAssignment = function(lside, caseList) {
 		this.LeftSide = lside;
@@ -56,7 +56,7 @@ var theoryInterpreter = (function(){
 	};
 	CaseAssignment.prototype.LeftSide = null;
 	CaseAssignment.prototype.CaseList = null;
-	interpreter.CaseAssignment = CaseAssignment;
+	compiler.CaseAssignment = CaseAssignment;
 	
 	var CaseDef = function(id, expr) {
 		this.Id = id;
@@ -64,7 +64,7 @@ var theoryInterpreter = (function(){
 	};
 	CaseDef.prototype.Id = null;
 	CaseDef.prototype.Expr = null;
-	interpreter.CaseDef = CaseDef;
+	compiler.CaseDef = CaseDef;
 	
 	var ParamDef = function(type, id, def) {
 		this.Type = type;
@@ -74,7 +74,7 @@ var theoryInterpreter = (function(){
 	ParamDef.prototype.Type = null;
 	ParamDef.prototype.Id = null;
 	ParamDef.prototype.Default = null;
-	interpreter.ParamDef = ParamDef;
+	compiler.ParamDef = ParamDef;
 	
-	return interpreter;
+	return compiler;
 })();

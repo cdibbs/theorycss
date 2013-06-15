@@ -3,23 +3,26 @@
 		<title>Theory Tests</title>
 		<script type='text/javascript' src='http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js'></script>
 		<script type='text/javascript' src='theory.js'></script>
-		<script type='text/javascript' src='interpreter.js'></script>
+		<script type='text/javascript' src='compiler.js'></script>
 		<script type='text/javascript'>
 			$(document).ready(function() {
-				theory.yy = theoryInterpreter;
+				theory.yy = theoryCompiler;
 				var result = theory.parse($('#kludge').text());
 				console.log(result);
 			});
 		</script>
 		<script type='text/x-theory' id='kludge'>
+			/*
 			data Number a = long a | int a | float a | double a;
 			data RGBa c = (int r, int g, int b, float a);
 			data HSLa c = (float h, float s, float l, float a);
 			data Color c = RGBa c | HSLa c;
+			data Tree a =  Leaf a | Branch [Tree a]
 			data ImgCtx ctx = (string source, string alt, image img);
+			*/
 			
 			image OurOffice {
-				source = '/img/stock-photo.jpg';
+				src = '/img/stock-photo.jpg';
 				alt = 'Our office'
 				
 				[-- Contexts --]
@@ -34,27 +37,29 @@
 			/* my very first theory */
 			theory Color {
 				
-				namespace Primary {
-					Red = Color(255, 0, 0, 1),
-					Yellow = RGBa(255, 255, 0, 1),
-					Blue = RGBa(0, 0, 255, 1)
-				};
-				
-				namespace Secondary {
-					... Primary ...
-					Orange = (Red + Yellow) / 2,
-					Purple = (Red + Blue) / 2,
-					Green = (Yellow + Blue) / 2
-				};
-				
-				namespace Tertiary {
-					... Secondary ...
-					Vermilion = (Red + Orange) / 2,
-					Amber = (Yellow + Orange) / 2,
-					Chartreuse = (Yellow + Green) / 2,
-					Viridian = (Blue + Green) / 2,
-					Violet = (Blue + Purple) / 2,
-					Magenta = (Red + Purple) / 2
+				ns RYB {
+					ns Primary {
+						Red = Color(255, 0, 0, 1);
+						Yellow = RGBa(255, 255, 0, 1);
+						Blue = RGBa(0, 0, 255, 1);
+					};
+					
+					ns Secondary {
+						... Primary ...
+						Orange = (Red + Yellow) / 2;
+						Purple = (Red + Blue) / 2;
+						Green = (Yellow + Blue) / 2;
+					};
+					
+					ns Tertiary {
+						... Secondary ...
+						Vermilion = (Red + Orange) / 2;
+						Amber = (Yellow + Orange) / 2;
+						Chartreuse = (Yellow + Green) / 2;
+						Viridian = (Blue + Green) / 2;
+						Violet = (Blue + Purple) / 2;
+						Magenta = (Red + Purple) / 2;
+					};
 				};
 								
 				fn Tuple rgba(int r, int g, int b, int a = 1) -> new Tuple(r, g, b, a);
@@ -94,7 +99,8 @@
 				 */
 				fn Color[] ComplementPair(Color c, Number level)
 					-> [ Rotate(c, 180-360/3*2^(level-1)),
-						 Rotate(c, 180+360/3*2^(level-1)) ];				
+						 Rotate(c, 180+360/3*2^(level-1)) ];
+						 
 			}
 			
 			theory Main {
@@ -105,6 +111,7 @@
 					desktop -> decor1
 					tablet -> decor2
 					mobile -> rgba(255,0,0,1);
+				OffWhite = #fafafa;
 					
 				[-- Assertions --]
 				IsTrue(Contrast(Colors.scrunched, Colors.dominant) > 0.5);
@@ -115,13 +122,54 @@
 				tablet = "screen and (width >= 800px)";
 				mobile = "screen and (width >= 400px)";
 				
+				treeFrag login = 
+					(form
+						(input.text, input.password, input.submit)
+					)
+					
+				treeFrag topbar = 
+					(block
+						(a (img)),
+						login
+					)
+				
+				[[html]]
+					[[body]]
+						[[div.navbar]]
+							<- @desktop: header(topbar, 32px)
+							<- @mobile: nodisplay
+							<- @tablet: header(topbar, 20px)
+							@desktop {
+								display: fixed;
+								z-index: 1030;
+							}
+						[[div.main]]
+							<- @desktop: menu(left, 25%)
+							<- @tablet: menu(top, 48px)
+							[[div.content]]
+								<- @desktop: twocol
+								<- @tablet: onecol
+						[[div.footer]] <- footer
+							
+					{ display: fixed; left: 0; right: 0; top: 0; height: 32px; margin: 0; z-index: 1030; }
+				/* { fixed; edges l,r,t=0; height: 32px; margin: 0; z 1030; } */
+									
+					[[div]] {
+						{ width: 100%; height: 100%; background: $OffWhite; background-image: linear-gradient(to top, #fff, #f2f2f2);
+							padding-left: 0; padding-right: 0; box-shadow: 0 1px 10px rgba(0,0,0,0.1); }
+						/* { fill; bg OffWhite 'repeat-x'; grad 'to left top', White, #f2f2f2; padding sides=0; shadow 0 1px 10px black\a=0.1; } */
+						
+					}
+				}
+				
+				
 				fn Color Chris(Color variable) -> 0;
 			}
 			
-			test Main {
+			/*test Main {
 				[-- Colors :: Color --]
 				IsTrue(Contrast(scrunched, dominant) > Contrasts.RGColorBlind_EasilyReadable);
-			}
+			}*/
 			
 			theory Another extends Bob {
 				
@@ -129,7 +177,29 @@
 		</script>
 	</head>
 	<body>
-		
+	<div class='navbar-fixed-top'>
+		<div class='navbar-inner'>
+			<div class='container'>
+				<div class='row'>
+					<div class='span6'>
+						<span class='hordz-logo'>Hordz.Org</span>
+					</div>	
+					<div class='span6'>
+						<form method='post' class="navbar-form login-form" action='/accounts/logout'>
+							<input type='hidden' name='csrfmiddlewaretoken' value='uMQTosgrQM5emlC1uWDmv6PjYnEG7iJZ' />
+							<div>
+								Welcome,
+								<a href='/accounts/home' title='Go to your profile'>
+									cdibbs</a>.
+							</div>
+							<button type="submit" class="logout-btn btn btn-primary">Logout</button>
+							<a href='#' class='btn btn-info help-btn'>Help</a>
+						</form>						
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
 		
 	</body>
 </html>
