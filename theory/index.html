@@ -127,18 +127,45 @@
 						(input.text, input.password, input.submit)
 					)
 					
-				treeFrag topbar = 
-					(block
-						(a (img)),
-						login
+				ff fixedbar(align, thickness) = 
+					(block 
+						-> apply ({ display:fixed, top:0, left:0, right:0, bottom:0 } - { align:0 })
+						<- apply if t!? then { axis : t } endif
+							where axis = if align in ('top', 'bottom') then 'height' else 'width' endif
+							yield t
+						
+						(... // e.g., bootstrap-y .container, .row, .row-fluid, etc  
+							(a 
+								(img
+									<- yield
+										t = if (thickness!) then thickness
+										else 
+											(if align in ('top', 'bottom') then img.height else img.width endif) 
+											?? thickness
+										endif 
+								)
+							),
+							login
+						)
+					)
+					
+				ff curveddeck() = 
+					(any
+						-> yield x = 0, y = 0
+						
+						(...
+							-> apply { position:relative, top:y, left:x, height:100% }
+								where x = x * 2, y = y * 2
+								
+						)
 					)
 				
 				[[html]]
 					[[body]]
-						[[div.navbar]]
-							<- @desktop: header(topbar, 32px)
-							<- @mobile: nodisplay
-							<- @tablet: header(topbar, 20px)
+						[[div.navbar]] : fixedbar('top', 32px)
+							<- @desktop: fixedbar('top', 32px)
+							<- @mobile: {display:none}
+							<- @tablet: fixedbar('top', 32px)
 							@desktop {
 								display: fixed;
 								z-index: 1030;
@@ -149,6 +176,11 @@
 							[[div.content]]
 								<- @desktop: twocol
 								<- @tablet: onecol
+								// three decks, 7 cards each
+								[[div.deck]] x 3 : curveddeck()
+									[[div]] 
+										|_ x 7
+									
 						[[div.footer]] <- footer
 							
 					{ display: fixed; left: 0; right: 0; top: 0; height: 32px; margin: 0; z-index: 1030; }
