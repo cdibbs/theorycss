@@ -11,27 +11,33 @@
 				console.log(result);
 			});
 		</script>
+		tree frags => [[div]] [[span]] |_ x3
+		frag functions => ((node)) ((child)) ((...))
+		function expressions => fn name(bob) -> expression
+		data definitions
+		theories
+		
 		<script type='text/x-theory' id='kludge'>
 			/*
 			data Number a = long a | int a | float a | double a;
 			data RGBa c = (int r, int g, int b, float a);
 			data HSLa c = (float h, float s, float l, float a);
 			data Color c = RGBa c | HSLa c;
-			data Tree a =  Leaf a | Branch [Tree a]
+			data Tree a =  Leaf a | Branch [Tree a];
 			data ImgCtx ctx = (string source, string alt, image img);
+			data Image img = { [Attr], [ImgCtx] };  
 			*/
 			
-			image OurOffice {
-				src = '/img/stock-photo.jpg';
-				alt = 'Our office'
+			/*Image OurOffice {
+				src = '/img/stock-photo.jpg',
+				alt = 'Our office',
 				
-				[-- Contexts --]
-				fn ImgCtx Bannerized(Color tint = Tertiary.Veridian)
-					-> filter(tint, trim(scale(self, ...)));
+				ImgCtx Bannerized = fn(Color tint = Tertiary.Veridian)
+					-> filter(tint, trim(scale(self, ...))),
 				
-				fn ImgCtx Taggable()
-					-> doStuffToEnhanceIt();
-			}
+				ImgCtx Taggable = fn()
+					-> doStuffToEnhanceIt()
+			}*/
 			
 			
 			/* my very first theory */
@@ -128,26 +134,24 @@
 					)
 					
 				ff fixedbar(align, thickness) = 
-					(block 
-						-> apply ({ display:fixed, top:0, left:0, right:0, bottom:0 } - { align:0 })
-						<- apply if t!? then { axis : t } endif
+					((block)) 
+						-> style ({ display:fixed, top:0, left:0, right:0, bottom:0 } - { \align:0 })
+						<- style if t!? then { \axis : t } else nothing endif
 							where axis = if align in ('top', 'bottom') then 'height' else 'width' endif
-							yield t
+							yield { thickness : t }
 						
-						(... // e.g., bootstrap-y .container, .row, .row-fluid, etc  
-							(a 
-								(img
+						((...)) // e.g., bootstrap-y .container, .row, .row-fluid, etc  
+							((a)) 
+								((img))
 									<- yield
 										t = if (thickness!) then thickness
 										else 
 											(if align in ('top', 'bottom') then img.height else img.width endif) 
 											?? thickness
 										endif 
-								)
-							),
-							login
-						)
-					)
+							
+							((#login))
+						
 					
 				ff curveddeck() = 
 					(any
