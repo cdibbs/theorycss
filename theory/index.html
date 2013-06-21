@@ -17,6 +17,11 @@
 		data definitions
 		theories
 		
+		demos:
+		- square box in parent rect
+		- fractal
+		- html gen?
+		
 		<script type='text/x-theory' id='kludge'>
 			/*
 			data Number a = long a | int a | float a | double a;
@@ -134,7 +139,7 @@
 					)
 					
 				ff fixedbar(align, thickness) = 
-					((block)) 
+					((block))					
 						-> style ({ display:fixed, top:0, left:0, right:0, bottom:0 } - { \align:0 })
 						<- style if t!? then { \axis : t } else nothing endif
 							where axis = if align in ('top', 'bottom') then 'height' else 'width' endif
