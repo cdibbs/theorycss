@@ -17,6 +17,9 @@
 		data definitions
 		theories
 		
+		Needed:
+		- way to auto-generate colorblind version of stylesheets
+		
 		<script type='text/x-theory' id='kludge'>
 			/*
 			data Number a = long a | int a | float a | double a;
@@ -110,25 +113,31 @@
 			}
 			
 			theory Main {
-				[-- Colors :: Color --]
-				dominant = rgba(255,255,0,1);
-				(decor1, decor2) = ComplementPair(dominant, 3);
-				scrunched @=
-					desktop -> decor1
-					tablet -> decor2
-					mobile -> rgba(255,0,0,1);
-				OffWhite = #fafafa;
-					
-				[-- Assertions --]
-				IsTrue(Contrast(Colors.scrunched, Colors.dominant) > 0.5);
-				AreEqual()
-
-				[-- Media --]
-				desktop = "screen and (width >= 1200px)";
-				tablet = "screen and (width >= 800px)";
-				mobile = "screen and (width >= 400px)";
+				[[html]]
+					[[body]]
+						[[div.navbar]] of fixedbar('top', 32px)
+							<- @desktop: fixedbar('top', 32px)
+							<- @mobile: {display:none}
+							<- @tablet: fixedbar('top', 32px)
+							@desktop {
+								display: fixed;
+								z-index: 1030;
+							}
+						[[div.main]]
+							<- @desktop: menu(left, 25%)
+							<- @tablet: menu(top, 48px)
+							[[div.content]]
+								<- @desktop: twocol
+								<- @tablet: onecol
+								// three decks, 7 cards each
+								[[div.deck]] x 3 : curveddeck()
+									[[div]] 
+										|_ x 7
+									
+						[[div.footer]] <- footer
 				
-				treeFrag login = 
+				[-- FragFuncs --]				
+				ff login = 
 					(form
 						(input.text, input.password, input.submit)
 					)
@@ -163,43 +172,24 @@
 								
 						)
 					)
-				
-				[[html]]
-					[[body]]
-						[[div.navbar]] : fixedbar('top', 32px)
-							<- @desktop: fixedbar('top', 32px)
-							<- @mobile: {display:none}
-							<- @tablet: fixedbar('top', 32px)
-							@desktop {
-								display: fixed;
-								z-index: 1030;
-							}
-						[[div.main]]
-							<- @desktop: menu(left, 25%)
-							<- @tablet: menu(top, 48px)
-							[[div.content]]
-								<- @desktop: twocol
-								<- @tablet: onecol
-								// three decks, 7 cards each
-								[[div.deck]] x 3 : curveddeck()
-									[[div]] 
-										|_ x 7
-									
-						[[div.footer]] <- footer
-							
-					{ display: fixed; left: 0; right: 0; top: 0; height: 32px; margin: 0; z-index: 1030; }
-				/* { fixed; edges l,r,t=0; height: 32px; margin: 0; z 1030; } */
-									
-					[[div]] {
-						{ width: 100%; height: 100%; background: $OffWhite; background-image: linear-gradient(to top, #fff, #f2f2f2);
-							padding-left: 0; padding-right: 0; box-shadow: 0 1px 10px rgba(0,0,0,0.1); }
-						/* { fill; bg OffWhite 'repeat-x'; grad 'to left top', White, #f2f2f2; padding sides=0; shadow 0 1px 10px black\a=0.1; } */
-						
-					}
-				}
-				
-				
-				fn Color Chris(Color variable) -> 0;
+			
+				[-- Colors :: Color --]
+					dominant = rgba(255,255,0,1);
+					(decor1, decor2) = ComplementPair(dominant, 3);
+					scrunched @=
+						desktop -> decor1
+						tablet -> decor2
+						mobile -> rgba(255,0,0,1);
+					OffWhite = #fafafa;
+					
+				[-- Media --]
+					desktop = "screen and (width >= 1200px)";
+					tablet = "screen and (width >= 800px)";
+					mobile = "screen and (width >= 400px)";
+					
+				[-- Assertions --]
+					IsTrue(Contrast(Colors.scrunched, Colors.dominant) > 0.5);
+					AreEqual()				
 			}
 			
 			/*test Main {
@@ -207,7 +197,7 @@
 				IsTrue(Contrast(scrunched, dominant) > Contrasts.RGColorBlind_EasilyReadable);
 			}*/
 			
-			theory Another extends Bob {
+			theory Article {
 				
 			}
 		</script>
