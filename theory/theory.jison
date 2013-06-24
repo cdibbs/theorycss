@@ -52,7 +52,15 @@ nsbody
 def
 	: sdef
 	| fdef
+	| ffdef
+	| tfdef
 	;
+	
+ffdef
+	: FRAGFUNC id LPAREN paramlist RPAREN ASSIGN FRAGSPEC;
+	
+FRAGSPEC
+	: LFFNODE id RFFNODE 
 	
 deflist
 	: def deflist
