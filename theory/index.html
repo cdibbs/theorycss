@@ -117,106 +117,74 @@
 						 
 			}
 			
-<<<<<<< HEAD
 			theory Main {
 				[[html]]
 					[[body]]
-						[[div.navbar]] of fixedbar('top', 32px)
+						[[div.navbar]]
+							<- fixedbar('top', 32px),
+								{ display: fixed; z-index: 1030 }
 							<- @desktop: fixedbar('top', 32px)
 							<- @mobile: {display:none}
 							<- @tablet: fixedbar('top', 32px)
-							@desktop {
-								display: fixed;
-								z-index: 1030;
-							}
+							
 						[[div.main]]
 							<- @desktop: menu(left, 25%)
 							<- @tablet: menu(top, 48px)
-							[[div.content]]
-								<- @desktop: twocol
-								<- @tablet: onecol
+							
+							[[div.content]] :: Article 
+								
+							[[div.demo]]
 								// three decks, 7 cards each
 								[[div.deck]] x 3 : curveddeck()
 									[[div]] 
 										|_ x 7
 									
 						[[div.footer]] <- footer
-=======
-			theory Main {				
-				[-- Colors :: Color --]
-				dominant = rgba(255,255,0,1);
-				(decor1, decor2) = ComplementPair(dominant, 3);
-				scrunched @=
-					desktop -> decor1
-					tablet -> decor2
-					mobile -> rgba(255,0,0,1);
-				OffWhite = #fafafa;
-					
-				[-- Assertions --]
-				IsTrue(Contrast(Colors.scrunched, Colors.dominant) > 0.5);
-				AreEqual()
-
-				[-- Media --]
-				desktop = "screen and (width >= 1200px)";
-				tablet = "screen and (width >= 800px)";
-				mobile = "screen and (width >= 400px)";
->>>>>>> fae9d84ac101b73f9be853ab5bd3553012be9f72
+						
 				
 				[-- FragFuncs --]				
-				ff login = 
-					(form
-						(input.text, input.password, input.submit)
-					)
-					
 				ff fixedbar(align, thickness) = 
 					((block))
 						-> style ({ display:fixed, top:0, left:0, right:0, bottom:0 } - { \align:0 })
 						<- style if t!? then { \axis : t } else nothing endif
 							where axis = if align in ('top', 'bottom') then 'height' else 'width' endif
-							yield { thickness : t }
+							yield thickness = t
 						
 						((...)) // e.g., bootstrap-y .container, .row, .row-fluid, etc  
 							((a)) 
 								((img))
-									<- yield {
-										t : if (thickness!) then
+									<- yield t = if (thickness!) then
 												thickness
 											else 
 												(if align in ('top', 'bottom') then img.height else img.width endif) 
 												?? thickness
 											endif
-									} 
-							
 							((\login))
 						
 					
 				ff curveddeck() = 
-					(any
-						-> yield x = 0, y = 0
-						
-						(...
+					((any))
+						-> yield x = 0, y = 0						
+						((...))
 							-> apply { position:relative, top:y, left:x, height:100% }
 								where x = x * 2, y = y * 2
-								
-						)
-					)
 			
 				[-- Colors :: Color --]
-					dominant = rgba(255,255,0,1);
-					(decor1, decor2) = ComplementPair(dominant, 3);
+					dominant = rgba(255,255,0,1)
+					(decor1, decor2) = ComplementPair(dominant, 3)
 					scrunched @=
 						desktop -> decor1
 						tablet -> decor2
-						mobile -> rgba(255,0,0,1);
-					OffWhite = #fafafa;
+						mobile -> rgba(255,0,0,1)
+					OffWhite = #fafafa
 					
 				[-- Media --]
-					desktop = "screen and (width >= 1200px)";
-					tablet = "screen and (width >= 800px)";
-					mobile = "screen and (width >= 400px)";
+					desktop = "screen and (width >= 1200px)"
+					tablet = "screen and (width >= 800px)"
+					mobile = "screen and (width >= 400px)"
 					
 				[-- Assertions --]
-					IsTrue(Contrast(Colors.scrunched, Colors.dominant) > 0.5);
+					IsTrue(Contrast(Colors.scrunched, Colors.dominant) > 0.5)
 					AreEqual()				
 			}
 			
@@ -226,7 +194,34 @@
 			}*/
 			
 			theory Article {
+				[-- Primitives --]
+				numExplicitPages = 8
 				
+				[[div.content]]
+					@desktop -> twocol()
+					@mobile -> onecol()
+					
+					[[div.col1]]
+						[[div.ads]]
+					[[div.col2]]
+					
+					[[div.pager]]
+						-> pager(numExplicitPages)
+						
+						[[table > tr]]
+							[[td.leftmost]]
+							[[td]] x \numExplicitPages
+							[[td.rightmost]]
+							
+				[-- FragFuncs --]
+				ff pager(pages) =
+					((block))
+						((...))
+							((td))
+							((td)) x pages
+								\i -> style { color : \rainbow(\i) }
+							((td))
+					 
 			}
 		</script>
 	</head>
