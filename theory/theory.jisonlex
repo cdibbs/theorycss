@@ -13,6 +13,7 @@ id			[a-zA-Z][a-zA-Z0-9]*
 "/*".*"*/"		/* ignore comment */
 "theory"		return 'THEORY';
 "extends"		return 'EXTENDS';
+"uses"			return 'USES';
 "true"			return 'TRUE';
 "false"			return 'FALSE';
 "ns"			return 'PREFIX';
@@ -21,7 +22,12 @@ id			[a-zA-Z][a-zA-Z0-9]*
 "data"			return 'DATA';
 "needs"			return 'NEEDS';
 "fn"			return 'FUNCTION';
+"ff"			return 'FRAGFUNC';
 "->"			return 'IMPLICATION';
+"<-"			return 'REVIMPLICATION';
+"style"			return 'STYLE';
+"where"			return 'WHERE';
+"yield"			return 'YIELD';
 "map"			return 'MAP';
 "for"			return 'FOR';
 "null"			return 'NULL';
@@ -40,6 +46,9 @@ id			[a-zA-Z][a-zA-Z0-9]*
 "--]"			return 'SETEND';
 "[["			return 'XPATHSTART';
 "]]"			return 'XPATHEND';
+"(("			return 'LFFNODE';
+"))"			return 'RFFNODE';
+"\\"			return 'ESCAPE';	
 "..."			return 'ELLIPSIS';
 "eq"|"=="		return 'EQUALITY';
 "gt"|">"		return 'GT';
@@ -67,4 +76,26 @@ id			[a-zA-Z][a-zA-Z0-9]*
 ","				return 'COMMA';
 \".*\"  yytext = yytext.substr(1,yyleng-2); return 'STRING_LIT';
 "."				return 'DOT';
+/^ */gm			%{
+					if (typeof yy._iemitstack === 'undefined') {
+						yy._iemitstack = [0];
+					}
+					var indentation = lexeme.length;
+
+				    col += indentation;
+				
+				    if (indentation > yy._iemitstack[0]) {
+				        yy._iemitstack.unshift(indentation);
+				        return "INDENT";
+				    }
+				
+				    var tokens = [];
+				
+				    while (indentation < yy._iemitstack[0]) {
+				        tokens.push("DEDENT");
+				        yy._iemitstack.shift();
+				    }
+				
+				    if (tokens.length) return tokens;
+				%}
 <<EOF>>			return 'ENDOFFILE';
