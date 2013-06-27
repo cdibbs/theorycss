@@ -24,6 +24,7 @@ theory
 	
 theorybody
 	: deflist
+	| nslist
 	|
 		{ $$ = []; }
 	;
@@ -39,13 +40,18 @@ dtypelist
 		{ $$ = [$paramdef]; }
 	;
 	
+nslist
+	: namespace nslist
+	| namespace
+	;
+	
 namespace
-	: NAMESPACE id LBRACK nsbody RBRACK EOL
+	: PREFIX id LBRACE nsbody RBRACE EOL
 	;
 	
 nsbody
-	: spacedef spacedeflist
-		{ $$ = $spacedeflist; $$.unshift($spacedef); }
+	: deflist
+	| nslist
 	|
 	;
 
@@ -57,10 +63,31 @@ def
 	;
 	
 ffdef
-	: FRAGFUNC id LPAREN paramlist RPAREN ASSIGN FRAGSPEC;
+	: FRAGFUNC id LPAREN paramlist RPAREN ASSIGN ffnodetree;
 	
-FRAGSPEC
-	: LFFNODE id RFFNODE 
+ffnodetree
+	: ffnodelist INDENT ffnodelist DEINDENT
+	| ffnodelist;
+	
+ffnodelist
+	: ffnode ffnodelist
+	| ffnode;
+	
+ffnode
+	: LFFNODE id RFFNODE
+	| LFFNODE id RFFNODE ffimplist;
+	
+ffimplist
+	: IMPLICATION fragexpr REVIMPLICATION fragexpr
+	| IMPLICATION fragexpr
+	| REVIMPLICATION fragexpr;
+	
+fragexpr
+	: STYLE expr WHERE expr YIELD expr
+	| WHERE expr YIELD expr
+	| STYLE expr YIELD expr
+	| STYLE expr
+	| YIELD expr;	
 	
 deflist
 	: def deflist
@@ -171,20 +198,46 @@ e
     : NATLITERAL
     | HEXCOLOR
     | NULL
-    | id
-    | id LPAREN elist RPAREN
+    | id LPAREN elist RPAREN // function call
     | STRING_LIT
-    ;/*
+	| prec3list
+    ;
+	
+prec3list
+	: prec2list prec3op prec3list
+	| prec2list prec3op prec2list
+	;
+
+prec3op
+	: EQUALITY | GT | LT | GTE | LTE;
+	
+prec2list
+	: atomlist plusmin prec2list
+	| atomlist plusmin atomlist
+	;
+	
+atomlist
+	: atom muldiv atomlist
+	| atom muldiv atom
+	;
+	
+muldiv : TIMES | DIVIDE;
+	
+atom
+	: id | number | LPAREN e RPAREN;
+
+binop
+	: PLUS | MINUS | TIMES | DIVIDE | EQUALITY | GT | LT | GTE | LTE | OR | AND;
+	
+unaryleft
+	: NOT;
+	
+unaryright
+	: NOT | QUESTION;
+    /*
     | IF LPAREN e RPAREN LBRACE el RBRACE ELSE LBRACE el RBRACE
     | FOR LPAREN e SEMICOLON e SEMICOLON e RPAREN LBRACE el RBRACE
     | PRINTNAT LPAREN e RPAREN
-    | e PLUS e
-    | e MINUS e
-    | e TIMES e
-    | e EQUALITY e
-    | e GREATER e
-    | NOT e
-    | e OR e
     | e DOT id
     | id ASSIGN e
     | e DOT id ASSIGN e

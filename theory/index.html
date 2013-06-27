@@ -24,8 +24,7 @@
 		- square box in parent rect
 		- fractal
 		- html gen?
-		
-		<script type='text/x-theory' id='kludge'>
+
 			/*
 			data Number a = long a | int a | float a | double a;
 			data RGBa c = (int r, int g, int b, float a);
@@ -45,28 +44,28 @@
 				
 				ImgCtx Taggable = fn()
 					-> doStuffToEnhanceIt()
-			}*/
-			
-			
+			}*/		
+		<script type='text/x-theory' id='kludge'>
 			/* my very first theory */
 			theory Color {
 				
 				ns RYB {
 					ns Primary {
+						[-- Colors --]
 						Red = Color(255, 0, 0, 1);
 						Yellow = RGBa(255, 255, 0, 1);
 						Blue = RGBa(0, 0, 255, 1);
 					};
 					
 					ns Secondary {
-						... Primary ...
+						[-- Colors --]
 						Orange = (Red + Yellow) / 2;
 						Purple = (Red + Blue) / 2;
 						Green = (Yellow + Blue) / 2;
 					};
 					
 					ns Tertiary {
-						... Secondary ...
+						[-- Colors --]
 						Vermilion = (Red + Orange) / 2;
 						Amber = (Yellow + Orange) / 2;
 						Chartreuse = (Yellow + Green) / 2;

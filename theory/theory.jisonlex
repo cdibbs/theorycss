@@ -62,9 +62,11 @@ id			[a-zA-Z][a-zA-Z0-9]*
 "-"				return 'MINUS';
 "*"				return 'TIMES';
 "/"				return 'DIVIDE';
-"||"			return 'OR';
+"||"|"or"		return 'OR';
 "|"				return 'PIPE';
-"&&"			return 'AND';
+"&&"|"and"		return 'AND';
+"not"|"!"		return 'NOT';
+"?"				return 'QUESTION';
 "{"				return 'LBRACE';
 "}"				return 'RBRACE';
 "("				return 'LPAREN';
@@ -76,7 +78,7 @@ id			[a-zA-Z][a-zA-Z0-9]*
 ","				return 'COMMA';
 \".*\"  yytext = yytext.substr(1,yyleng-2); return 'STRING_LIT';
 "."				return 'DOT';
-/^ */gm			%{
+/^\s*/gm			%{
 					if (typeof yy._iemitstack === 'undefined') {
 						yy._iemitstack = [0];
 					}
