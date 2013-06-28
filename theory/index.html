@@ -52,6 +52,7 @@
 				ns RYB {
 					ns Primary {
 						[-- Colors --]
+						Red = 3;
 						Red = Color(255, 0, 0, 1);
 						Yellow = RGBa(255, 255, 0, 1);
 						Blue = RGBa(0, 0, 255, 1);
@@ -75,33 +76,33 @@
 					};
 				};
 								
-				fn Tuple rgba(int r, int g, int b, int a = 1) -> new Tuple(r, g, b, a);
+				fn rgba(int r, int g, int b, int a = 1) -> Tuple(r, g, b, a);
 				
-				fn Tuple ryba(int r, int y, int b, int a = 1) -> new Tuple(r, (y+b)/2, b, a);
+				fn ryba(int r, int y, int b, int a = 1) -> Tuple(r, (y+b)/2, b, a);
 				
-				fn Tuple hsla(int h, int s, int l, int a = 1) -> new Tuple();
+				fn hsla(int h, int s, int l, int a = 1) -> Tuple();
 				
 				/**
 	 			* Darkens a color by a decimal. p = 0.05 means darken L by 5%, in HSL.
 	 			*/ 
-				fn Color Darken(Color c, Number p) -> c * (1 - p);
+				fn Darken(Color c, Number p) -> c * (1 - p);
 
 				/**
 	 			* Lightens a color by a decimal. p = 0.05 means lighten L by 5%, in HSL.
 	 			*/
-				fn Color Lighten(Color c, Number p) -> c * (1 + p);
+				fn Lighten(Color c, Number p) -> c * (1 + p);
 
 				/**
 				 * Sets the lightness of a Color (range 0.0 to 1.0) in HSL
 				 */
-				fn Color SetLightness(Color c, Number p) -> (c.toHSLa() and (-1,-1,0,-1)) or (0,0,-p,0);
+				fn SetLightness(Color c, Number p) -> (c.toHSLa() and (-1,-1,0,-1)) or (0,0,-p,0);
 			
 				/**
 				 * 
 				 */
-				fn Color Complement(Color c) -> Rotate(c, 180);
+				fn Complement(Color c) -> Rotate(c, 180);
 			
-				fn Color Rotate(Color c, Number degrees) -> 0;
+				fn Rotate(Color c, Number degrees) -> 0;
 			
 				/**
 				 * Given a color, find the two colors adjacent to its complement at the given
@@ -110,7 +111,7 @@
 				 * pair on the tertiary wheel (level = 3) would each be +/- 15 degrees from
 				 * the complement.  
 				 */
-				fn Color[] ComplementPair(Color c, Number level)
+				fn ComplementPair(Color c, Number level)
 					-> [ Rotate(c, 180-360/3*2^(level-1)),
 						 Rotate(c, 180+360/3*2^(level-1)) ];
 						 

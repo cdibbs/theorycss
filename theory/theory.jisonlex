@@ -1,8 +1,9 @@
-digit                       [0-9]
+dec                         [0-9]
 esc                         "\\"
 int                         "-"?(?:[0-9]|[1-9][0-9]+)
 exp                         (?:[eE][-+]?[0-9]+)
 hex							[0-9A-Fa-f]
+bin							[0-1]
 frac                        (?:\.[0-9]+)
 id			[a-zA-Z][a-zA-Z0-9]*
 
@@ -10,7 +11,7 @@ id			[a-zA-Z][a-zA-Z0-9]*
 \s+				/* ignore blank */
 \s*\n\s*		/* ignore blank */
 "//".*			/* ignore comment */
-"/*".*"*/"		/* ignore comment */
+"/*"(.|\n|\r)*?"*/"		/* ignore comment */
 "theory"		return 'THEORY';
 "extends"		return 'EXTENDS';
 "uses"			return 'USES';
@@ -31,7 +32,9 @@ id			[a-zA-Z][a-zA-Z0-9]*
 "map"			return 'MAP';
 "for"			return 'FOR';
 "null"			return 'NULL';
-{digit}+		return 'NATLITERAL';
+{dec}+		return 'NATLITERAL';
+"0x"{hex}+		return 'HEXNATLITERAL';
+{bin}+"b"		return 'BINNATLITERAL';
 "#"{hex}+		return 'HEXCOLOR';
 {id}			return 'ID';
 "reduce"		return 'REDUCE';
@@ -65,6 +68,7 @@ id			[a-zA-Z][a-zA-Z0-9]*
 "||"|"or"		return 'OR';
 "|"				return 'PIPE';
 "&&"|"and"		return 'AND';
+"^"|"xor"		return 'XOR';
 "not"|"!"		return 'NOT';
 "?"				return 'QUESTION';
 "{"				return 'LBRACE';

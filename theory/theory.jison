@@ -40,18 +40,12 @@ dtypelist
 		{ $$ = [$paramdef]; }
 	;
 	
-nslist
-	: namespace nslist
-	| namespace
-	;
-	
 namespace
 	: PREFIX id LBRACE nsbody RBRACE EOL
 	;
 	
 nsbody
 	: deflist
-	| nslist
 	|
 	;
 
@@ -60,6 +54,7 @@ def
 	| fdef
 	| ffdef
 	| tfdef
+	| namespace
 	;
 	
 ffdef
@@ -122,8 +117,8 @@ sdef
 	;
 	
 fdef
-	: FUNCTION id LPAREN paramlist RPAREN TYPIFY typedef IMPLICATION e EOL
-		{ $$ = new yy.FnDef($id, $paramlist, $typedef, $e); }
+	: FUNCTION id LPAREN paramlist RPAREN IMPLICATION e EOL
+		{ $$ = new yy.FnDef($id, $paramlist, null, $e); }
 	;
 	
 lside
@@ -192,16 +187,22 @@ elist
 		{ $$ = $elist; $$.unshift($e); }
 	| e
 		{ $$ = [ $e ]; }
+	|
 	;
 
 e
-    : NATLITERAL
-    | HEXCOLOR
-    | NULL
-    | id LPAREN elist RPAREN // function call
-    | STRING_LIT
-	| prec3list
+    : prec3list
+	| prec2list
+	| prec1list
     ;
+	
+functioncall : id LPAREN elist RPAREN;
+	
+member : functioncall | id;
+	
+memberchain
+	: member DOT memberchain
+	| member;
 	
 prec3list
 	: prec2list prec3op prec3list
@@ -212,9 +213,11 @@ prec3op
 	: EQUALITY | GT | LT | GTE | LTE;
 	
 prec2list
-	: atomlist plusmin prec2list
-	| atomlist plusmin atomlist
+	: prec1list plusmin prec2list
+	| prec1list plusmin prec1list
 	;
+	
+prec1list : atomlist | atom;
 	
 atomlist
 	: atom muldiv atomlist
@@ -223,11 +226,42 @@ atomlist
 	
 muldiv : TIMES | DIVIDE;
 	
+plusmin : PLUS | MINUS;
+	
 atom
-	: id | number | LPAREN e RPAREN;
+	: number | string | dict | memberchain | LPAREN e RPAREN;
+	
+number : integer | hexint | BINNATLITERAL | float | color;
+	
+color : HEXCOLOR;
+	
+integer
+	: plusmin NATLITERAL
+	| NATLITERAL
+	;
+
+hexint
+	: plusmin HEXNATLITERAL
+	| HEXNATLITERAL
+	;
+	
+float
+	: integer DOT NATLITERAL
+	| integer DOT NATLITERAL "f"
+	| integer "f"
+	;
+	
+dict
+	: LBRACK colondeflist RBRACK;
+	
+colondeflist
+	: string COLON e COMMA colondeflist
+	| string COLON e
+	|
+	;
 
 binop
-	: PLUS | MINUS | TIMES | DIVIDE | EQUALITY | GT | LT | GTE | LTE | OR | AND;
+	: OR | AND | XOR;
 	
 unaryleft
 	: NOT;
