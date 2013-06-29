@@ -95,7 +95,7 @@
 				/**
 				 * Sets the lightness of a Color (range 0.0 to 1.0) in HSL
 				 */
-				fn SetLightness(Color c, Number p) -> (c.toHSLa() and (-1,-1,0,-1)) or (0,0,-p,0);
+				fn SetLightness(Color c, Number p) -> 0; /*(c.toHSLa() && (-1,-1,0,-1)) || (0,0,-p,0);*/
 			
 				/**
 				 * 
@@ -112,8 +112,8 @@
 				 * the complement.  
 				 */
 				fn ComplementPair(Color c, Number level)
-					-> [ Rotate(c, 180-360/3*2^(level-1)),
-						 Rotate(c, 180+360/3*2^(level-1)) ];
+					-> [ Rotate(c, 180-360/3*2**(level-1)),
+						 Rotate(c, 180+360/3*2**(level-1)) ];
 						 
 			}
 			

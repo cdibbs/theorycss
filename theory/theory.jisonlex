@@ -70,6 +70,7 @@ id			[a-zA-Z][a-zA-Z0-9]*
 "&&"|"and"		return 'AND';
 "^"|"xor"		return 'XOR';
 "not"|"!"		return 'NOT';
+"**"			return 'POWER';
 "?"				return 'QUESTION';
 "{"				return 'LBRACE';
 "}"				return 'RBRACE';

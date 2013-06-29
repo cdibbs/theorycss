@@ -1,5 +1,7 @@
 /* Theory CSS grammar by Chris Dibbern */
 
+// http://www.lysator.liu.se/c/ANSI-C-grammar-y.html
+
 %%
 
 file
@@ -191,9 +193,11 @@ elist
 	;
 
 e
-    : prec3list
+    : prec4list
+    | prec3list
 	| prec2list
 	| prec1list
+	| prec0list
     ;
 	
 functioncall : id LPAREN elist RPAREN;
@@ -203,6 +207,11 @@ member : functioncall | id;
 memberchain
 	: member DOT memberchain
 	| member;
+	
+prec4list
+	: prec3list binop prec4list
+	| prec3list binop prec3list
+	;
 	
 prec3list
 	: prec2list prec3op prec3list
@@ -217,11 +226,17 @@ prec2list
 	| prec1list plusmin prec1list
 	;
 	
-prec1list : atomlist | atom;
+prec1list
+	: prec0list muldiv prec1list
+	| prec0list muldiv prec0list
+	;
+	
+prec0list
+	: atomlist | atom;
 	
 atomlist
-	: atom muldiv atomlist
-	| atom muldiv atom
+	: atom POWER atomlist
+	| atom POWER atom
 	;
 	
 muldiv : TIMES | DIVIDE;
@@ -229,7 +244,7 @@ muldiv : TIMES | DIVIDE;
 plusmin : PLUS | MINUS;
 	
 atom
-	: number | string | dict | memberchain | LPAREN e RPAREN;
+	: LPAREN e RPAREN | number | string | dict | memberchain | array;
 	
 number : integer | hexint | BINNATLITERAL | float | color;
 	
@@ -252,30 +267,19 @@ float
 	;
 	
 dict
-	: LBRACK colondeflist RBRACK;
+	: LBRACE colondeflist RBRACE;
 	
+array
+	: LBRACKET elist RBRACKET;
+		
 colondeflist
 	: string COLON e COMMA colondeflist
 	| string COLON e
 	|
 	;
-
-binop
-	: OR | AND | XOR;
 	
 unaryleft
 	: NOT;
 	
 unaryright
 	: NOT | QUESTION;
-    /*
-    | IF LPAREN e RPAREN LBRACE el RBRACE ELSE LBRACE el RBRACE
-    | FOR LPAREN e SEMICOLON e SEMICOLON e RPAREN LBRACE el RBRACE
-    | PRINTNAT LPAREN e RPAREN
-    | e DOT id
-    | id ASSIGN e
-    | e DOT id ASSIGN e
-    | id LPAREN e RPAREN
-    | e DOT id LPAREN e RPAREN
-    | LPAREN e RPAREN
-    ;*/
