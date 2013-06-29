@@ -47,10 +47,10 @@
 			}*/		
 		<script type='text/x-theory' id='kludge'>
 			/* my very first theory */
-			theory Color {
+			namespace Color {
 				
-				ns RYB {
-					ns Primary {
+				namespace RYB {
+					namespace Primary {
 						[-- Colors --]
 						Red = 3;
 						Red = Color(255, 0, 0, 1);
@@ -58,14 +58,14 @@
 						Blue = RGBa(0, 0, 255, 1);
 					};
 					
-					ns Secondary {
+					namespace Secondary {
 						[-- Colors --]
 						Orange = (Red + Yellow) / 2;
 						Purple = (Red + Blue) / 2;
 						Green = (Yellow + Blue) / 2;
 					};
 					
-					ns Tertiary {
+					namespace Tertiary {
 						[-- Colors --]
 						Vermilion = (Red + Orange) / 2;
 						Amber = (Yellow + Orange) / 2;
@@ -117,19 +117,42 @@
 						 
 			}
 			
+			namespace css {
+				fixed = \{ display:fixed }
+				absolute = \{ display:absolute }
+				relative = \{ display:relative }
+				gone = \{ display:none }
+				
+				boxSides = \{ top:auto, right:auto, bottom:auto, left:auto }
+				
+				with boxSides:
+					fn prev(which) ->
+						this[p]
+						where p = this.keyIndex(which)-1
+						
+					fn next(which) -> 
+						this[n]
+						where n = this.keyIndex(which)+1
+					
+					fn adjacent(which) ->
+						this.prev() union this.next()
+						
+					fn opposite(which) ->
+						this.next().next()
+			}
+			
 			theory Main {
 				[[html]]
 					[[body]]
 						[[div.navbar]]
-							<- fixedbar('top', 32px),
-								{ display: fixed; z-index: 1030 }
-							<- @desktop: fixedbar('top', 32px)
-							<- @mobile: {display:none}
-							<- @tablet: fixedbar('top', 32px)
+							is fixedbar('top', thickness = 32px)
+							is { 'z-index' : 1030 }
+							@mobile is gone
+							@tablet is fixedbar('top', 32px)
 							
 						[[div.main]]
-							<- @desktop: menu(left, 25%)
-							<- @tablet: menu(top, 48px)
+							-> @desktop: menu(left, 25%)
+							-> @tablet: menu(top, 48px)
 							
 							[[div.content]] :: Article 
 								
@@ -143,11 +166,11 @@
 						
 				
 				[-- FragFuncs --]				
-				ff fixedbar(align, thickness) = 
+				ff fixedbar(side, thickness) = 
 					((block))
-						-> style ({ display:fixed, top:0, left:0, right:0, bottom:0 } - { \align:0 })
-						<- style if t!? then { \axis : t } else nothing endif
-							where axis = if align in ('top', 'bottom') then 'height' else 'width' endif
+						-> style ( fixed union boxSides ) - boxSides.opposite(align)
+						<- style if t?! then { axis : t } else nothing endif
+							where axis = 'height' if align in ('top', 'bottom') else 'width' endif
 							yield thickness = t
 						
 						((...)) // e.g., bootstrap-y .container, .row, .row-fluid, etc  
@@ -210,7 +233,7 @@
 						
 						[[table > tr]]
 							[[td.leftmost]]
-							[[td]] x \numExplicitPages
+							[[td]] x numExplicitPages
 							[[td.rightmost]]
 							
 				[-- FragFuncs --]
@@ -219,7 +242,7 @@
 						((...))
 							((td))
 							((td)) x pages
-								\i -> style { color : \rainbow(\i) }
+								\i -> style \{ color : \rainbow(\i) }
 							((td))
 					 
 			}

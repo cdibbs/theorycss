@@ -199,6 +199,38 @@ e
 	| prec1list
 	| prec0list
     ;
+    
+atom
+	: id
+	| constant
+	| STRING_LIT
+	| LPAREN e RPAREN
+	;
+
+postfix_expression
+	: atom
+	| postfix_expression LBRACKET e RBRACKET
+	| postfix_expression LPAREN RPAREN
+	| postfix_expression LPAREN argument_expression_list RPAREN
+	| postfix_expression INC_OP
+	| postfix_expression DEC_OP
+	| postfix_expression EXCUSEME 
+	;
+	
+argument_expression_list
+	: assignment_expression
+	| argument_expression_list COMMA assignment_expression
+	;
+	
+unary_expression
+	| postfix_expression
+	| unary_op
+	;
+	
+unary_operator
+	: NOT
+	| 
+	: LPAREN e RPAREN | number | string | dict | memberchain | array;
 	
 functioncall : id LPAREN elist RPAREN;
 	
@@ -242,9 +274,6 @@ atomlist
 muldiv : TIMES | DIVIDE;
 	
 plusmin : PLUS | MINUS;
-	
-atom
-	: LPAREN e RPAREN | number | string | dict | memberchain | array;
 	
 number : integer | hexint | BINNATLITERAL | float | color;
 	

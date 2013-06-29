@@ -17,7 +17,7 @@ id			[a-zA-Z][a-zA-Z0-9]*
 "uses"			return 'USES';
 "true"			return 'TRUE';
 "false"			return 'FALSE';
-"ns"			return 'PREFIX';
+"namespace"		return 'PREFIX';
 "test"			return 'TEST';
 "image"			return 'IMAGE';
 "data"			return 'DATA';
@@ -72,6 +72,7 @@ id			[a-zA-Z][a-zA-Z0-9]*
 "not"|"!"		return 'NOT';
 "**"			return 'POWER';
 "?"				return 'QUESTION';
+"?!"			return 'EXCUSEME';
 "{"				return 'LBRACE';
 "}"				return 'RBRACE';
 "("				return 'LPAREN';
