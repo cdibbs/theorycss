@@ -32,6 +32,13 @@
 			data Color c = RGBa c | HSLa c;
 			data Tree a =  Leaf a | Branch [Tree a];
 			data ImgCtx ctx = (string source, string alt, image img);
+			every ImgCtx can
+				fn blaaaah() -> 0
+				
+			portrait = new ImgCtx(url, text)
+			this portrait can
+				fn blah() -> 0
+				
 			data Image img = { [Attr], [ImgCtx] };  
 			*/
 			
@@ -135,26 +142,24 @@
 						where n = this.keyIndex(which)+1
 					
 					fn adjacent(which) ->
-						this.prev() union this.next()
+						this.prev(which) union this.next(which)
 						
 					fn opposite(which) ->
-						this.next().next()
+						this.next(which).next(which)
 			}
 			
 			theory Main {
 				[[html]]
 					[[body]]
 						[[div.navbar]]
-							is fixedbar('top', thickness = 32px)
-							is { 'z-index' : 1030 }
-							@mobile is gone
+							is fixedbar('top', thickness = 32px), { 'z-index' : 1030 }
 							@tablet is fixedbar('top', 32px)
+							@mobile is gone
 							
 						[[div.main]]
-							-> @desktop: menu(left, 25%)
-							-> @tablet: menu(top, 48px)
+							@? \media -> minutia[media]
 							
-							[[div.content]] :: Article 
+							[[div.content :: Article]] 
 								
 							[[div.demo]]
 								// three decks, 7 cards each
@@ -162,15 +167,16 @@
 									[[div]] 
 										|_ x 7
 									
-						[[div.footer]] <- footer
+						[[div.footer]]
+							is footer
 						
 				
 				[-- FragFuncs --]				
 				ff fixedbar(side, thickness) = 
 					((block))
-						-> style ( fixed union boxSides ) - boxSides.opposite(align)
+						-> style fixed union (boxSides - boxSides.opposite(side))
 						<- style if t?! then { axis : t } else nothing endif
-							where axis = 'height' if align in ('top', 'bottom') else 'width' endif
+							where axis = 'height' if side in ('top', 'bottom') else 'width' endif
 							yield thickness = t
 						
 						((...)) // e.g., bootstrap-y .container, .row, .row-fluid, etc  

@@ -5,16 +5,20 @@
 %%
 
 file
-	: theorylist ENDOFFILE
+	: bodylist ENDOFFILE
 		{ return $theorylist; }
 	|
 	;
 
-theorylist
-	: theory theorylist
-		{ $$ = $theorylist; $$.unshift($theory); }
+bodylist
+	: namespace
+		{ $$ = [$namespace]; }
 	| theory
 		{ $$ = [$theory]; }
+	| bodylist theory
+		{ $$ = $bodylist; $$.unshift($theory); }
+	| bodylist namespace
+		{ $$ = $bodylist; $$.unshift($namespace); }
 	; 
 	
 theory
@@ -43,7 +47,7 @@ dtypelist
 	;
 	
 namespace
-	: PREFIX id LBRACE nsbody RBRACE EOL
+	: PREFIX id LBRACE nsbody RBRACE
 	;
 	
 nsbody
@@ -112,15 +116,15 @@ typedef
 	;
 
 sdef
-	: SETSTART id TYPIFY id SETEND eqdeflist
-		{ $$ = new yy.SetDef($id, $4, $eqdeflist); }
-	| SETSTART id SETEND eqdeflist
-		{ $$ = new yy.SetDef($id, $id, $eqdeflist); }
+	: SETSTART id TYPIFY id SETEND assignment_list
+		{ $$ = new yy.SetDef($id, $4, $assignment_list); }
+	| SETSTART id SETEND assignment_list
+		{ $$ = new yy.SetDef($id, $id, $assignment_list); }
 	;
 	
 fdef
-	: FUNCTION id LPAREN paramlist RPAREN IMPLICATION e EOL
-		{ $$ = new yy.FnDef($id, $paramlist, null, $e); }
+	: FUNCTION id LPAREN paramlist RPAREN IMPLICATION expression EOL
+		{ $$ = new yy.FnDef($id, $paramlist, null, $expression); }
 	;
 	
 lside
@@ -130,18 +134,18 @@ lside
 		{ $$ = $tuplevarlist; }
 	;
 	
-eqdef
-	: lside ASSIGN e EOL
-		{ $$ = new yy.Assignment($lside, $e); }
+assignment
+	: lside ASSIGN expression EOL
+		{ $$ = new yy.Assignment($lside, $expression); }
 	| lside CASEASSIGN caselist EOL
 		{ $$ = new yy.CaseAssignment($lside, $caselist); }
 	;
 	
-eqdeflist
-	: eqdef eqdeflist
-		{ $$ = $eqdeflist; $$.unshift($eqdef); }
-	| eqdef
-		{ $$ = [ $eqdef ]; }
+assignment_list
+	: assignment assignment_list
+		{ $$ = $assignment_list; $$.unshift($assignment); }
+	| assignment
+		{ $$ = [ $assignment ]; }
 	;
 
 caselist
@@ -152,8 +156,8 @@ caselist
 	;
 
 casedef
-	: id IMPLICATION e
-		{ $$ = new yy.CaseDef($id, $e); }
+	: id IMPLICATION expression
+		{ $$ = new yy.CaseDef($id, $expression); }
 	;
 
 paramlist
@@ -185,31 +189,23 @@ boollit
 	;
 	
 elist
-	: e COMMA elist
+	: expression COMMA elist
 		{ $$ = $elist; $$.unshift($e); }
-	| e
+	| expression
 		{ $$ = [ $e ]; }
 	|
 	;
 
-e
-    : prec4list
-    | prec3list
-	| prec2list
-	| prec1list
-	| prec0list
-    ;
-    
 atom
 	: id
 	| constant
 	| STRING_LIT
-	| LPAREN e RPAREN
+	| LPAREN expression RPAREN
 	;
 
 postfix_expression
 	: atom
-	| postfix_expression LBRACKET e RBRACKET
+	| postfix_expression LBRACKET expression RBRACKET
 	| postfix_expression LPAREN RPAREN
 	| postfix_expression LPAREN argument_expression_list RPAREN
 	| postfix_expression INC_OP
@@ -218,50 +214,91 @@ postfix_expression
 	;
 	
 argument_expression_list
-	: assignment_expression
-	| argument_expression_list COMMA assignment_expression
+	: assignment
+	| argument_expression_list COMMA assignment
 	;
 	
 unary_expression
-	| postfix_expression
-	| unary_op
+	: postfix_expression
+	| unary_op postfix_expression
 	;
 	
-unary_operator
-	: NOT
-	| 
-	: LPAREN e RPAREN | number | string | dict | memberchain | array;
-	
-functioncall : id LPAREN elist RPAREN;
-	
-member : functioncall | id;
-	
-memberchain
-	: member DOT memberchain
-	| member;
-	
-prec4list
-	: prec3list binop prec4list
-	| prec3list binop prec3list
-	;
-	
-prec3list
-	: prec2list prec3op prec3list
-	| prec2list prec3op prec2list
+power_expression
+	: unary_expression
+	| power_expression POWER unary_expression
 	;
 
-prec3op
-	: EQUALITY | GT | LT | GTE | LTE;
+muldivmod : TIMES | DIVIDE | MOD;
 	
-prec2list
-	: prec1list plusmin prec2list
-	| prec1list plusmin prec1list
+multiplicative_expression
+	: power_expression
+	| multiplicative_expression MULDIVMOD power_expression
 	;
 	
-prec1list
-	: prec0list muldiv prec1list
-	| prec0list muldiv prec0list
+additive_expression
+	: multiplicative_expression
+	| additive_expression ADDSUB multiplicative_expression
 	;
+	
+shift : SHIFTL | SHIFTR;
+	
+shift_expression
+	: additive_expression
+	| shift_expression shift additive_expression
+	;
+
+compare : GT | LT | GTE | LTE; 
+	
+relational_expression
+	: shift_expression
+	| relational_expression compare shift_expression
+	;
+
+equiv : EQ | NEQ;
+	
+equivalence_expression
+	: relational_expression
+	| equivalence_expression equiv relational_expression
+	;
+		
+and_expression
+	: relational_expression
+	| and_expression B_AND relational_expression
+	;
+
+xor_expression
+	: and_expression
+	| xor_expression XOR and_expression
+	;
+	
+ior_expression
+	: xor_expression
+	| ior_expression B_OR xor_expression
+	;
+		
+logical_and_expression
+	: ior_expression
+	| logical_and_expression AND ior_expression
+	;
+	
+logical_or_expression
+	: logical_and_expression
+	| logical_or_expression OR logical_and_expression
+	;
+	
+conditional_expression
+	: logical_or_expression
+	| expression IF logical_or_expression ELSE expression ENDIF
+	;
+	
+expression
+	: conditional_expression
+	;
+	
+unary_op
+	: NOT;
+	
+constant : number | dict | array;
 	
 prec0list
 	: atomlist | atom;
@@ -270,8 +307,6 @@ atomlist
 	: atom POWER atomlist
 	| atom POWER atom
 	;
-	
-muldiv : TIMES | DIVIDE;
 	
 plusmin : PLUS | MINUS;
 	
@@ -295,20 +330,14 @@ float
 	| integer "f"
 	;
 	
-dict
-	: LBRACE colondeflist RBRACE;
-	
 array
 	: LBRACKET elist RBRACKET;
-		
+	
+dict
+	: LBRACE colondeflist RBRACE;
+			
 colondeflist
-	: string COLON e COMMA colondeflist
-	| string COLON e
+	: string COLON expression COMMA colondeflist
+	| string COLON expression
 	|
 	;
-	
-unaryleft
-	: NOT;
-	
-unaryright
-	: NOT | QUESTION;
