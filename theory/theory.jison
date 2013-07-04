@@ -135,9 +135,9 @@ lside
 	;
 	
 assignment
-	: lside ASSIGN expression
+	: lside ASSIGN expression EOL
 		{ $$ = new yy.Assignment($lside, $expression); }
-	| lside CASEASSIGN caselist
+	| lside CASEASSIGN caselist EOL
 		{ $$ = new yy.CaseAssignment($lside, $caselist); }
 	;
 	
@@ -168,9 +168,9 @@ paramlist
 	;
 	
 paramdef
-	: typedef id
+	: expression
 		{ $$ = new yy.ParamDef($typedef, $id); }
-	| typedef id ASSIGN lit
+	| assignment 
 		{ $$ = new yy.ParamDef($typedef, $id, $lit); }
 	;
 	
@@ -207,12 +207,12 @@ postfix_expression
 	: atom
 	| postfix_expression LBRACKET expression RBRACKET
 	| postfix_expression LPAREN RPAREN
-//	| postfix_expression LPAREN elist RPAREN
+	| postfix_expression LPAREN paramlist RPAREN
 	| postfix_expression INC_OP
 	| postfix_expression DEC_OP
 	| postfix_expression EXCUSEME 
 	;
-		
+			
 unary_expression
 	: postfix_expression
 	| unary_op postfix_expression
