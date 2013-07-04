@@ -135,17 +135,17 @@ lside
 	;
 	
 assignment
-	: lside ASSIGN expression EOL
+	: lside ASSIGN expression
 		{ $$ = new yy.Assignment($lside, $expression); }
-	| lside CASEASSIGN caselist EOL
+	| lside CASEASSIGN caselist
 		{ $$ = new yy.CaseAssignment($lside, $caselist); }
 	;
 	
 assignment_list
-	: assignment assignment_list
-		{ $$ = $assignment_list; $$.unshift($assignment); }
-	| assignment
+	: assignment
 		{ $$ = [ $assignment ]; }
+	| assignment assignment_list
+		{ $$ = $assignment_list; $$.unshift($assignment); }
 	;
 
 caselist
@@ -207,17 +207,12 @@ postfix_expression
 	: atom
 	| postfix_expression LBRACKET expression RBRACKET
 	| postfix_expression LPAREN RPAREN
-	| postfix_expression LPAREN argument_expression_list RPAREN
+//	| postfix_expression LPAREN elist RPAREN
 	| postfix_expression INC_OP
 	| postfix_expression DEC_OP
 	| postfix_expression EXCUSEME 
 	;
-	
-argument_expression_list
-	: assignment
-	| argument_expression_list COMMA assignment
-	;
-	
+		
 unary_expression
 	: postfix_expression
 	| unary_op postfix_expression
@@ -300,27 +295,17 @@ unary_op
 	
 constant : number | dict | array;
 	
-prec0list
-	: atomlist | atom;
-	
-atomlist
-	: atom POWER atomlist
-	| atom POWER atom
-	;
-	
-plusmin : PLUS | MINUS;
-	
 number : integer | hexint | BINNATLITERAL | float | color;
 	
 color : HEXCOLOR;
 	
 integer
-	: plusmin NATLITERAL
+	: MINUS NATLITERAL
 	| NATLITERAL
 	;
 
 hexint
-	: plusmin HEXNATLITERAL
+	: MINUS HEXNATLITERAL
 	| HEXNATLITERAL
 	;
 	
