@@ -1,5 +1,15 @@
 %%
 
-if : if expression ':' INDENT expression DEDENT;
+file 
+	: INDENT bodylist DEDENT ENDOFFILE
+	|
+	;
 
-expression : if | '0';
+bodylist
+	: ifstmt
+	| bodylist ifstmt
+	;
+
+ifstmt : IF LPAREN expression RPAREN COLON INDENT expression DEDENT;
+
+expression : NATLITERAL | ID | ifstmt;

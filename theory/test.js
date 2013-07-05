@@ -74,9 +74,9 @@
 var test = (function(){
 var parser = {trace: function trace() { },
 yy: {},
-symbols_: {"0":8,"error":2,"if":3,"expression":4,":":5,"INDENT":6,"DEDENT":7,"$accept":0,"$end":1},
-terminals_: {2:"error",5:":",6:"INDENT",7:"DEDENT",8:"0"},
-productions_: [0,[3,6],[4,1],[4,1]],
+symbols_: {"error":2,"file":3,"INDENT":4,"bodylist":5,"DEDENT":6,"ENDOFFILE":7,"ifstmt":8,"IF":9,"LPAREN":10,"expression":11,"RPAREN":12,"COLON":13,"NATLITERAL":14,"ID":15,"$accept":0,"$end":1},
+terminals_: {2:"error",4:"INDENT",6:"DEDENT",7:"ENDOFFILE",9:"IF",10:"LPAREN",12:"RPAREN",13:"COLON",14:"NATLITERAL",15:"ID"},
+productions_: [0,[3,4],[3,0],[5,1],[5,2],[8,8],[11,1],[11,1],[11,1]],
 performAction: function anonymous(yytext, yyleng, yylineno, yy, yystate /* action[1] */, $$ /* vstack */, _$ /* lstack */) {
 /* this == yyval */
 
@@ -84,8 +84,8 @@ var $0 = $$.length - 1;
 switch (yystate) {
 }
 },
-table: [{3:1},{1:[3],3:3,4:2,8:[1,4]},{5:[1,5]},{3:3,4:2,5:[2,2],7:[2,2],8:[1,4]},{5:[2,3],7:[2,3]},{6:[1,6]},{3:3,4:7,8:[1,4]},{7:[1,8]},{1:[2,1],5:[2,1],7:[2,1],8:[2,1]}],
-defaultActions: {},
+table: [{1:[2,2],3:1,4:[1,2]},{1:[3]},{5:3,8:4,9:[1,5]},{6:[1,6],8:7,9:[1,5]},{6:[2,3],9:[2,3]},{10:[1,8]},{7:[1,9]},{6:[2,4],9:[2,4]},{8:13,9:[1,5],11:10,14:[1,11],15:[1,12]},{1:[2,1]},{12:[1,14]},{6:[2,6],12:[2,6]},{6:[2,7],12:[2,7]},{6:[2,8],12:[2,8]},{13:[1,15]},{4:[1,16]},{8:13,9:[1,5],11:17,14:[1,11],15:[1,12]},{6:[1,18]},{6:[2,5],9:[2,5],12:[2,5]}],
+defaultActions: {9:[2,1]},
 parseError: function parseError(str, hash) {
     if (hash.recoverable) {
         this.trace(str);
@@ -94,7 +94,7 @@ parseError: function parseError(str, hash) {
     }
 },
 parse: function parse(input) {
-    var self = this, stack = [0], vstack = [null], lstack = [], table = this.table, yytext = '', yylineno = 0, yyleng = 0, recovering = 0, TERROR = 2, EOF = 1;
+    var self = this, stack = [0], tstack = [], vstack = [null], lstack = [], table = this.table, yytext = '', yylineno = 0, yyleng = 0, recovering = 0, TERROR = 2, EOF = 1;
     this.lexer.setInput(input);
     this.lexer.yy = this.yy;
     this.yy.lexer = this.lexer;
@@ -117,8 +117,12 @@ parse: function parse(input) {
     }
     function lex() {
         var token;
-        token = self.lexer.lex() || EOF;
+        token = tstack.shift() || self.lexer.lex() || EOF;
         if (typeof token !== 'number') {
+            if (token instanceof Array) {
+                tstack = tstack.concat(token.splice(1));
+                token = token[0];
+            }
             token = self.symbols_[token] || token;
         }
         return token;
@@ -548,183 +552,176 @@ performAction: function anonymous(yy,yy_,$avoiding_name_collisions,YY_START) {
 
 var YYSTATE=YY_START;
 switch($avoiding_name_collisions) {
-case 0:/* ignore blank */
+case 0:/* ignore comment */
 break;
-case 1:/* ignore blank */
+case 1:/* ignore comment */
 break;
-case 2:/* ignore comment */
+case 2:return 'THEORY';
 break;
-case 3:/* ignore comment */
+case 3:return 'EXTENDS';
 break;
-case 4:return 'THEORY';
+case 4:return 'USES';
 break;
-case 5:return 'EXTENDS';
+case 5:return 'TRUE';
 break;
-case 6:return 'USES';
+case 6:return 'FALSE';
 break;
-case 7:return 'TRUE';
+case 7:return 'PREFIX';
 break;
-case 8:return 'FALSE';
+case 8:return 'TEST';
 break;
-case 9:return 'PREFIX';
+case 9:return 'IMAGE';
 break;
-case 10:return 'TEST';
+case 10:return 'DATA';
 break;
-case 11:return 'IMAGE';
+case 11:return 'NEEDS';
 break;
-case 12:return 'DATA';
+case 12:return 'FUNCTION';
 break;
-case 13:return 'NEEDS';
+case 13:return 'FRAGFUNC';
 break;
-case 14:return 'FUNCTION';
+case 14:return 'IMPLICATION';
 break;
-case 15:return 'FRAGFUNC';
+case 15:return 'REVIMPLICATION';
 break;
-case 16:return 'IMPLICATION';
+case 16:return 'STYLE';
 break;
-case 17:return 'REVIMPLICATION';
+case 17:return 'WHERE';
 break;
-case 18:return 'STYLE';
+case 18:return 'YIELD';
 break;
-case 19:return 'WHERE';
+case 19:return 'MAP';
 break;
-case 20:return 'YIELD';
+case 20:return 'FOR';
 break;
-case 21:return 'MAP';
+case 21:return 'NULL';
 break;
-case 22:return 'FOR';
+case 22:return 14;
 break;
-case 23:return 'NULL';
+case 23:return 'HEXNATLITERAL';
 break;
-case 24:return 'NATLITERAL';
+case 24:return 'BINNATLITERAL';
 break;
-case 25:return 'HEXNATLITERAL';
+case 25:return 'HEXCOLOR';
 break;
-case 26:return 'BINNATLITERAL';
+case 26:return 'REDUCE';
 break;
-case 27:return 'HEXCOLOR';
+case 27:return 9;
 break;
-case 28:return 'ID';
+case 28:return 'INT';
 break;
-case 29:return 'REDUCE';
+case 29:return 'LONG';
 break;
-case 30:return 'IF';
+case 30:return 'FLOAT';
 break;
-case 31:return 'INT';
+case 31:return 'DOUBLE';
 break;
-case 32:return 'LONG';
+case 32:return 'ELSE';
 break;
-case 33:return 'FLOAT';
+case 33:return 'ELSEIF';
 break;
-case 34:return 'DOUBLE';
+case 34:return 'ENDIF'; 
 break;
-case 35:return 'ELSE';
+case 35:return 'SETSTART';
 break;
-case 36:return 'ELSEIF';
+case 36:return 'SETEND';
 break;
-case 37:return 'ENDIF'; 
+case 37:return 'XPATHSTART';
 break;
-case 38:return 'SETSTART';
+case 38:return 'XPATHEND';
 break;
-case 39:return 'SETEND';
+case 39:return 'LFFNODE';
 break;
-case 40:return 'XPATHSTART';
+case 40:return 'RFFNODE';
 break;
-case 41:return 'XPATHEND';
+case 41:return 'ESCAPE';	
 break;
-case 42:return 'LFFNODE';
+case 42:return 'ELLIPSIS';
 break;
-case 43:return 'RFFNODE';
+case 43:return 'EQ';
 break;
-case 44:return 'ESCAPE';	
+case 44:return 'NEQ';
 break;
-case 45:return 'ELLIPSIS';
+case 45:return 'GT';
 break;
-case 46:return 'EQ';
+case 46:return 'LT';
 break;
-case 47:return 'NEQ';
+case 47:return 'GTE';
 break;
-case 48:return 'GT';
+case 48:return 'LTE';
 break;
-case 49:return 'LT';
+case 49:return 'SHIFTL';
 break;
-case 50:return 'GTE';
+case 50:return 'SHIFTR';
 break;
-case 51:return 'LTE';
+case 51:return 'TYPIFY';
 break;
-case 52:return 'SHIFTL';
+case 52:return 'ASSIGN';
 break;
-case 53:return 'SHIFTR';
+case 53:return 'CASEASSIGN';
 break;
-case 54:return 'TYPIFY';
+case 54:return 'PLUS';
 break;
-case 55:return 'ASSIGN';
+case 55:return 'MINUS';
 break;
-case 56:return 'CASEASSIGN';
+case 56:return 'TIMES';
 break;
-case 57:return 'PLUS';
+case 57:return 'DIVIDE';
 break;
-case 58:return 'MINUS';
+case 58:return 'MOD';
 break;
-case 59:return 'TIMES';
+case 59:return 'OR';
 break;
-case 60:return 'DIVIDE';
+case 60:return 'PIPE';
 break;
-case 61:return 'MOD';
+case 61:return 'AND';
 break;
-case 62:return 'OR';
+case 62:return 'B_AND';
 break;
-case 63:return 'PIPE';
+case 63:return 'B_OR';
 break;
-case 64:return 'AND';
+case 64:return 'XOR';
 break;
-case 65:return 'B_AND';
+case 65:return 'NOT';
 break;
-case 66:return 'B_OR';
+case 66:return 'POWER';
 break;
-case 67:return 'XOR';
+case 67:return 'QUESTION';
 break;
-case 68:return 'NOT';
+case 68:return 'EXCUSEME';
 break;
-case 69:return 'POWER';
+case 69:return 'LBRACE';
 break;
-case 70:return 'QUESTION';
+case 70:return 'RBRACE';
 break;
-case 71:return 'EXCUSEME';
+case 71:return 10;
 break;
-case 72:return 'LBRACE';
+case 72:return 12;
 break;
-case 73:return 'RBRACE';
+case 73:return 'LBRACKET';
 break;
-case 74:return 'LPAREN';
+case 74:return 'RBRACKET';
 break;
-case 75:return 'RPAREN';
+case 75:return 13;
 break;
-case 76:return 'LBRACKET';
+case 76:return 'EOL';
 break;
-case 77:return 'RBRACKET';
+case 77:return 'COMMA';
 break;
-case 78:return 'COLON';
+case 78:yy_.yytext = yy_.yytext.substr(1,yy_.yyleng-2); return 'STRING_LIT';
 break;
-case 79:return 'EOL';
+case 79:return 'DOT';
 break;
-case 80:return 'COMMA';
-break;
-case 81:yy_.yytext = yy_.yytext.substr(1,yy_.yyleng-2); return 'STRING_LIT';
-break;
-case 82:return 'DOT';
-break;
-case 83:
+case 80:
+					console.log("here we are");
 					if (typeof yy._iemitstack === 'undefined') {
 						yy._iemitstack = [0];
 					}
-					var indentation = lexeme.length;
+					var indentation = yy_.yytext.length;
 
-				    col += indentation;
-				
 				    if (indentation > yy._iemitstack[0]) {
 				        yy._iemitstack.unshift(indentation);
-				        return "INDENT";
+				        return 4;
 				    }
 				
 				    var tokens = [];
@@ -737,12 +734,16 @@ case 83:
 				    if (tokens.length) return tokens;
 				
 break;
-case 84:return 'ENDOFFILE';
+case 81:/* ignore blank */
+break;
+case 82:return 15;
+break;
+case 83:return 7;
 break;
 }
 },
-rules: [/^(?:\s+)/,/^(?:\s*\n\s*)/,/^(?:\/\/.*)/,/^(?:\/\*(.|\n|\r)*?\*\/)/,/^(?:theory\b)/,/^(?:extends\b)/,/^(?:uses\b)/,/^(?:true\b)/,/^(?:false\b)/,/^(?:namespace\b)/,/^(?:test\b)/,/^(?:image\b)/,/^(?:data\b)/,/^(?:needs\b)/,/^(?:fn\b)/,/^(?:ff\b)/,/^(?:->)/,/^(?:<-)/,/^(?:style\b)/,/^(?:where\b)/,/^(?:yield\b)/,/^(?:map\b)/,/^(?:for\b)/,/^(?:null\b)/,/^(?:([0-9])+)/,/^(?:0x([0-9A-Fa-f])+)/,/^(?:([0-1])+b\b)/,/^(?:#([0-9A-Fa-f])+)/,/^(?:([a-zA-Z][a-zA-Z0-9]*))/,/^(?:reduce\b)/,/^(?:if\b)/,/^(?:int\b)/,/^(?:long\b)/,/^(?:float\b)/,/^(?:double\b)/,/^(?:else\b)/,/^(?:else\s+if\b)/,/^(?:endif\b)/,/^(?:\[--)/,/^(?:--\])/,/^(?:\[\[)/,/^(?:\]\])/,/^(?:\(\()/,/^(?:\)\))/,/^(?:\\)/,/^(?:\.\.\.)/,/^(?:eq|==)/,/^(?:neq|!=)/,/^(?:gt|>)/,/^(?:lt|<)/,/^(?:gte|>=)/,/^(?:lte|<=)/,/^(?:<<)/,/^(?:>>)/,/^(?:::)/,/^(?:=)/,/^(?:@=)/,/^(?:\+)/,/^(?:-)/,/^(?:\*)/,/^(?:\/)/,/^(?:%|mod\b)/,/^(?:\|\||or\b)/,/^(?:\|)/,/^(?:&&|and\b)/,/^(?:&)/,/^(?:\|)/,/^(?:\^|xor\b)/,/^(?:not|!)/,/^(?:\*\*)/,/^(?:\?)/,/^(?:\?!)/,/^(?:\{)/,/^(?:\})/,/^(?:\()/,/^(?:\))/,/^(?:\[)/,/^(?:\])/,/^(?::)/,/^(?:;)/,/^(?:,)/,/^(?:".*")/,/^(?:\.)/,/^(?:(?=^)\s*(?=gm))/,/^(?:$)/],
-conditions: {"INITIAL":{"rules":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84],"inclusive":true}}
+rules: [/^(?:\/\/.*)/,/^(?:\/\*(.|\n|\r)*?\*\/)/,/^(?:theory\b)/,/^(?:extends\b)/,/^(?:uses\b)/,/^(?:true\b)/,/^(?:false\b)/,/^(?:namespace\b)/,/^(?:test\b)/,/^(?:image\b)/,/^(?:data\b)/,/^(?:needs\b)/,/^(?:fn\b)/,/^(?:ff\b)/,/^(?:->)/,/^(?:<-)/,/^(?:style\b)/,/^(?:where\b)/,/^(?:yield\b)/,/^(?:map\b)/,/^(?:for\b)/,/^(?:null\b)/,/^(?:([0-9]+)+)/,/^(?:0x([0-9A-Fa-f]+))/,/^(?:([0-1]+)b\b)/,/^(?:#([0-9A-Fa-f]+))/,/^(?:reduce\b)/,/^(?:if\b)/,/^(?:int\b)/,/^(?:long\b)/,/^(?:float\b)/,/^(?:double\b)/,/^(?:else\b)/,/^(?:else\s+if\b)/,/^(?:endif\b)/,/^(?:\[--)/,/^(?:--\])/,/^(?:\[\[)/,/^(?:\]\])/,/^(?:\(\()/,/^(?:\)\))/,/^(?:\\)/,/^(?:\.\.\.)/,/^(?:eq|==)/,/^(?:neq|!=)/,/^(?:gt|>)/,/^(?:lt|<)/,/^(?:gte|>=)/,/^(?:lte|<=)/,/^(?:<<)/,/^(?:>>)/,/^(?:::)/,/^(?:=)/,/^(?:@=)/,/^(?:\+)/,/^(?:-)/,/^(?:\*)/,/^(?:\/)/,/^(?:%|mod\b)/,/^(?:\|\||or\b)/,/^(?:\|)/,/^(?:&&|and\b)/,/^(?:&)/,/^(?:\|)/,/^(?:\^|xor\b)/,/^(?:not|!)/,/^(?:\*\*)/,/^(?:\?)/,/^(?:\?!)/,/^(?:\{)/,/^(?:\})/,/^(?:\()/,/^(?:\))/,/^(?:\[)/,/^(?:\])/,/^(?::)/,/^(?:;)/,/^(?:,)/,/^(?:".*")/,/^(?:\.)/,/^(?:[\n\r]\s*)/,/^(?:\s+)/,/^(?:([a-zA-Z][a-zA-Z0-9]*))/,/^(?:$)/],
+conditions: {"INITIAL":{"rules":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83],"inclusive":true}}
 };
 return lexer;
 })();

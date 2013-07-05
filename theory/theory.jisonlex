@@ -1,15 +1,15 @@
-dec                         [0-9]
+dec                         [0-9]+
 esc                         "\\"
 int                         "-"?(?:[0-9]|[1-9][0-9]+)
 exp                         (?:[eE][-+]?[0-9]+)
-hex							[0-9A-Fa-f]
-bin							[0-1]
+hex							[0-9A-Fa-f]+
+bin							[0-1]+
 frac                        (?:\.[0-9]+)
-id			[a-zA-Z][a-zA-Z0-9]*
+id							[a-zA-Z][a-zA-Z0-9]*
+newline						\n+
 
 %%
-\s+				/* ignore blank */
-\s*\n\s*		/* ignore blank */
+//(\n|\r)+		/* ignore blank */
 "//".*			/* ignore comment */
 "/*"(.|\n|\r)*?"*/"		/* ignore comment */
 "theory"		return 'THEORY';
@@ -33,10 +33,9 @@ id			[a-zA-Z][a-zA-Z0-9]*
 "for"			return 'FOR';
 "null"			return 'NULL';
 {dec}+		return 'NATLITERAL';
-"0x"{hex}+		return 'HEXNATLITERAL';
-{bin}+"b"		return 'BINNATLITERAL';
-"#"{hex}+		return 'HEXCOLOR';
-{id}			return 'ID';
+"0x"{hex}		return 'HEXNATLITERAL';
+{bin}"b"		return 'BINNATLITERAL';
+"#"{hex}		return 'HEXCOLOR';
 "reduce"		return 'REDUCE';
 "if"			return 'IF';
 "int"			return 'INT';
@@ -91,17 +90,16 @@ id			[a-zA-Z][a-zA-Z0-9]*
 ","				return 'COMMA';
 \".*\"  yytext = yytext.substr(1,yyleng-2); return 'STRING_LIT';
 "."				return 'DOT';
-/^\s*/gm			%{
+[\n\r]\s*		%{
+					console.log("here we are");
 					if (typeof yy._iemitstack === 'undefined') {
 						yy._iemitstack = [0];
 					}
-					var indentation = lexeme.length;
+					var indentation = yytext.length;
 
-				    col += indentation;
-				
 				    if (indentation > yy._iemitstack[0]) {
 				        yy._iemitstack.unshift(indentation);
-				        return "INDENT";
+				        return 'INDENT';
 				    }
 				
 				    var tokens = [];
@@ -113,4 +111,6 @@ id			[a-zA-Z][a-zA-Z0-9]*
 				
 				    if (tokens.length) return tokens;
 				%}
+\s+				/* ignore blank */
+{id}			return 'ID';
 <<EOF>>			return 'ENDOFFILE';
