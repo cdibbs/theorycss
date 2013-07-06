@@ -2,38 +2,25 @@
 
 // http://www.lysator.liu.se/c/ANSI-C-grammar-y.html
 
+%options flex
+%ebnf
+
 %%
 
 file
-	: bodylist ENDOFFILE
-		{ return $theorylist; }
-	|
-	;
-
-bodylist
-	: namespace
-		{ $$ = [$namespace]; }
-	| theory
-		{ $$ = [$theory]; }
-	| bodylist theory
-		{ $$ = $bodylist; $$.unshift($theory); }
-	| bodylist namespace
-		{ $$ = $bodylist; $$.unshift($namespace); }
-	; 
-	
-theory
-	: THEORY id EXTENDS id LBRACE theorybody RBRACE
-		{ $$ = new yy.Theory($id, $theorybody, $4); }
-	| THEORY id LBRACE theorybody RBRACE
-		{ $$ = new yy.Theory($id, $theorybody); }
+	: (namespace | NEWLINE)* ENDOFFILE
+		{ $$ = $1; }
 	;
 	
-theorybody
-	: deflist
-	| nslist
-	|
-		{ $$ = []; }
+namespace : PREFIX id LBRACE (theory | data | NEWLINE)* RBRACE
 	;
+	
+theory : THEORY id (EXTENDS id)? LBRACE (def | NEWLINE)* RBRACE
+		{ $$ = new yy.Theory($2, $theorybody, $4); }
+	;
+	
+def : sdef | fdef | ffdef | treefrag;
+ 
 	
 data
 	: DATA paramlist = dtypelist EOL
@@ -46,33 +33,17 @@ dtypelist
 		{ $$ = [$paramdef]; }
 	;
 	
-namespace
-	: PREFIX id LBRACE nsbody RBRACE
-	;
+treefrag : tfnode NEWLINE+ (INDENT treefrag DEDENT | treefrag)+ EOL;
 	
-nsbody
-	: deflist
-	|
-	;
-
-def
-	: sdef
-	| fdef
-	| ffdef
-	| tfdef
-	| namespace
-	;
+tfnode : XPATHSTART leafid (TYPIFY id)? XPATHEND NEWLINE tf_islist;
 	
-ffdef
-	: FRAGFUNC id LPAREN paramlist RPAREN ASSIGN ffnodetree;
+leafid : (id | DOT)+;
 	
-ffnodetree
-	: ffnodelist INDENT ffnodelist DEINDENT
-	| ffnodelist;
+tf_islist : ((AT id)? IS id NEWLINE)*;
 	
-ffnodelist
-	: ffnode ffnodelist
-	| ffnode;
+ffdef : FRAGFUNC id LPAREN paramlist RPAREN ASSIGN ffnodetree;
+	
+ffnodetree : ffnode (INDENT ffnodetree DEDENT) | ffnode;
 	
 ffnode
 	: LFFNODE id RFFNODE
@@ -89,14 +60,7 @@ fragexpr
 	| STYLE expr YIELD expr
 	| STYLE expr
 	| YIELD expr;	
-	
-deflist
-	: def deflist
-		{ $$ = $deflist; $$.unshift($def); }
-	| def
-		{ $$ = [$def]; }
-	;
-	
+		
 id
 	: ID
 	;
@@ -135,9 +99,9 @@ lside
 	;
 	
 assignment
-	: lside ASSIGN expression EOL
+	: lside ASSIGN expression NEWLINE
 		{ $$ = new yy.Assignment($lside, $expression); }
-	| lside CASEASSIGN caselist EOL
+	| lside CASEASSIGN caselist NEWLINE
 		{ $$ = new yy.CaseAssignment($lside, $caselist); }
 	;
 	
@@ -156,7 +120,7 @@ caselist
 	;
 
 casedef
-	: id IMPLICATION expression
+	: id IMPLICATION expression NEWLINE
 		{ $$ = new yy.CaseDef($id, $expression); }
 	;
 
@@ -170,8 +134,8 @@ paramlist
 paramdef
 	: expression
 		{ $$ = new yy.ParamDef($typedef, $id); }
-	| assignment 
-		{ $$ = new yy.ParamDef($typedef, $id, $lit); }
+//	| assignment 
+//		{ $$ = new yy.ParamDef($typedef, $id, $lit); }
 	;
 	
 lit
@@ -213,10 +177,7 @@ postfix_expression
 	| postfix_expression EXCUSEME 
 	;
 			
-unary_expression
-	: postfix_expression
-	| unary_op postfix_expression
-	;
+unary_expression : [unary_op] postfix_expression;
 	
 power_expression
 	: unary_expression

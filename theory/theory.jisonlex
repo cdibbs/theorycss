@@ -9,9 +9,10 @@ id							[a-zA-Z][a-zA-Z0-9]*
 newline						\n+
 
 %%
-//(\n|\r)+		/* ignore blank */
+(\n|\r)+		return 'NEWLINE';
 "//".*			/* ignore comment */
 "/*"(.|\n|\r)*?"*/"		/* ignore comment */
+\s+				/* ignore whitespace */
 "theory"		return 'THEORY';
 "extends"		return 'EXTENDS';
 "uses"			return 'USES';
@@ -49,6 +50,7 @@ newline						\n+
 "--]"			return 'SETEND';
 "[["			return 'XPATHSTART';
 "]]"			return 'XPATHEND';
+"is"			return 'IS';
 "(("			return 'LFFNODE';
 "))"			return 'RFFNODE';
 "\\"			return 'ESCAPE';	
@@ -64,6 +66,7 @@ newline						\n+
 "::"			return 'TYPIFY';
 "="				return 'ASSIGN';
 "@="			return 'CASEASSIGN';
+"@"				return 'AT';
 "+"				return 'PLUS';
 "-"				return 'MINUS';
 "*"				return 'TIMES';
@@ -90,7 +93,7 @@ newline						\n+
 ","				return 'COMMA';
 \".*\"  yytext = yytext.substr(1,yyleng-2); return 'STRING_LIT';
 "."				return 'DOT';
-[\n\r]\s*		%{
+\s+		%{
 					console.log("here we are");
 					if (typeof yy._iemitstack === 'undefined') {
 						yy._iemitstack = [0];
@@ -111,6 +114,5 @@ newline						\n+
 				
 				    if (tokens.length) return tokens;
 				%}
-\s+				/* ignore blank */
 {id}			return 'ID';
 <<EOF>>			return 'ENDOFFILE';

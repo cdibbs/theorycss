@@ -7,18 +7,10 @@
 		<script type='text/javascript' src='compiler.js'></script>
 		<script type='text/javascript'>
 			$(document).ready(function() {
-				/*theory.yy = theoryCompiler;
-				var result = theory.parse($('#kludge').text());
-				console.log(result);*/
-				
-				var result = test.parse($('#testindent').text());
+				theory.yy = theoryCompiler;
+				var result = theory.parse($('#best').text());
 				console.log(result);
 			});
-		</script>
-		<script type='text/x-theory' id='testindent'>
-			if (123):
-		if (123123):
-					123
 		</script>
 		tree frags => [[div]] [[span]] |_ x3
 		frag functions => ((node)) ((child)) ((...))
@@ -60,8 +52,73 @@
 				
 				ImgCtx Taggable = fn()
 					-> doStuffToEnhanceIt()
-			}*/		
-		<script type='text/x-theory' id='kludge'>
+			}*/
+		<script type='text/x-theory' id='best'>
+		namespace Website {
+			theory Main {
+				[[html]]				
+					[[body]]			
+						[[div.navbar]]
+							is bob
+							@tablet is janet
+							@mobile is gone
+							
+						[[div.main]]
+							[[div.leftmenu :: LeftMenu]]
+							[[div.content :: Article]] 
+									
+						[[div.footer]]
+							is footer;
+						
+				
+				[-- FragFuncs --]
+				ff fixedbar(side, thickness) = 
+					((block))
+						-> style fixed union (boxSides - boxSides.opposite(side))
+						<- style if t?! then { axis : t } else nothing endif
+							where axis = 'height' if side in ('top', 'bottom') else 'width' endif
+							yield thickness = t
+						
+						((...)) // e.g., bootstrap-y .container, .row, .row-fluid, etc  
+							((a)) 
+								((img))
+									<- yield t = if (thickness!) then
+												thickness
+											else 
+												(if align in ('top', 'bottom') then img.height else img.width endif) 
+												?? thickness
+											endif
+							((\login))
+						
+					
+				ff curveddeck() = 
+					((any))
+						-> yield x = 0, y = 0						
+						((...))
+							-> apply { position:relative, top:y, left:x, height:100% }
+								where x = x * 2, y = y * 2
+			
+				[-- Colors :: Color --]
+					dominant = rgba(255,255,0,1)
+					(decor1, decor2) = ComplementPair(dominant, 3)
+					scrunched @=
+						desktop -> decor1
+						tablet -> decor2
+						mobile -> rgba(255,0,0,1)
+					OffWhite = #fafafa
+					
+				[-- Media --]
+					desktop = "screen and (width >= 1200px)"
+					tablet = "screen and (width >= 800px)"
+					mobile = "screen and (width >= 400px)"
+					
+				[-- Assertions --]
+					IsTrue(Contrast(Colors.scrunched, Colors.dominant) > 0.5)
+					AreEqual()				
+			}
+		}
+		</script>
+		<script type='text/x-theory' id='thoughts'>
 			/* my very first theory */
 			namespace Color {
 				
