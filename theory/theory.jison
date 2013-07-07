@@ -15,9 +15,11 @@ file
 namespace : PREFIX id INDENT (theory | data | NEWLINE)* DEDENT
 	;
 	
-theory : THEORY id (EXTENDS id)? INDENT (def | NEWLINE)* DEDENT
+theory : THEORY id (EXTENDS id)? INDENT theorybody DEDENT
 		{ $$ = new yy.Theory($2, $theorybody, $4); }
 	;
+	
+theorybody : (def | NEWLINE)*;
 	
 def : sdef | fdef | fragfunc | treefrag;
  
@@ -35,11 +37,11 @@ dtypelist
 
 treefrag : tfnode (INDENT treefrag+ DEDENT)?;
 
-tfnode : XPATHSTART leafid (TYPIFY id)? XPATHEND;
+tfnode : XPATHSTART leafid (TYPIFY id)? XPATHEND (TYPIFY INDENT tf_islist DEDENT)?;
 	
 leafid : (id | DOT)+;
 	
-tf_islist : ((AT id)? IS id NEWLINE)*;
+tf_islist : ((AT id)? IS expression NEWLINE)+;
 	
 fragfunc : FRAGFUNC id LPAREN paramlist? RPAREN IMPLICATION fftree;
 	
@@ -55,11 +57,11 @@ ffimplist
 	| REVIMPLICATION fragexpr;
 	
 fragexpr
-	: STYLE expr WHERE expr YIELD expr
-	| WHERE expr YIELD expr
-	| STYLE expr YIELD expr
-	| STYLE expr
-	| YIELD expr;
+	: STYLE expression WHERE expression YIELD expression
+	| WHERE expression YIELD expression
+	| STYLE expression YIELD expression
+	| STYLE expression
+	| YIELD expression;
 		
 id
 	: ID
@@ -170,14 +172,13 @@ atom
 postfix_expression
 	: atom
 	| postfix_expression LBRACKET expression RBRACKET
-	| postfix_expression LPAREN RPAREN
-	| postfix_expression LPAREN paramlist RPAREN
+	| postfix_expression LPAREN paramlist? RPAREN
 	| postfix_expression INC_OP
 	| postfix_expression DEC_OP
 	| postfix_expression EXCUSEME 
 	;
 			
-unary_expression : [unary_op] postfix_expression;
+unary_expression : unary_op? postfix_expression;
 	
 power_expression
 	: unary_expression
@@ -254,7 +255,7 @@ expression
 unary_op
 	: NOT;
 	
-constant : number | dict | array;
+constant : number;
 	
 number : integer | hexint | BINNATLITERAL | float | color;
 	

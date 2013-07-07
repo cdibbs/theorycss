@@ -90,6 +90,19 @@ id							[a-zA-Z][a-zA-Z0-9]*
 ","				return 'COMMA';
 \".*\"  yytext = yytext.substr(1,yyleng-2); return 'STRING_LIT';
 "."				return 'DOT';
+[\n\r\s]+<<EOF>>	%{
+					if (typeof yy._iemitstack === 'undefined') {
+						return 'ENDOFFILE';
+					}
+					
+					var tokens = [];
+				
+				    while (0 < yy._iemitstack[0]) {
+				        tokens.push("DEDENT");
+				        yy._iemitstack.shift();
+				    }
+				    if (tokens.length) return tokens;
+				%}
 [\n\r]+\s+/![^\n\r]		/* eat blank lines */
 [\n\r]\s+		%{
 					if (typeof yy._iemitstack === 'undefined') {
