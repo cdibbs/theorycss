@@ -30,7 +30,8 @@ id							[a-zA-Z][a-zA-Z0-9]*
 "map"			return 'MAP';
 "for"			return 'FOR';
 "null"			return 'NULL';
-{dec}+		return 'NATLITERAL';
+{dec}+(\.{dec}+|f)	return 'FLOAT';
+{dec}+			return 'NATLITERAL';
 "0x"{hex}		return 'HEXNATLITERAL';
 {bin}"b"		return 'BINNATLITERAL';
 "#"{hex}		return 'HEXCOLOR';
@@ -88,7 +89,7 @@ id							[a-zA-Z][a-zA-Z0-9]*
 ":"				return 'COLON';
 ";"				return 'EOL';
 ","				return 'COMMA';
-\".*\"  yytext = yytext.substr(1,yyleng-2); return 'STRING_LIT';
+\".*\"|\'.*\'		yytext = yytext.substr(1,yyleng-2); return 'STRING_LIT';
 "."				return 'DOT';
 [\n\r\s]+<<EOF>>	%{
 					if (typeof yy._iemitstack === 'undefined') {

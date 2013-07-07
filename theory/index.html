@@ -21,6 +21,9 @@
 		
 		Needed:
 		- way to auto-generate colorblind version of stylesheets
+		- mimick:
+			- arbitrary descendant
+			- direct descendant
 		
 		demos:
 		- square box in parent rect
@@ -60,8 +63,8 @@ namespace Website
 		[[html]]
 			[[body]]
 				[[div.navbar]] ::
-					is fixedbar('top', thickness = 32px), { 'z-index' : 1030 }
-					@tablet is fixedbar('top', 32px)
+					is { 'z-index' : 1030 };
+					@tablet is fixedbar('top', 32px);
 					@mobile is gone
 				[[div.main]]
 					[[div.leftmenu :: LeftMenu]]

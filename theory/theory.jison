@@ -22,26 +22,14 @@ theory : THEORY id (EXTENDS id)? INDENT theorybody DEDENT
 theorybody : (def | NEWLINE)*;
 	
 def : sdef | fdef | fragfunc | treefrag;
- 
 	
-data
-	: DATA paramlist = dtypelist EOL
-	;
-	
-dtypelist
-	: paramdef PIPE dtypelist EOL
-		{ $$ = $dtypelist; $$.unshift($paramdef); }
-	| paramdef
-		{ $$ = [$paramdef]; }
-	;
-
 treefrag : tfnode (INDENT treefrag+ DEDENT)?;
 
 tfnode : XPATHSTART leafid (TYPIFY id)? XPATHEND (TYPIFY INDENT tf_islist DEDENT)?;
 	
 leafid : (id | DOT)+;
 	
-tf_islist : ((AT id)? IS expression NEWLINE)+;
+tf_islist : ((AT id)? IS expression EOL)+;
 	
 fragfunc : FRAGFUNC id LPAREN paramlist? RPAREN IMPLICATION fftree;
 	
@@ -63,10 +51,6 @@ fragexpr
 	| STYLE expression
 	| YIELD expression;
 		
-id
-	: ID
-	;
-
 tuplevarlist
 	: id COMMA tuplevarlist
 		{ $$ = $tuplevarlist; $$.unshift($id); }
@@ -89,28 +73,28 @@ sdef
 	;
 	
 fdef
-	: FUNCTION id LPAREN paramlist RPAREN IMPLICATION expression EOL
+	: FUNCTION id LPAREN paramlist? RPAREN IMPLICATION expression EOL
 		{ $$ = new yy.FnDef($id, $paramlist, null, $expression); }
 	;
 	
 lside
 	: id
 		{ $$ = [ $id ]; }
-	| LPAREN tuplevarlist RPAREN
-		{ $$ = $tuplevarlist; }
+//	| LPAREN tuplevarlist RPAREN
+//		{ $$ = $tuplevarlist; }
 	;
 	
 assignment
-	: lside ASSIGN expression NEWLINE
+	: lside ASSIGN expression
 		{ $$ = new yy.Assignment($lside, $expression); }
-	| lside CASEASSIGN caselist NEWLINE
+	| lside CASEASSIGN caselist
 		{ $$ = new yy.CaseAssignment($lside, $caselist); }
 	;
 	
 assignment_list
 	: assignment
 		{ $$ = [ $assignment ]; }
-	| assignment assignment_list
+	| assignment COMMA assignment_list
 		{ $$ = $assignment_list; $$.unshift($assignment); }
 	;
 
@@ -122,23 +106,21 @@ caselist
 	;
 
 casedef
-	: id IMPLICATION expression NEWLINE
+	: id IMPLICATION expression
 		{ $$ = new yy.CaseDef($id, $expression); }
 	;
 
-paramlist
-	: paramdef COMMA paramlist
-		{ $$ = $paramlist; $$.unshift($paramdef); }
-	| paramdef
-		{ $$ = [ $paramdef ]; }
+arglist
+	: argdef
+	| argdef COMMA arglist
 	;
 	
-paramdef
+argdef
 	: expression
-		{ $$ = new yy.ParamDef($typedef, $id); }
 //	| assignment 
-//		{ $$ = new yy.ParamDef($typedef, $id, $lit); }
 	;
+	
+paramlist : id (COMMA id)*;
 	
 lit
 	: NATLITERAL
@@ -164,127 +146,84 @@ elist
 
 atom
 	: id
-	| constant
+	| number
 	| STRING_LIT
 	| LPAREN expression RPAREN
+	| dict
 	;
+
 
 postfix_expression
 	: atom
-	| postfix_expression LBRACKET expression RBRACKET
-	| postfix_expression LPAREN paramlist? RPAREN
+	| postfix_expression LBRACKET expression RBRACKET 
 	| postfix_expression INC_OP
 	| postfix_expression DEC_OP
-	| postfix_expression EXCUSEME 
+	| postfix_expression EXCUSEME
+	| postfix_expression LPAREN arglist RPAREN
 	;
 			
 unary_expression : unary_op? postfix_expression;
 	
-power_expression
-	: unary_expression
-	| power_expression POWER unary_expression
-	;
+power_expression : (power_expression POWER)? unary_expression;
 
-muldivmod : TIMES | DIVIDE | MOD;
+multiplicative_expression : (multiplicative_expression muldivmod_op)? power_expression;
 	
-multiplicative_expression
-	: power_expression
-	| multiplicative_expression MULDIVMOD power_expression
-	;
+additive_expression : (additive_expression addsub_op)? multiplicative_expression;
 	
-additive_expression
-	: multiplicative_expression
-	| additive_expression ADDSUB multiplicative_expression
-	;
+shift_expression : (shift_expression shift_op)? additive_expression; 
 	
-shift : SHIFTL | SHIFTR;
-	
-shift_expression
-	: additive_expression
-	| shift_expression shift additive_expression
-	;
+relational_expression : (relational_expression compare_op)? shift_expression;
 
-compare : GT | LT | GTE | LTE; 
-	
-relational_expression
-	: shift_expression
-	| relational_expression compare shift_expression
-	;
-
-equiv : EQ | NEQ;
-	
-equivalence_expression
-	: relational_expression
-	| equivalence_expression equiv relational_expression
-	;
+equivalence_expression : (equivalence_expression equiv_op)? relational_expression;
 		
-and_expression
-	: relational_expression
-	| and_expression B_AND relational_expression
-	;
+and_expression : (and_expression B_AND)? relational_expression;
 
-xor_expression
-	: and_expression
-	| xor_expression XOR and_expression
-	;
-	
-ior_expression
-	: xor_expression
-	| ior_expression B_OR xor_expression
-	;
+xor_expression : (xor_expression XOR)? and_expression;
 		
-logical_and_expression
-	: ior_expression
-	| logical_and_expression AND ior_expression
-	;
+ior_expression : (ior_expression B_OR)? xor_expression;
+		
+logical_and_expression : (logical_and_expression AND)? ior_expression;
 	
-logical_or_expression
-	: logical_and_expression
-	| logical_or_expression OR logical_and_expression
-	;
+logical_or_expression : (logical_or_expression OR)? logical_and_expression;
 	
-conditional_expression
-	: logical_or_expression
-	| expression IF logical_or_expression ELSE expression ENDIF
-	;
+test_expression : logical_or_expression IF logical_or_expression (ELSE logical_or_expression)? ENDIF;
+
+expression : test_expression | logical_or_expression;
 	
-expression
-	: conditional_expression
-	;
+unary_op : NOT;
+
+equiv_op : EQ | NEQ;
+
+compare_op : GT | LT | GTE | LTE;
+
+muldivmod_op : TIMES | DIVIDE | MOD;
+
+shift_op : SHIFTL | SHIFTR;
+
+addsub_op : PLUS | MINUS;
 	
-unary_op
-	: NOT;
-	
-constant : number;
-	
-number : integer | hexint | BINNATLITERAL | float | color;
+number : integer | FLOAT | color | HEXNATLITERAL | BINNATLITERAL;
+
+id : ID;
 	
 color : HEXCOLOR;
 	
-integer
-	: MINUS NATLITERAL
-	| NATLITERAL
+integer : MINUS? NATLITERAL;
+	
+array : LBRACKET elist RBRACKET;
+	
+dict : LBRACE ddeflist RBRACE;
+			
+ddeflist
+	: dictdef
+	| dictdef COMMA ddeflist
 	;
 
-hexint
-	: MINUS HEXNATLITERAL
-	| HEXNATLITERAL
-	;
-	
-float
-	: integer DOT NATLITERAL
-	| integer DOT NATLITERAL "f"
-	| integer "f"
-	;
-	
-array
-	: LBRACKET elist RBRACKET;
-	
-dict
-	: LBRACE colondeflist RBRACE;
-			
-colondeflist
-	: string COLON expression COMMA colondeflist
-	| string COLON expression
-	|
+dictdef : ddatom COLON expression;
+
+ddatom
+	: id
+	| number
+	| STRING_LIT
+	| LPAREN expression RPAREN
 	;
