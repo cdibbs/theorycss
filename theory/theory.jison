@@ -12,14 +12,14 @@ file
 		{ $$ = $1; }
 	;
 	
-namespace : PREFIX id LBRACE (theory | data | NEWLINE)* RBRACE
+namespace : PREFIX id INDENT (theory | data | NEWLINE)* DEDENT
 	;
 	
-theory : THEORY id (EXTENDS id)? LBRACE (def | NEWLINE)* RBRACE
+theory : THEORY id (EXTENDS id)? INDENT (def | NEWLINE)* DEDENT
 		{ $$ = new yy.Theory($2, $theorybody, $4); }
 	;
 	
-def : sdef | fdef | ffdef | treefrag;
+def : sdef | fdef | fragfunc | treefrag;
  
 	
 data
@@ -32,22 +32,22 @@ dtypelist
 	| paramdef
 		{ $$ = [$paramdef]; }
 	;
-	
-treefrag : tfnode NEWLINE+ (INDENT treefrag DEDENT | treefrag)+ EOL;
-	
-tfnode : XPATHSTART leafid (TYPIFY id)? XPATHEND NEWLINE tf_islist;
+
+treefrag : tfnode (INDENT treefrag+ DEDENT)?;
+
+tfnode : XPATHSTART leafid (TYPIFY id)? XPATHEND;
 	
 leafid : (id | DOT)+;
 	
 tf_islist : ((AT id)? IS id NEWLINE)*;
 	
-ffdef : FRAGFUNC id LPAREN paramlist RPAREN ASSIGN ffnodetree;
+fragfunc : FRAGFUNC id LPAREN paramlist? RPAREN IMPLICATION fftree;
 	
-ffnodetree : ffnode (INDENT ffnodetree DEDENT) | ffnode;
+fftree : ffnode (INDENT fftree DEDENT)?;
 	
-ffnode
-	: LFFNODE id RFFNODE
-	| LFFNODE id RFFNODE ffimplist;
+ffnode : LFFNODE ffid RFFNODE;
+
+ffid : leafid | ELLIPSIS;
 	
 ffimplist
 	: IMPLICATION fragexpr REVIMPLICATION fragexpr
@@ -59,7 +59,7 @@ fragexpr
 	| WHERE expr YIELD expr
 	| STYLE expr YIELD expr
 	| STYLE expr
-	| YIELD expr;	
+	| YIELD expr;
 		
 id
 	: ID

@@ -5,16 +5,13 @@ exp                         (?:[eE][-+]?[0-9]+)
 hex							[0-9A-Fa-f]+
 bin							[0-1]+
 frac                        (?:\.[0-9]+)
-id							[a-zA-Z][a-zA-Z0-9]*
-newline						\n+
+id							[a-zA-Z][a-zA-Z0-9]*					
 
 %%
-(\n|\r)+		return 'NEWLINE';
-"//".*			/* ignore comment */
+"//".*					/* ignore comment */
 "/*"(.|\n|\r)*?"*/"		/* ignore comment */
-\s+				/* ignore whitespace */
-"theory"		return 'THEORY';
-"extends"		return 'EXTENDS';
+"theory"				return 'THEORY';
+"extends"				return 'EXTENDS';
 "uses"			return 'USES';
 "true"			return 'TRUE';
 "false"			return 'FALSE';
@@ -93,13 +90,12 @@ newline						\n+
 ","				return 'COMMA';
 \".*\"  yytext = yytext.substr(1,yyleng-2); return 'STRING_LIT';
 "."				return 'DOT';
-\s+		%{
-					console.log("here we are");
+[\n\r]+\s+/![^\n\r]		/* eat blank lines */
+[\n\r]\s+		%{
 					if (typeof yy._iemitstack === 'undefined') {
 						yy._iemitstack = [0];
 					}
-					var indentation = yytext.length;
-
+					var indentation = yytext.length - yytext.search(/\s/) - 1;
 				    if (indentation > yy._iemitstack[0]) {
 				        yy._iemitstack.unshift(indentation);
 				        return 'INDENT';
@@ -111,8 +107,8 @@ newline						\n+
 				        tokens.push("DEDENT");
 				        yy._iemitstack.shift();
 				    }
-				
 				    if (tokens.length) return tokens;
 				%}
+\s+				/* ignore whitespace */
 {id}			return 'ID';
 <<EOF>>			return 'ENDOFFILE';
