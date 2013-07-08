@@ -122,13 +122,6 @@ argdef
 	
 paramlist : id (COMMA id)*;
 	
-lit
-	: NATLITERAL
-		{ $$ = parseInt($1); }
-	| NULL
-		{ $$ = null; }
-	;
-	
 boollit
 	: TRUE
 		{ $$ = true; }
@@ -202,13 +195,11 @@ shift_op : SHIFTL | SHIFTR;
 
 addsub_op : PLUS | MINUS;
 	
-number : integer | FLOAT | color | HEXNATLITERAL | BINNATLITERAL;
+number : INTEGER | FLOAT | color | HEXNATLITERAL | BINNATLITERAL | FLOAT_UNITS | INT_UNITS;
 
 id : ID;
 	
 color : HEXCOLOR;
-	
-integer : MINUS? NATLITERAL;
 	
 array : LBRACKET elist RBRACKET;
 	

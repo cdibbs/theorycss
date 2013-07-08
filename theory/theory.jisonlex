@@ -1,11 +1,11 @@
-dec                         [0-9]+
 esc                         "\\"
 int                         "-"?(?:[0-9]|[1-9][0-9]+)
 exp                         (?:[eE][-+]?[0-9]+)
 hex							[0-9A-Fa-f]+
 bin							[0-1]+
 frac                        (?:\.[0-9]+)
-id							[a-zA-Z][a-zA-Z0-9]*					
+id							[a-zA-Z][a-zA-Z0-9]*
+float						"-"?(?:[0-9]|[1-9][0-9]+)("f"|"."[0-9]*"f"?)
 
 %%
 "//".*					/* ignore comment */
@@ -30,8 +30,8 @@ id							[a-zA-Z][a-zA-Z0-9]*
 "map"			return 'MAP';
 "for"			return 'FOR';
 "null"			return 'NULL';
-{dec}+(\.{dec}+|f)	return 'FLOAT';
-{dec}+			return 'NATLITERAL';
+{float}			return 'FLOAT';
+{int}			return 'INTEGER';
 "0x"{hex}		return 'HEXNATLITERAL';
 {bin}"b"		return 'BINNATLITERAL';
 "#"{hex}		return 'HEXCOLOR';
@@ -89,6 +89,8 @@ id							[a-zA-Z][a-zA-Z0-9]*
 ":"				return 'COLON';
 ";"				return 'EOL';
 ","				return 'COMMA';
+{float}{id}		return 'FLOAT_UNITS';
+{int}{id}		return 'INT_UNITS';
 \".*\"|\'.*\'		yytext = yytext.substr(1,yyleng-2); return 'STRING_LIT';
 "."				return 'DOT';
 [\n\r\s]+<<EOF>>	%{
