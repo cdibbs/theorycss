@@ -29,20 +29,24 @@ tfnode : XPATHSTART leafid (TYPIFY id)? XPATHEND (TYPIFY INDENT tf_islist DEDENT
 	
 leafid : (id | DOT)+;
 	
-tf_islist : ((AT id)? IS expression EOL)+;
+tf_islist : ((AT id)? IS expression)+;
 	
 fragfunc : FRAGFUNC id LPAREN paramlist? RPAREN IMPLICATION fftree;
 	
-fftree : ffnode (INDENT fftree DEDENT)?;
+fftree : ffnode (INDENT ffimplist? fftree DEDENT)?;
 	
 ffnode : LFFNODE ffid RFFNODE;
 
 ffid : leafid | ELLIPSIS;
 	
 ffimplist
-	: IMPLICATION fragexpr REVIMPLICATION fragexpr
-	| IMPLICATION fragexpr
-	| REVIMPLICATION fragexpr;
+	: IMPLICATION fragexprblock REVIMPLICATION fragexprblock
+	| IMPLICATION fragexprblock
+	| REVIMPLICATION fragexprblock;
+	
+fragexprblock
+	: INDENT fragexpr DEDENT
+	| fragexpr;
 	
 fragexpr
 	: STYLE expression WHERE expression YIELD expression
@@ -73,8 +77,8 @@ sdef
 	;
 	
 fdef
-	: FUNCTION id LPAREN paramlist? RPAREN IMPLICATION expression EOL
-		{ $$ = new yy.FnDef($id, $paramlist, null, $expression); }
+	: FUNCTION id LPAREN paramlist? RPAREN IMPLICATION INDENT expression DEDENT
+		{ $$ = new yy.FnDef($id, $3, null, $expression); }
 	;
 	
 lside
@@ -152,7 +156,7 @@ postfix_expression
 	| postfix_expression INC_OP
 	| postfix_expression DEC_OP
 	| postfix_expression EXCUSEME
-	| postfix_expression LPAREN arglist RPAREN
+	| postfix_expression (DOT id)? LPAREN arglist RPAREN
 	;
 			
 unary_expression : unary_op? postfix_expression;

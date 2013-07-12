@@ -55,10 +55,10 @@ float						"-"?(?:[0-9]|[1-9][0-9]+)("f"|"."[0-9]*"f"?)
 "..."			return 'ELLIPSIS';
 "eq"|"=="		return 'EQ';
 "neq"|"!="		return 'NEQ';
-"gt"|">"		return 'GT';
-"lt"|"<"		return 'LT';
 "gte"|">="		return 'GTE';
 "lte"|"<="		return 'LTE';
+"gt"|">"		return 'GT';
+"lt"|"<"		return 'LT';
 "<<"			return 'SHIFTL';
 ">>"			return 'SHIFTR';
 "::"			return 'TYPIFY';
@@ -91,7 +91,7 @@ float						"-"?(?:[0-9]|[1-9][0-9]+)("f"|"."[0-9]*"f"?)
 ","				return 'COMMA';
 {float}{id}		return 'FLOAT_UNITS';
 {int}{id}		return 'INT_UNITS';
-\".*\"|\'.*\'		yytext = yytext.substr(1,yyleng-2); return 'STRING_LIT';
+\"[^\"]*\"|\'[^\']*\'		yytext = yytext.substr(1,yyleng-2); return 'STRING_LIT';
 "."				return 'DOT';
 [\n\r\s]+<<EOF>>	%{
 					if (typeof yy._iemitstack === 'undefined') {

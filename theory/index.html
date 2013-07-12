@@ -63,8 +63,8 @@ namespace Website
 		[[html]]
 			[[body]]
 				[[div.navbar]] ::
-					is { 'z-index' : 1030 };
-					@tablet is fixedbar('top', 32px);
+					is { 'z-index' : "103" }
+					@tablet is fixedbar('top', '32px') + { 'happy' : 'joy' }
 					@mobile is gone
 				[[div.main]]
 					[[div.leftmenu :: LeftMenu]]
@@ -74,6 +74,34 @@ namespace Website
 		ff curveddeck() -> 
 			((any))
 				((...))
+				
+		ff fixedbar(side, thickness) -> 
+			((block))
+				-> style (fixed + (boxSides - boxSides.opposite(side)))
+				<- style if t?! then { axis : t } else nothing endif
+					where axis = 'height' if side in ('top', 'bottom') else 'width' endif
+					yield thickness = t
+				
+				((...)) // e.g., bootstrap-y .container, .row, .row-fluid, etc  
+					((a)) 
+						((img))
+							<- yield t = if (thickness!) then
+										thickness
+									else 
+										(if align in ('top', 'bottom') then img.height else img.width endif) 
+										?? thickness
+									endif
+					((\login))
+			
+		fn fib(n) ->
+			1 if (n <= 2)
+			else fib(n - 1) + fib(n - 2)
+			endif
+				
+	theory Palette
+		[-- Colors --]
+		Background = #fff
+		
 
 		</script>
 		<script type='text/x-theory' id='thoughts'>
