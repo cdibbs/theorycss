@@ -6,6 +6,13 @@ bin							[0-1]+
 frac                        (?:\.[0-9]+)
 id							[a-zA-Z][a-zA-Z0-9]*
 float						"-"?(?:[0-9]|[1-9][0-9]+)("f"|"."[0-9]*"f"?)
+imp							"->"
+revimp						"<-"
+
+%s FF
+%s FFBLOCK
+%s FFFUNC
+%s FFNODE
 
 %%
 "//".*					/* ignore comment */
@@ -21,12 +28,28 @@ float						"-"?(?:[0-9]|[1-9][0-9]+)("f"|"."[0-9]*"f"?)
 "data"			return 'DATA';
 "needs"			return 'NEEDS';
 "fn"			return 'FUNCTION';
-"ff"			return 'FRAGFUNC';
-"->"			return 'IMPLICATION';
-"<-"			return 'REVIMPLICATION';
+"ff"			%{
+					this.begin('FF');
+					return 'FRAGFUNC';
+				%};
+<FF>{imp}		%{
+					this.begin('FFBLOCK');
+					return 'IMPLICATION';
+				%};
+<FFBLOCK>{revimp} %{
+					this.begin('FFFUNC');
+					return 'REVIMPLICATION';
+				%};
+<FFBLOCK>{imp}	%{
+					this.begin('FFFUNC');
+					return 'IMPLICATION';
+				%};
+{imp}			return 'IMPLICATION';
+{revimp}		return 'REVIMPLICATION';
 "style"			return 'STYLE';
 "where"			return 'WHERE';
 "yield"			return 'YIELD';
+"in"			return 'IN';
 "map"			return 'MAP';
 "for"			return 'FOR';
 "null"			return 'NULL';
@@ -37,6 +60,7 @@ float						"-"?(?:[0-9]|[1-9][0-9]+)("f"|"."[0-9]*"f"?)
 "#"{hex}		return 'HEXCOLOR';
 "reduce"		return 'REDUCE';
 "if"			return 'IF';
+"then"			return 'THEN';
 "int"			return 'INT';
 "long"			return 'LONG';
 "float"			return 'FLOAT';
@@ -49,8 +73,8 @@ float						"-"?(?:[0-9]|[1-9][0-9]+)("f"|"."[0-9]*"f"?)
 "[["			return 'XPATHSTART';
 "]]"			return 'XPATHEND';
 "is"			return 'IS';
-"(("			return 'LFFNODE';
-"))"			return 'RFFNODE';
+<FFBLOCK>"(("			this.begin('FFNODE'); return 'LFFNODE';
+<FFNODE>"))"			this.popState(); return 'RFFNODE';
 "\\"			return 'ESCAPE';	
 "..."			return 'ELLIPSIS';
 "eq"|"=="		return 'EQ';
@@ -67,6 +91,7 @@ float						"-"?(?:[0-9]|[1-9][0-9]+)("f"|"."[0-9]*"f"?)
 "@"				return 'AT';
 "+"				return 'PLUS';
 "-"				return 'MINUS';
+"**"			return 'POWER';
 "*"				return 'TIMES';
 "/"				return 'DIVIDE';
 "%"|"mod"		return 'MOD';
@@ -77,13 +102,14 @@ float						"-"?(?:[0-9]|[1-9][0-9]+)("f"|"."[0-9]*"f"?)
 "|"				return 'B_OR';
 "^"|"xor"		return 'XOR';
 "not"|"!"		return 'NOT';
-"**"			return 'POWER';
-"?"				return 'QUESTION';
 "?!"			return 'EXCUSEME';
+"??"			return 'IFNULL';
+"?"				return 'QUESTION';
 "{"				return 'LBRACE';
 "}"				return 'RBRACE';
 "("				return 'LPAREN';
 ")"				return 'RPAREN';
+" ["			return 'ARRAY_LBRACKET';
 "["				return 'LBRACKET';
 "]"				return 'RBRACKET';
 ":"				return 'COLON';
@@ -101,12 +127,13 @@ float						"-"?(?:[0-9]|[1-9][0-9]+)("f"|"."[0-9]*"f"?)
 					var tokens = [];
 				
 				    while (0 < yy._iemitstack[0]) {
+				    	this.popState();
 				        tokens.push("DEDENT");
 				        yy._iemitstack.shift();
 				    }
 				    if (tokens.length) return tokens;
 				%}
-[\n\r]+\s+/![^\n\r]		/* eat blank lines */
+[\n\r]+\s*/![^\n\r]		/* eat blank lines */
 [\n\r]\s+		%{
 					if (typeof yy._iemitstack === 'undefined') {
 						yy._iemitstack = [0];
@@ -114,12 +141,15 @@ float						"-"?(?:[0-9]|[1-9][0-9]+)("f"|"."[0-9]*"f"?)
 					var indentation = yytext.length - yytext.search(/\s/) - 1;
 				    if (indentation > yy._iemitstack[0]) {
 				        yy._iemitstack.unshift(indentation);
+				        console.log(this.topState(), "INDENT", this.stateStackSize());
 				        return 'INDENT';
 				    }
 				
 				    var tokens = [];
 				
 				    while (indentation < yy._iemitstack[0]) {
+				    	this.popState();
+				    	console.log(this.topState(), "DEDENT", this.stateStackSize());
 				        tokens.push("DEDENT");
 				        yy._iemitstack.shift();
 				    }

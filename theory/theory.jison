@@ -9,10 +9,11 @@
 
 file
 	: (namespace | NEWLINE)* ENDOFFILE
-		{ $$ = $1; }
+		{ return new yy.Program($$); }
 	;
 	
 namespace : PREFIX id INDENT (theory | data | NEWLINE)* DEDENT
+	{ $$ = new yy.Namespace($id, $4); }
 	;
 	
 theory : THEORY id (EXTENDS id)? INDENT theorybody DEDENT
@@ -31,29 +32,59 @@ leafid : (id | DOT)+;
 	
 tf_islist : ((AT id)? IS expression)+;
 	
-fragfunc : FRAGFUNC id LPAREN paramlist? RPAREN IMPLICATION fftree;
+fragfunc 
+	: FRAGFUNC id LPAREN RPAREN IMPLICATION ffcasetree
+		{ $$ = new yy.FragFunc($id, [], $ffcasetree); } 
+	| FRAGFUNC id LPAREN paramlist RPAREN IMPLICATION ffcasetree
+		{ $$ = new yy.FragFunc($id, $paramlist, $ffcasetree) };
 	
-fftree : ffnode (INDENT ffimplist? fftree DEDENT)?;
-	
-ffnode : LFFNODE ffid RFFNODE;
+ffcasetree : ffnode ffcasetree_nodedefblock?
+	{ $$ = new yy.FFCaseTree($1, $2); };
 
-ffid : leafid | ELLIPSIS;
+ffcasetree_nodedefblock : INDENT ffcasetree_nodedef DEDENT
+	{ $$ = $2; };
+
+ffcasetree_nodedef
+	: ffimplist ffcasetree
+		{ $$ = new yy.FFTreeNodeDef($1, $2); }
+	| ffimplist
+		{ $$ = new yy.FFTreeNodeDef($1, null); }
+	| ffcasetree
+		{ $$ = new yy.FFTreeNodeDef(null, $1); };
+	
+ffnode : LFFNODE ffid RFFNODE
+	{ $$ = $ffid; };
+
+ffid : (leafid | ELLIPSIS)
+	{ $$ = $1; };
 	
 ffimplist
 	: IMPLICATION fragexprblock REVIMPLICATION fragexprblock
+		{ $$ = new yy.FFNodeFunc($2, $4); }
 	| IMPLICATION fragexprblock
-	| REVIMPLICATION fragexprblock;
+		{ $$ = new yy.FFNodeFunc($2, null); }
+	| REVIMPLICATION fragexprblock
+		{ $$ = new yy.FFNodeFunc(null, $2); };
 	
 fragexprblock
 	: INDENT fragexpr DEDENT
-	| fragexpr;
+		{ $$ = $fragexpr; }
+	| fragexpr
+		{ $$ = $fragexpr; };
 	
 fragexpr
-	: STYLE expression WHERE expression YIELD expression
-	| WHERE expression YIELD expression
-	| STYLE expression YIELD expression
+	: STYLE expression WHERE assignment_list YIELD assignment_list
+		{ $$ = new yy.StyleWhereYield($expression, $assignment_list, $assignment_list1); }
+	| STYLE expression INDENT WHERE assignment_list YIELD assignment_list DEDENT
+		{ $$ = new yy.StyleWhereYield($expression, $assignment_list, $assignment_list1); }
+	| WHERE assignment_list YIELD assignment_list
+		{ $$ = new yy.StyleWhereYield(null, $assignment_list, $assignment_list1); }
+	| STYLE expression YIELD assignment_list
+		{ $$ = new yy.StyleWhereYield($expression, null, $assignment_list); }
 	| STYLE expression
-	| YIELD expression;
+		{ $$ = new yy.StyleWhereYield($expression, null, null); }
+	| YIELD assignment_list
+		{ $$ = new yy.StyleWhereYield(null, null, $assignment_list); };
 		
 tuplevarlist
 	: id COMMA tuplevarlist
@@ -90,9 +121,9 @@ lside
 	
 assignment
 	: lside ASSIGN expression
-		{ $$ = new yy.Assignment($lside, $expression); }
+		{  $$ = new yy.Assignment($lside, $3); }
 	| lside CASEASSIGN caselist
-		{ $$ = new yy.CaseAssignment($lside, $caselist); }
+		{ $$ = new yy.CaseAssignment($lside, $3); }
 	;
 	
 assignment_list
@@ -116,7 +147,9 @@ casedef
 
 arglist
 	: argdef
-	| argdef COMMA arglist
+		{ $$ = [ $argdef ]; }
+	| arglist COMMA argdef
+		{ $$ = $arglist.unshift($argdef); }
 	;
 	
 argdef
@@ -124,7 +157,11 @@ argdef
 //	| assignment 
 	;
 	
-paramlist : id (COMMA id)*;
+paramlist
+	: id
+		{ $$ = [$id]; }
+	| paramlist COMMA id
+		{ $$ = $paramlist.unshift($id); };
 	
 boollit
 	: TRUE
@@ -143,49 +180,145 @@ elist
 
 atom
 	: id
+		{ $$ = new yy.Atom(yy.Atom.Id, $1); }
 	| number
+		{ $$ = new yy.Atom(yy.Atom.NumConst, $number); }
+	| bool
+		{ $$ = new yy.Atom(yy.Atom.Boolean, $bool); }
 	| STRING_LIT
+		{ $$ = new yy.Atom(yy.Atom.StringLit, $yytext); }
 	| LPAREN expression RPAREN
+		{ $$ = $expression; }
 	| dict
+		{ $$ = $dict; }
 	;
 
 
 postfix_expression
 	: atom
-	| postfix_expression LBRACKET expression RBRACKET 
+		{ $$ = $1; }
+	| postfix_expression LBRACKET expression RBRACKET
+		{ $$ = new yy.PostFixExp(yy.PostFixExp.Index, $1, $3); } 
 	| postfix_expression INC_OP
+		{ $$ = new yy.PostFixExp(yy.PostFixExp.IncOp, $1); }
 	| postfix_expression DEC_OP
+		{ $$ = new yy.PostFixExp(yy.PostFixExp.DecOp, $1); }
 	| postfix_expression EXCUSEME
-	| postfix_expression (DOT id)? LPAREN arglist RPAREN
+		{ $$ = new yy.PostFixExp(yy.PostFixExp.ExcuseMe, $1); }
+	| postfix_expression NOT
+		{ $$ = new yy.PostFixExp(yy.PostFixExp.Important, $1); }
+	| postfix_expression DOT id
+		{ $$ = new yy.PostFixExp(yy.PostFixExp.Member, $1, $3); }
+	| postfix_expression LPAREN arglist RPAREN
+		{ $$ = new yy.PostFixExp(yy.PostFixExp.FunctionCall, $1, $3); }
 	;
 			
-unary_expression : unary_op? postfix_expression;
+unary_expression : unary_op? postfix_expression
+	{ $$ = $1 ? new yy.UnaryExp($2) : $2; };
 	
-power_expression : (power_expression POWER)? unary_expression;
+power_expression
+	: unary_expression
+		{ $$ = $1; }
+	| power_expression POWER unary_expression
+		{ $$ = new yy.BinaryOpExp($1, $2, $3); };
 
-multiplicative_expression : (multiplicative_expression muldivmod_op)? power_expression;
+multiplicative_expression
+	: power_expression
+		{ $$ = $1; }
+	| multiplicative_expression muldivmod_op power_expression
+		{ $$ = new yy.BinaryOpExp($1, $2, $3); };
 	
-additive_expression : (additive_expression addsub_op)? multiplicative_expression;
+additive_expression
+	: multiplicative_expression
+		{ $$ = $1; }
+	| additive_expression addsub_op multiplicative_expression
+		{ $$ = new yy.BinaryOpExp($1, $2, $3); };
 	
-shift_expression : (shift_expression shift_op)? additive_expression; 
+shift_expression
+	: additive_expression
+		{ $$ = $1; }
+	| shift_expression shift_op additive_expression
+		{ $$ = new yy.BinaryOpExp($1, $2, $3); }; 
 	
-relational_expression : (relational_expression compare_op)? shift_expression;
+relational_expression
+	: shift_expression
+		{ $$ = $1; }
+	| relational_expression compare_op shift_expression
+		{ $$ = new yy.BinaryOpExp($1, $2, $3); };
 
-equivalence_expression : (equivalence_expression equiv_op)? relational_expression;
+equivalence_expression
+	: relational_expression
+		{ $$ = $1; }
+	| equivalence_expression equiv_op relational_expression
+		{ $$ = new yy.BinaryOpExp($1, $2, $3); };
 		
-and_expression : (and_expression B_AND)? relational_expression;
+and_expression
+	: relational_expression
+		{ $$ = $1; }
+	| and_expression B_AND relational_expression
+		{ $$ = new yy.BinaryOpExp($1, $2, $3); };
 
-xor_expression : (xor_expression XOR)? and_expression;
+xor_expression
+	: and_expression
+		{ $$ = $1; }
+	| xor_expression XOR and_expression
+		{ $$ = new yy.BinaryOpExp($1, $2, $3); };
 		
-ior_expression : (ior_expression B_OR)? xor_expression;
+ior_expression
+	: xor_expression
+		{ $$ = $1; }
+	| ior_expression B_OR xor_expression
+		{ $$ = new yy.BinaryOpExp($1, $2, $3); };
 		
-logical_and_expression : (logical_and_expression AND)? ior_expression;
+logical_and_expression
+	: ior_expression
+		{ $$ = $1; }
+	| logical_and_expression AND ior_expression
+		{ $$ = new yy.BinaryOpExp($1, $2, $3); };
 	
-logical_or_expression : (logical_or_expression OR)? logical_and_expression;
-	
-test_expression : logical_or_expression IF logical_or_expression (ELSE logical_or_expression)? ENDIF;
+logical_or_expression
+	: logical_and_expression
+		{ $$ = $1; }
+	| logical_or_expression OR logical_and_expression
+		{ $$ = new yy.BinaryOpExp($1, $2, $3); };
 
-expression : test_expression | logical_or_expression;
+in_expression
+	: logical_or_expression
+		{ $$ = $1; }
+	| in_expression IN logical_or_expression
+		{ $$ = new yy.BinaryOpExp($1, $2, $3); };
+
+ifnull_expression
+	: in_expression
+		{ $$ = $1; }
+	| ifnull_expression IFNULL in_expression
+		{ $$ = new yy.BinaryOpExp($1, $2, $3); };
+	
+test_expression
+	: IF expression THEN block_expression ELSE block_expression ENDIF
+		{ $$ = new yy.TestExp([[$expression, $block_expression], [true, $6]]); }
+	| IF expression THEN block_expression elseif_list ENDIF
+		{ $$ = new yy.TestExp($elseif_list.unshift([$expression, $block_expression])); }
+	| IF expression THEN block_expression elseif_list ELSE block_expression ENDIF
+		{ $$ = new yy.TestExp($elseif_list.unshift([$expression, $block_expression], [true, $7])); }  
+	| IF expression THEN block_expression ENDIF
+		{ $$ = new yy.TestExp([[$expression, $block_expression]]); };
+		
+elseif_list
+	: ELSEIF expression THEN block_expression
+		{ $$ = [[$expression, $block_expression]]; }
+	| elseif_list ELSEIF expression THEN block_expression
+		{ $$ = $elseif_list.push([$expression, $block_expression]); }
+	;
+
+expression : test_expression | ifnull_expression
+	{ $$ = $1; };
+
+block_expression
+	: INDENT expression DEDENT
+		{ $$ = $expression; } 
+	| expression
+		{ $$ = $expression; };
 	
 unary_op : NOT;
 
@@ -199,13 +332,21 @@ shift_op : SHIFTL | SHIFTR;
 
 addsub_op : PLUS | MINUS;
 	
-number : INTEGER | FLOAT | color | HEXNATLITERAL | BINNATLITERAL | FLOAT_UNITS | INT_UNITS;
+number : INTEGER | FLOAT | color | HEXNATLITERAL | BINNATLITERAL | FLOAT_UNITS | INT_UNITS
+	{ $$ = $1; };
 
 id : ID;
 	
-color : HEXCOLOR;
+color : HEXCOLOR
+	{ $$ = $1; };
 	
-array : LBRACKET elist RBRACKET;
+bool
+	: TRUE
+		{ $$ = false; }
+	| FALSE
+		{ $$ = true; };
+	
+array : ARRAY_LBRACKET (expression (COMMA expression)*)? RBRACKET;
 	
 dict : LBRACE ddeflist RBRACE;
 			

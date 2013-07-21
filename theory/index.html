@@ -1,7 +1,7 @@
 <html>
 	<head>
 		<title>Theory Tests</title>
-		<script type='text/javascript' src='http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js'></script>
+		<script type='text/javascript' src='jquery-1.7.1.js'></script>
 		<script type='text/javascript' src='theory.js'></script>
 		<script type='text/javascript' src='test.js'></script>
 		<script type='text/javascript' src='compiler.js'></script>
@@ -74,33 +74,35 @@ namespace Website
 		ff curveddeck() -> 
 			((any))
 				((...))
+
+		fn fib(n) ->
+			if (n <= 2) then 1
+			else fib(n - 1) + fib(n - 2)
+			endif
 				
 		ff fixedbar(side, thickness) -> 
 			((block))
 				-> style (fixed + (boxSides - boxSides.opposite(side)))
-				<- style if t?! then { axis : t } else nothing endif
-					where axis = 'height' if side in ('top', 'bottom') else 'width' endif
+				<- style if t?! then { 'axis' : t } else nothing endif
+					where axis = if (side in array('top', 'bottom')) then 'height' else 'width' endif
 					yield thickness = t
 				
-				((...)) // e.g., bootstrap-y .container, .row, .row-fluid, etc  
-					((a)) 
+				((...)) // e.g., bootstrap-y .container, .row, .row-fluid, etc
+					((a))
 						((img))
 							<- yield t = if (thickness!) then
-										thickness
-									else 
-										(if align in ('top', 'bottom') then img.height else img.width endif) 
-										?? thickness
+									thickness
+								else
+									if (align in array('top', 'bottom')) then
+										img.height
+									else
+										img.width
 									endif
-					((\login))
-			
-		fn fib(n) ->
-			1 if (n <= 2)
-			else fib(n - 1) + fib(n - 2)
-			endif
-				
+								endif
+
 	theory Palette
 		[-- Colors --]
-		Background = #fff
+		Background = 3**(2*5+3)
 		
 
 		</script>
