@@ -6,6 +6,8 @@ bin							[0-1]+
 frac                        (?:\.[0-9]+)
 id							[a-zA-Z][a-zA-Z0-9]*
 float						"-"?(?:[0-9]|[1-9][0-9]+)("f"|"."[0-9]*"f"?)
+spc							[\t \u00a0\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u200b\u2028\u2029\u3000]
+str							\"[^\"]*\"|\'[^\']*\'
 imp							"->"
 revimp						"<-"
 
@@ -46,6 +48,8 @@ revimp						"<-"
 				%};
 {imp}			return 'IMPLICATION';
 {revimp}		return 'REVIMPLICATION';
+"^"				return 'UP';
+"v"|"V"			return 'DOWN';
 "style"			return 'STYLE';
 "where"			return 'WHERE';
 "yield"			return 'YIELD';
@@ -100,7 +104,7 @@ revimp						"<-"
 "&&"|"and"		return 'AND';
 "&"				return 'B_AND';
 "|"				return 'B_OR';
-"^"|"xor"		return 'XOR';
+"xor"			return 'XOR';
 "not"|"!"		return 'NOT';
 "?!"			return 'EXCUSEME';
 "??"			return 'IFNULL';
@@ -117,44 +121,42 @@ revimp						"<-"
 ","				return 'COMMA';
 {float}{id}		return 'FLOAT_UNITS';
 {int}{id}		return 'INT_UNITS';
-\"[^\"]*\"|\'[^\']*\'		yytext = yytext.substr(1,yyleng-2); return 'STRING_LIT';
+{str}			yytext = yytext.substr(1,yyleng-2); return 'STRING_LIT';
 "."				return 'DOT';
-[\n\r\s]+<<EOF>>	%{
-					if (typeof yy._iemitstack === 'undefined') {
-						return 'ENDOFFILE';
-					}
-					
+\s*<<EOF>>		%{
+					// remaining DEDENTs implied by EOF, regardless of tabs/spaces
 					var tokens = [];
 				
-				    while (0 < yy._iemitstack[0]) {
+				    while (0 < _iemitstack[0]) {
 				    	this.popState();
 				        tokens.push("DEDENT");
-				        yy._iemitstack.shift();
+				        _iemitstack.shift();
 				    }
+				    tokens.push("ENDOFFILE");
+				    
 				    if (tokens.length) return tokens;
 				%}
-[\n\r]+\s*/![^\n\r]		/* eat blank lines */
-[\n\r]\s+		%{
-					if (typeof yy._iemitstack === 'undefined') {
-						yy._iemitstack = [0];
-					}
+[\n\r]+{spc}*/![^\n\r]		/* eat blank lines */
+[\n\r]{spc}*		%{
 					var indentation = yytext.length - yytext.search(/\s/) - 1;
-				    if (indentation > yy._iemitstack[0]) {
-				        yy._iemitstack.unshift(indentation);
+				    if (indentation > _iemitstack[0]) {
+				        _iemitstack.unshift(indentation);
 				        console.log(this.topState(), "INDENT", this.stateStackSize());
 				        return 'INDENT';
 				    }
 				
 				    var tokens = [];
 				
-				    while (indentation < yy._iemitstack[0]) {
+				    while (indentation < _iemitstack[0]) {
 				    	this.popState();
 				    	console.log(this.topState(), "DEDENT", this.stateStackSize());
 				        tokens.push("DEDENT");
-				        yy._iemitstack.shift();
+				        _iemitstack.shift();
 				    }
 				    if (tokens.length) return tokens;
 				%}
-\s+				/* ignore whitespace */
+{spc}+			/* ignore whitespace */
 {id}			return 'ID';
-<<EOF>>			return 'ENDOFFILE';
+
+%%
+_iemitstack = [0];

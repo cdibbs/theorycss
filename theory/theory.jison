@@ -33,24 +33,47 @@ leafid : (id | DOT)+;
 tf_islist : ((AT id)? IS expression)+;
 	
 fragfunc 
-	: FRAGFUNC id LPAREN RPAREN IMPLICATION ffcasetree
+	: FRAGFUNC id LPAREN RPAREN IMPLICATION ffactionblock
 		{ $$ = new yy.FragFunc($id, [], $ffcasetree); } 
-	| FRAGFUNC id LPAREN paramlist RPAREN IMPLICATION ffcasetree
+	| FRAGFUNC id LPAREN paramlist RPAREN IMPLICATION ffactionblock
 		{ $$ = new yy.FragFunc($id, $paramlist, $ffcasetree) };
+		
+ffactionblock
+	: INDENT ffaction DEDENT
+	| ffaction
+	;
+		
+ffaction
+	: ffcasetree
+	| WHERE assignment_list ffcasetree
+	;
 	
-ffcasetree : ffnode ffcasetree_nodedefblock?
-	{ $$ = new yy.FFCaseTree($1, $2); };
+ffcasetree
+	: ffnode ffcasetree_nodedefblock
+		{ $$ = new yy.FFCaseTree($1, $2); }
+	;
 
-ffcasetree_nodedefblock : INDENT ffcasetree_nodedef DEDENT
-	{ $$ = $2; };
+ffcasetree_nodedefblock
+	: INDENT ffcasetree_nodedef DEDENT
+		{ $$ = $2; }
+	;
 
 ffcasetree_nodedef
-	: ffimplist ffcasetree
-		{ $$ = new yy.FFTreeNodeDef($1, $2); }
-	| ffimplist
-		{ $$ = new yy.FFTreeNodeDef($1, null); }
+	: ffdtfdef ffbtfdef ffcasetree
+		{ $$ = new yy.FFTreeNodeDef($1, $2, $3, 'depth-first'); }
+	| ffbtfdef ffdtfdef ffcasetree
+		{ $$ = new yy.FFTreeNodeDef($1, $2, $3, 'breadth-first'); }
+	| ffdtfdef ffcasetree
+		{ $$ = new yy.FFTreeNodeDef($1, null, $2); }
+	| ffbtfdef ffcasetree
+		{ $$ = new yy.FFTreeNodeDef(null, $1, $2); }
+	| ffdtfdef
+		{ $$ = new yy.FFTreeNodeDef($1, null, null); }
+	| ffbtfdef
+		{ $$ = new yy.FFTreeNodeDef(null, $1, null); }
 	| ffcasetree
-		{ $$ = new yy.FFTreeNodeDef(null, $1); };
+		{ $$ = new yy.FFTreeNodeDef(null, $1); }
+	;
 	
 ffnode : LFFNODE ffid RFFNODE
 	{ $$ = $ffid; };
@@ -58,14 +81,26 @@ ffnode : LFFNODE ffid RFFNODE
 ffid : (leafid | ELLIPSIS)
 	{ $$ = $1; };
 	
-ffimplist
+// depth traversal functions - the logic to apply before and after the depth-recursive call
+ffdtfdef
 	: IMPLICATION fragexprblock REVIMPLICATION fragexprblock
 		{ $$ = new yy.FFNodeFunc($2, $4); }
 	| IMPLICATION fragexprblock
 		{ $$ = new yy.FFNodeFunc($2, null); }
 	| REVIMPLICATION fragexprblock
-		{ $$ = new yy.FFNodeFunc(null, $2); };
+		{ $$ = new yy.FFNodeFunc(null, $2); }
+	;
 	
+// breadth traversal functions - the logic to apply before and after the breadth-recursive call
+ffbtfdef
+	: UP fragexprblock DOWN fragexprblock
+		{ $$ = new yy.FFNodeFunc($2, $4); }
+	| UP fragexprblock
+		{ $$ = new yy.FFNodeFunc($2, null); }
+	| DOWN fragexprblock
+		{ $$ = new yy.FFNodeFunc(null, $2); }
+	;
+
 fragexprblock
 	: INDENT fragexpr DEDENT
 		{ $$ = $fragexpr; }
@@ -122,8 +157,6 @@ lside
 assignment
 	: lside ASSIGN expression
 		{  $$ = new yy.Assignment($lside, $3); }
-	| lside CASEASSIGN caselist
-		{ $$ = new yy.CaseAssignment($lside, $3); }
 	;
 	
 assignment_list
@@ -132,6 +165,20 @@ assignment_list
 	| assignment COMMA assignment_list
 		{ $$ = $assignment_list; $$.unshift($assignment); }
 	;
+	
+caseassignment
+	: assignment
+	| lside CASEASSIGN caselist
+		{ $$ = new yy.CaseAssignment($lside, $3); }
+	;
+		
+caseassignment_list
+	: caseassignment
+		{ $$ = [ $caseassignment ]; }
+	| caseassignment COMMA caseassignment_list
+		{ $$ = $caseassignment_list; $$.unshift($assignment); }
+	;
+	
 
 caselist
 	: casedef caselist
