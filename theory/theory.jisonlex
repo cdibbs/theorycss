@@ -48,8 +48,17 @@ revimp						"<-"
 				%};
 {imp}			return 'IMPLICATION';
 {revimp}		return 'REVIMPLICATION';
-"^"				return 'UP';
-"v"|"V"			return 'DOWN';
+<FFBLOCK>"^"	%{
+					this.begin('FFFUNC');
+					return 'UP';
+				%};
+<FFBLOCK>"v"|"V"	%{
+					this.begin('FFFUNC');
+					return 'DOWN';
+				%};
+<FFFUNC>";"		%{
+					while(this.topState() === 'FFFUNC') { this.popState(); };
+				%};
 "style"			return 'STYLE';
 "where"			return 'WHERE';
 "yield"			return 'YIELD';
@@ -57,7 +66,9 @@ revimp						"<-"
 "map"			return 'MAP';
 "for"			return 'FOR';
 "null"			return 'NULL';
+{float}{id}		return 'FLOAT_UNITS';
 {float}			return 'FLOAT';
+{int}{id}		return 'INT_UNITS';
 {int}			return 'INTEGER';
 "0x"{hex}		return 'HEXNATLITERAL';
 {bin}"b"		return 'BINNATLITERAL';
@@ -119,8 +130,6 @@ revimp						"<-"
 ":"				return 'COLON';
 ";"				return 'EOL';
 ","				return 'COMMA';
-{float}{id}		return 'FLOAT_UNITS';
-{int}{id}		return 'INT_UNITS';
 {str}			yytext = yytext.substr(1,yyleng-2); return 'STRING_LIT';
 "."				return 'DOT';
 \s*<<EOF>>		%{
@@ -142,6 +151,7 @@ revimp						"<-"
 				    if (indentation > _iemitstack[0]) {
 				        _iemitstack.unshift(indentation);
 				        console.log(this.topState(), "INDENT", this.stateStackSize());
+				        this.begin(this.topState()); // deepen our current state
 				        return 'INDENT';
 				    }
 				

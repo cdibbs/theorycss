@@ -1,7 +1,7 @@
 <html>
 	<head>
 		<title>Theory Tests</title>
-		<script type='text/javascript' src='jquery-1.7.1.js'></script>
+		<script type='text/javascript' src='jquery-1.9.0.min.js'></script>
 		<script type='text/javascript' src='theory.js'></script>
 		<script type='text/javascript' src='test.js'></script>
 		<script type='text/javascript' src='compiler.js'></script>
@@ -62,25 +62,27 @@ namespace Website
 	theory Main
 		[[html]]
 			[[body]]
-				[[div.navbar]] ::
-					is { 'z-index' : "103" }
-					@tablet is fixedbar('top', '32px') + { 'happy' : 'joy' }
-					@mobile is gone
+				[[div.navbar]]
+					is { 'z-index' : "103" };
+					@tablet is fixedbar('top', '32px') + { 'happy' : 'joy' };
+					@mobile is gone;
 				[[div.main]] 
-					[[div.leftmenu :: LeftMenu]] ::
-						is scaleSibs(14.0)
+					[[div.leftmenu :: LeftMenu]]
+						is scaleSibs(14.0);
 					[[div.content :: Article]] //-> 3, x 3 
 				[[div.footer]]
 				
 		ff curveddeck() ->
 			((any))
 				((...))
-				
+					v style joe;
+					^ style bob;
+
 		ff scaleSibs(fsize) ->
 			where fsize = 14pt
 			((...))
 				v style { 'font-size' : fsize }
-					yield fsize = fsize * 1.2;
+					yield fsize = fsize * 1.2
 
 		fn fib(n) ->
 			if (n <= 2) then 1
@@ -89,24 +91,24 @@ namespace Website
 			
 		ff gradientSibs(color1, color2) ->
 			where bg = 'background-color'
-			((any)) 
-				v style { bg : color1 }
-					yield count = 2
-			((...))
-				v yield count = count + 1
-				^ style { bg : (color1 + color2) / index + color1 }
-					where index = index + 1
 			((any))
-				^ style { bg : color2 }
-					yield index = 1
+				((any))
+					v style { bg : color1 }
+						yield count = 2;
+				((...))
+					v yield count = count + 1;
+					^ style { bg : (color1 + color2) / index + color1 }
+						where index = index + 1;
+				((any))
+					^ style { bg : color2 }
+						yield index = 1;
 				
 		ff fixedbar(side, thickness) -> 
 			((block))
-				-> style (fixed + (boxSides - boxSides.opposite(side)))
+				-> style (fixed + (boxSides - boxSides.opposite(side)));
 				<- style if t?! then { 'axis' : t } else nothing endif
 					where axis = if (side in array('top', 'bottom')) then 'height' else 'width' endif
-					yield thickness = t
-				
+					yield thickness = t;
 				((...)) // e.g., bootstrap-y .container, .row, .row-fluid, etc
 					((a))
 						((img))
@@ -118,7 +120,7 @@ namespace Website
 									else
 										img.width
 									endif
-								endif
+								endif;
 
 	theory Palette
 		[-- Colors --]
@@ -226,9 +228,9 @@ namespace Website
 				[[html]]
 					[[body]]
 						[[div.navbar]]
-							is fixedbar('top', thickness = 32px), { 'z-index' : 1030 }
-							@tablet is fixedbar('top', 32px)
-							@mobile is gone
+							is fixedbar('top', thickness = 32px), { 'z-index' : 1030 };
+							@tablet is fixedbar('top', 32px);
+							@mobile is gone;
 							
 						[[div.main]]
 							@? \media -> minutia[media]

@@ -24,19 +24,32 @@ theorybody : (def | NEWLINE)*;
 	
 def : sdef | fdef | fragfunc | treefrag;
 	
-treefrag : tfnode (INDENT treefrag+ DEDENT)?;
+treefrag : tf_node tf_defblock;
 
-tfnode : XPATHSTART leafid (TYPIFY id)? XPATHEND (TYPIFY INDENT tf_islist DEDENT)?;
+tf_node : XPATHSTART leafid (TYPIFY id)? XPATHEND;
+
+tf_defblock
+	: INDENT tf_islist treefrag* DEDENT
+	|
+	;
 	
 leafid : (id | DOT)+;
-	
-tf_islist : ((AT id)? IS expression)+;
+
+tf_islist
+	: 
+	| tf_islist tf_is
+	;
+
+tf_is
+	: AT id IS expression EOL
+	| IS expression EOL
+	;
 	
 fragfunc 
 	: FRAGFUNC id LPAREN RPAREN IMPLICATION ffactionblock
-		{ $$ = new yy.FragFunc($id, [], $ffcasetree); } 
+		{ $$ = new yy.FragFunc($id, [], $ffactionblock); } 
 	| FRAGFUNC id LPAREN paramlist RPAREN IMPLICATION ffactionblock
-		{ $$ = new yy.FragFunc($id, $paramlist, $ffcasetree) };
+		{ $$ = new yy.FragFunc($id, $paramlist, $ffactionblock) };
 		
 ffactionblock
 	: INDENT ffaction DEDENT
@@ -44,13 +57,19 @@ ffactionblock
 	;
 		
 ffaction
+	: ffcasetreelist
+	| WHERE assignment_list ffcasetreelist
+	;
+	
+ffcasetreelist
 	: ffcasetree
-	| WHERE assignment_list ffcasetree
+	| ffcasetree ffcasetreelist
 	;
 	
 ffcasetree
 	: ffnode ffcasetree_nodedefblock
 		{ $$ = new yy.FFCaseTree($1, $2); }
+	| ffnode
 	;
 
 ffcasetree_nodedefblock
@@ -59,19 +78,19 @@ ffcasetree_nodedefblock
 	;
 
 ffcasetree_nodedef
-	: ffdtfdef ffbtfdef ffcasetree
+	: ffdtfdef ffbtfdef ffcasetreelist
 		{ $$ = new yy.FFTreeNodeDef($1, $2, $3, 'depth-first'); }
-	| ffbtfdef ffdtfdef ffcasetree
+	| ffbtfdef ffdtfdef ffcasetreelist
 		{ $$ = new yy.FFTreeNodeDef($1, $2, $3, 'breadth-first'); }
-	| ffdtfdef ffcasetree
+	| ffdtfdef ffcasetreelist
 		{ $$ = new yy.FFTreeNodeDef($1, null, $2); }
-	| ffbtfdef ffcasetree
+	| ffbtfdef ffcasetreelist
 		{ $$ = new yy.FFTreeNodeDef(null, $1, $2); }
 	| ffdtfdef
 		{ $$ = new yy.FFTreeNodeDef($1, null, null); }
 	| ffbtfdef
 		{ $$ = new yy.FFTreeNodeDef(null, $1, null); }
-	| ffcasetree
+	| ffcasetreelist
 		{ $$ = new yy.FFTreeNodeDef(null, $1); }
 	;
 	
@@ -93,7 +112,7 @@ ffdtfdef
 	
 // breadth traversal functions - the logic to apply before and after the breadth-recursive call
 ffbtfdef
-	: UP fragexprblock DOWN fragexprblock
+	: DOWN fragexprblock UP fragexprblock
 		{ $$ = new yy.FFNodeFunc($2, $4); }
 	| UP fragexprblock
 		{ $$ = new yy.FFNodeFunc($2, null); }
@@ -110,12 +129,18 @@ fragexprblock
 fragexpr
 	: STYLE expression WHERE assignment_list YIELD assignment_list
 		{ $$ = new yy.StyleWhereYield($expression, $assignment_list, $assignment_list1); }
+	| WHERE assignment_list INDENT YIELD assignment_list DEDENT
+		{ $$ = new yy.StyleWhereYield(null, $assignment_list, $assignment_list1); }
+	| STYLE expression YIELD assignment_list
+		{ $$ = new yy.StyleWhereYield($expression, null, $assignment_list); }
+	| STYLE expression INDENT YIELD assignment_list DEDENT
+		{ $$ = new yy.StyleWhereYield($expression, null, $assignment_list); }
+	| STYLE expression INDENT WHERE assignment_list DEDENT
+		{ $$ = new yy.StyleWhereYield($expression, $assignment_list, null); }
 	| STYLE expression INDENT WHERE assignment_list YIELD assignment_list DEDENT
 		{ $$ = new yy.StyleWhereYield($expression, $assignment_list, $assignment_list1); }
 	| WHERE assignment_list YIELD assignment_list
 		{ $$ = new yy.StyleWhereYield(null, $assignment_list, $assignment_list1); }
-	| STYLE expression YIELD assignment_list
-		{ $$ = new yy.StyleWhereYield($expression, null, $assignment_list); }
 	| STYLE expression
 		{ $$ = new yy.StyleWhereYield($expression, null, null); }
 	| YIELD assignment_list
@@ -379,7 +404,7 @@ shift_op : SHIFTL | SHIFTR;
 
 addsub_op : PLUS | MINUS;
 	
-number : INTEGER | FLOAT | color | HEXNATLITERAL | BINNATLITERAL | FLOAT_UNITS | INT_UNITS
+number : FLOAT_UNITS | INT_UNITS | INTEGER | FLOAT | color | HEXNATLITERAL | BINNATLITERAL
 	{ $$ = $1; };
 
 id : ID;
