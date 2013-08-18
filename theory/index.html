@@ -1,7 +1,7 @@
 <html>
 	<head>
 		<title>Theory Tests</title>
-		<script type='text/javascript' src='jquery-1.9.0.min.js'></script>
+		<script type='text/javascript' src='jquery-1.7.1.js'></script>
 		<script type='text/javascript' src='theory.js'></script>
 		<script type='text/javascript' src='test.js'></script>
 		<script type='text/javascript' src='compiler.js'></script>
@@ -106,21 +106,15 @@ namespace Website
 		ff fixedbar(side, thickness) -> 
 			((block))
 				-> style (fixed + (boxSides - boxSides.opposite(side)));
-				<- style if t?! then { 'axis' : t } else nothing endif
+				<- style if t?! or thickness? then { 'axis' : (if (thickness!) then thickness else t endif) } else nothing endif
 					where axis = if (side in array('top', 'bottom')) then 'height' else 'width' endif
 					yield thickness = t;
 				((...)) // e.g., bootstrap-y .container, .row, .row-fluid, etc
-					((a))
-						((img))
-							<- yield t = if (thickness!) then
-									thickness
-								else
-									if (align in array('top', 'bottom')) then
-										img.height
-									else
-										img.width
-									endif
-								endif;
+					<- yield t = if (align in array('top', 'bottom')) then
+								this.height
+							else
+								this.width
+							endif;
 
 	theory Palette
 		[-- Colors --]

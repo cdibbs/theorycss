@@ -22,27 +22,45 @@ theory : THEORY id (EXTENDS id)? INDENT theorybody DEDENT
 	
 theorybody : (def | NEWLINE)*;
 	
-def : sdef | fdef | fragfunc | treefrag;
+def : sdef { $$ = $1; } | fdef { $$ = $1; } | fragfunc { $$ = $1; } | treefrag { $$ = $1; };
 	
-treefrag : tf_node tf_defblock;
+treefrag
+	: tf_node tf_defblock
+	{ $$ = ['tf', $tf_node, $tf_defblock]; }
+	;
 
-tf_node : XPATHSTART leafid (TYPIFY id)? XPATHEND;
+tf_node
+	: XPATHSTART leafid (TYPIFY id)? XPATHEND
+	{ $$ = ['tfnode', $leafid, $3]; }
+	;
 
 tf_defblock
-	: INDENT tf_islist treefrag* DEDENT
+	: INDENT tf_islist tf_list DEDENT
+	{ $$ = [$tf_islist, $tf_list]; }
 	|
+	;
+	
+tf_list
+	: treefrag tf_list
+	{ $$ = $tf_list; $$.unshift($treefrag); }
+	| 
+	{ $$ = []; }
 	;
 	
 leafid : (id | DOT)+;
 
 tf_islist
 	: 
+	{ $$ = []; }
 	| tf_islist tf_is
+	{ $$ = $tf_islist; $$.push($tf_is); }
 	;
 
 tf_is
 	: AT id IS expression EOL
+	{ $$ = ['tfis', $id, $expression]; }
 	| IS expression EOL
+	{ $$ = ['tfis', null, $expression]; }
 	;
 	
 fragfunc 
@@ -53,23 +71,30 @@ fragfunc
 		
 ffactionblock
 	: INDENT ffaction DEDENT
+		{ $$ = $ffaction; }
 	| ffaction
+		{ $$ = $faction; }
 	;
 		
 ffaction
 	: ffcasetreelist
+		{ $$ = new yy.FFAction($ffcasetreelist, null); }
 	| WHERE assignment_list ffcasetreelist
+		{ $$ = new yy.FFAction($ffcasetreelist, $assignment_list); }
 	;
 	
 ffcasetreelist
-	: ffcasetree
-	| ffcasetree ffcasetreelist
+	: ffcasetreelist ffcasetree
+		{ $$ = $ffcasetreelist; $$.push($ffcasetree); }
+	| ffcasetree
+		{ $$ = [$ffcasetree]; }
 	;
 	
 ffcasetree
 	: ffnode ffcasetree_nodedefblock
 		{ $$ = new yy.FFCaseTree($1, $2); }
 	| ffnode
+		{ $$ = new yy.FFCaseTree($1, null); }
 	;
 
 ffcasetree_nodedefblock
@@ -252,17 +277,17 @@ elist
 
 atom
 	: id
-		{ $$ = new yy.Atom(yy.Atom.Id, $1); }
+		{ $$ = ['id', $1]; }
 	| number
-		{ $$ = new yy.Atom(yy.Atom.NumConst, $number); }
+		{ $$ = ['num', $number]; }
 	| bool
-		{ $$ = new yy.Atom(yy.Atom.Boolean, $bool); }
+		{ $$ = ['bool', $bool]; }
 	| STRING_LIT
-		{ $$ = new yy.Atom(yy.Atom.StringLit, $yytext); }
+		{ $$ = ['str', $yytext]; }
 	| LPAREN expression RPAREN
 		{ $$ = $expression; }
 	| dict
-		{ $$ = $dict; }
+		{ $$ = ['dict', $dict]; }
 	;
 
 
@@ -270,41 +295,41 @@ postfix_expression
 	: atom
 		{ $$ = $1; }
 	| postfix_expression LBRACKET expression RBRACKET
-		{ $$ = new yy.PostFixExp(yy.PostFixExp.Index, $1, $3); } 
+		{ $$ = ['[]', $1, $3]; } 
 	| postfix_expression INC_OP
-		{ $$ = new yy.PostFixExp(yy.PostFixExp.IncOp, $1); }
+		{ $$ = ['++', $1]; }
 	| postfix_expression DEC_OP
-		{ $$ = new yy.PostFixExp(yy.PostFixExp.DecOp, $1); }
+		{ $$ = ['--', $1]; }
 	| postfix_expression EXCUSEME
-		{ $$ = new yy.PostFixExp(yy.PostFixExp.ExcuseMe, $1); }
+		{ $$ = ['!?', $1]; }
 	| postfix_expression NOT
-		{ $$ = new yy.PostFixExp(yy.PostFixExp.Important, $1); }
+		{ $$ = ['!', $1]; }
 	| postfix_expression DOT id
-		{ $$ = new yy.PostFixExp(yy.PostFixExp.Member, $1, $3); }
+		{ $$ = ['.', $1, $3]; }
 	| postfix_expression LPAREN arglist RPAREN
-		{ $$ = new yy.PostFixExp(yy.PostFixExp.FunctionCall, $1, $3); }
+		{ $$ = ['fn', $1, $3]; }
 	;
 			
 unary_expression : unary_op? postfix_expression
-	{ $$ = $1 ? new yy.UnaryExp($2) : $2; };
+	{ $$ = $1 ? [$1, $2] : $2; };
 	
 power_expression
 	: unary_expression
 		{ $$ = $1; }
 	| power_expression POWER unary_expression
-		{ $$ = new yy.BinaryOpExp($1, $2, $3); };
+		{ $$ = [$2, $1, $3]; };
 
 multiplicative_expression
 	: power_expression
 		{ $$ = $1; }
 	| multiplicative_expression muldivmod_op power_expression
-		{ $$ = new yy.BinaryOpExp($1, $2, $3); };
+		{ $$ = [$2, $1, $3]; };
 	
 additive_expression
 	: multiplicative_expression
 		{ $$ = $1; }
 	| additive_expression addsub_op multiplicative_expression
-		{ $$ = new yy.BinaryOpExp($1, $2, $3); };
+		{ $$ = [$2, $1, $3]; };
 	
 shift_expression
 	: additive_expression
@@ -316,25 +341,25 @@ relational_expression
 	: shift_expression
 		{ $$ = $1; }
 	| relational_expression compare_op shift_expression
-		{ $$ = new yy.BinaryOpExp($1, $2, $3); };
+		{ $$ = [$2, $1, $3]; };
 
 equivalence_expression
 	: relational_expression
 		{ $$ = $1; }
 	| equivalence_expression equiv_op relational_expression
-		{ $$ = new yy.BinaryOpExp($1, $2, $3); };
+		{ $$ = [$2, $1, $3]; };
 		
 and_expression
 	: relational_expression
 		{ $$ = $1; }
 	| and_expression B_AND relational_expression
-		{ $$ = new yy.BinaryOpExp($1, $2, $3); };
+		{ $$ = [$2, $1, $3]; };
 
 xor_expression
 	: and_expression
 		{ $$ = $1; }
 	| xor_expression XOR and_expression
-		{ $$ = new yy.BinaryOpExp($1, $2, $3); };
+		{ $$ = [$2, $1, $3]; };
 		
 ior_expression
 	: xor_expression
@@ -420,18 +445,25 @@ bool
 	
 array : ARRAY_LBRACKET (expression (COMMA expression)*)? RBRACKET;
 	
-dict : LBRACE ddeflist RBRACE;
+dict
+	: LBRACE ddeflist RBRACE
+	 	{ $$ = $ddeflist; }
+	;
 			
 ddeflist
 	: dictdef
+		{ $$ = { }; $$[$1[0]] = $1[1]; }
 	| dictdef COMMA ddeflist
+		{ $$ = $ddeflist; $$[$1[0]] = $1[1]; }
 	;
 
-dictdef : ddatom COLON expression;
+dictdef
+	: ddatom COLON expression
+		{ $$ = [ $1, $3 ]; }
+	;
 
 ddatom
 	: id
 	| number
 	| STRING_LIT
-	| LPAREN expression RPAREN
 	;

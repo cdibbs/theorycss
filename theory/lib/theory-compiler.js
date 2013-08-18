@@ -1,5 +1,5 @@
 var theoryCompiler = (function(){
-	"use strict";
+//	"use strict";
 	
 	var compiler = {};
 	var Program = function(namespaces) {
@@ -11,7 +11,7 @@ var theoryCompiler = (function(){
 	var Namespace = function(id, definitions) {
 		this.Name = id;
 		this.Definitions = definitions;
-	}
+	};
 	Namespace.prototype = { Name : null, Definitions : [] };
 	compiler.Namespace = Namespace;
 	
@@ -134,6 +134,15 @@ var theoryCompiler = (function(){
 	};
 	compiler.FragFunc = FragFunc;
 	
+	var FFAction = function(casetreelist, assignmentlist) {
+		this.CaseTreeList = casetreelist;
+		this.AssignmentList = assignmentlist;
+	};
+	FFAction.prototype = {
+		CaseTreeList : null, AssignmentList : null
+	};
+	compiler.FFAction = FFAction;
+	
 	var FFCaseTree = function(node, casetree) {
 		this.Node = node;
 		this.CaseTree = casetree;
@@ -173,3 +182,7 @@ var theoryCompiler = (function(){
 	
 	return compiler;
 })();
+
+if (typeof require !== 'undefined' && typeof exports !== 'undefined') {
+	exports.compiler = theoryCompiler;
+}
