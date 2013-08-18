@@ -1,0 +1,23 @@
+{
+  "bugs": {
+	"url": "http://github.com//jison/issues"  
+  },
+  "name": "theory",
+  "version": "0.1.0",
+  "description": "The Theory CSS metaprogramming language",
+  "main": "lib/theory-compiler",
+  "bin" : "lib/cli.js",
+  "devDependencies": {
+	  "jison": "0.4.x",
+	  "nomnom": "1.5.2"
+  },
+  "repository": "",
+  "keywords": [
+    "Node.js",
+    "Eclipse",
+    "Nodeclipse"
+  ],
+  "author": "",
+  "license": "MIT",
+  "readmeFilename": "README.md"
+}
