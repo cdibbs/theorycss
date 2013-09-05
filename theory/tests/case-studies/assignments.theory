@@ -1,0 +1,26 @@
+namespace TheoryTests
+	theory Main
+		a = 1;
+		b = 1 * 2 + a;
+		c = 3.14 * (something + 
+			parenthetic - ignoring
+		* indentation);
+
+		dict = { a : 1, b : 2, c : 3 };
+
+		d = within dict {
+			// ignores newlines within {}
+			(a * b * c) / (a + b + c)
+		};
+
+		complicated = (if within dict { a != c }
+			then 'okay'
+			else 'nopers' endif);
+
+		pc = 'width >= 1280px';
+		mobile = 'width < 1280';
+
+		casingthejoint @=
+			pc -> { display : 'block' },
+			mobile -> { display : 'none' };
+
