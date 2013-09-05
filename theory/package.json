@@ -9,7 +9,8 @@
   "bin" : "lib/cli.js",
   "devDependencies": {
 	  "jison": "0.4.x",
-	  "nomnom": "1.5.2"
+	  "nomnom": "1.5.2",
+	  "test" : "0.6.0"
   },
   "repository": "",
   "keywords": [

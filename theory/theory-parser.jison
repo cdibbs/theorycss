@@ -12,17 +12,38 @@ file
 		{ return new yy.Program($$); }
 	;
 	
-namespace : PREFIX id INDENT (theory | data | NEWLINE)* DEDENT
-	{ $$ = new yy.Namespace($id, $4); }
+namespace
+	: PREFIX id INDENT namespace_def DEDENT
+	{ $$ = ['ns', $id, $namespace_def]; }
 	;
 	
-theory : THEORY id (EXTENDS id)? INDENT theorybody DEDENT
-		{ $$ = new yy.Theory($2, $theorybody, $4); }
+namespace_def
+	: theory
+		{ $$ = [$theory]; }
+	| data
+		{ $$ = [$data]; }
+	| namespace_def theory
+		{ $$ = $namespace_def; $$.push($theory); }
+	| namespace_def data
+		{ $$ = $namespace_def; $$.push($data); }
+	;
+	
+	
+theory
+	: THEORY id INDENT theorybody DEDENT
+		{ $$ = ['theory', $2, $theorybody]; }
+	| THEORY id EXTENDS id INDENT theorybody DEDENT
+		{ $$ = ['theory', $2, $theorybody, $4]; }	
 	;
 	
 theorybody : (def | NEWLINE)*;
 	
-def : sdef { $$ = $1; } | fdef { $$ = $1; } | fragfunc { $$ = $1; } | treefrag { $$ = $1; };
+def : vdef { $$ = $1; } | fdef { $$ = $1; } | fragfunc { $$ = $1; } | treefrag { $$ = $1; };
+
+vdef
+	: caseassignment EOL
+		{ $$ = $1; }
+	;
 	
 treefrag
 	: tf_node tf_defblock
@@ -65,9 +86,9 @@ tf_is
 	
 fragfunc 
 	: FRAGFUNC id LPAREN RPAREN IMPLICATION ffactionblock
-		{ $$ = new yy.FragFunc($id, [], $ffactionblock); } 
+		{ $$ = ['ff', $id, [], $ffactionblock]; } 
 	| FRAGFUNC id LPAREN paramlist RPAREN IMPLICATION ffactionblock
-		{ $$ = new yy.FragFunc($id, $paramlist, $ffactionblock) };
+		{ $$ = ['ff', $id, $paramlist, $ffactionblock]; };
 		
 ffactionblock
 	: INDENT ffaction DEDENT
@@ -78,9 +99,9 @@ ffactionblock
 		
 ffaction
 	: ffcasetreelist
-		{ $$ = new yy.FFAction($ffcasetreelist, null); }
+		{ $$ = ['ffaction', $ffcasetreelist, null]; }
 	| WHERE assignment_list ffcasetreelist
-		{ $$ = new yy.FFAction($ffcasetreelist, $assignment_list); }
+		{ $$ = ['ffaction', $ffcasetreelist, $assignment_list]; }
 	;
 	
 ffcasetreelist
@@ -92,9 +113,9 @@ ffcasetreelist
 	
 ffcasetree
 	: ffnode ffcasetree_nodedefblock
-		{ $$ = new yy.FFCaseTree($1, $2); }
+		{ $$ = ['ffcasetree', $1, $2]; }
 	| ffnode
-		{ $$ = new yy.FFCaseTree($1, null); }
+		{ $$ = ['ffcasetree', $1, null]; }
 	;
 
 ffcasetree_nodedefblock
@@ -104,19 +125,19 @@ ffcasetree_nodedefblock
 
 ffcasetree_nodedef
 	: ffdtfdef ffbtfdef ffcasetreelist
-		{ $$ = new yy.FFTreeNodeDef($1, $2, $3, 'depth-first'); }
+		{ $$ = ['ffnodedef', $1, $2, $3, 'depth-first']; }
 	| ffbtfdef ffdtfdef ffcasetreelist
-		{ $$ = new yy.FFTreeNodeDef($1, $2, $3, 'breadth-first'); }
+		{ $$ = ['ffnodedef', $1, $2, $3, 'breadth-first']; }
 	| ffdtfdef ffcasetreelist
-		{ $$ = new yy.FFTreeNodeDef($1, null, $2); }
+		{ $$ = ['ffnodedef', $1, null, $2]; }
 	| ffbtfdef ffcasetreelist
-		{ $$ = new yy.FFTreeNodeDef(null, $1, $2); }
+		{ $$ = ['ffnodedef', null, $1, $2]; }
 	| ffdtfdef
-		{ $$ = new yy.FFTreeNodeDef($1, null, null); }
+		{ $$ = ['ffnodedef', $1, null, null]; }
 	| ffbtfdef
-		{ $$ = new yy.FFTreeNodeDef(null, $1, null); }
+		{ $$ = ['ffnodedef', null, $1, null]; }
 	| ffcasetreelist
-		{ $$ = new yy.FFTreeNodeDef(null, $1); }
+		{ $$ = ['ffnodedef', null, $1]; }
 	;
 	
 ffnode : LFFNODE ffid RFFNODE
@@ -128,21 +149,21 @@ ffid : (leafid | ELLIPSIS)
 // depth traversal functions - the logic to apply before and after the depth-recursive call
 ffdtfdef
 	: IMPLICATION fragexprblock REVIMPLICATION fragexprblock
-		{ $$ = new yy.FFNodeFunc($2, $4); }
+		{ $$ = ['nodefn', $2, $4]; }
 	| IMPLICATION fragexprblock
-		{ $$ = new yy.FFNodeFunc($2, null); }
+		{ $$ = ['nodefn', $2, null]; }
 	| REVIMPLICATION fragexprblock
-		{ $$ = new yy.FFNodeFunc(null, $2); }
+		{ $$ = ['nodefn', null, $2]; }
 	;
 	
 // breadth traversal functions - the logic to apply before and after the breadth-recursive call
 ffbtfdef
 	: DOWN fragexprblock UP fragexprblock
-		{ $$ = new yy.FFNodeFunc($2, $4); }
+		{ $$ = ['nodefn', $2, $4]; }
 	| UP fragexprblock
-		{ $$ = new yy.FFNodeFunc($2, null); }
+		{ $$ = ['nodefn', $2, null]; }
 	| DOWN fragexprblock
-		{ $$ = new yy.FFNodeFunc(null, $2); }
+		{ $$ = ['nodefn', null, $2]; }
 	;
 
 fragexprblock
@@ -153,23 +174,23 @@ fragexprblock
 	
 fragexpr
 	: STYLE expression WHERE assignment_list YIELD assignment_list
-		{ $$ = new yy.StyleWhereYield($expression, $assignment_list, $assignment_list1); }
+		{ $$ = ['s-w-y', $expression, $assignment_list, $assignment_list1]; }
 	| WHERE assignment_list INDENT YIELD assignment_list DEDENT
-		{ $$ = new yy.StyleWhereYield(null, $assignment_list, $assignment_list1); }
+		{ $$ = ['s-w-y', null, $assignment_list, $assignment_list1]; }
 	| STYLE expression YIELD assignment_list
-		{ $$ = new yy.StyleWhereYield($expression, null, $assignment_list); }
+		{ $$ = ['s-w-y', $expression, null, $assignment_list]; }
 	| STYLE expression INDENT YIELD assignment_list DEDENT
-		{ $$ = new yy.StyleWhereYield($expression, null, $assignment_list); }
+		{ $$ = ['s-w-y', $expression, null, $assignment_list]; }
 	| STYLE expression INDENT WHERE assignment_list DEDENT
-		{ $$ = new yy.StyleWhereYield($expression, $assignment_list, null); }
+		{ $$ = ['s-w-y', $expression, $assignment_list, null]; }
 	| STYLE expression INDENT WHERE assignment_list YIELD assignment_list DEDENT
-		{ $$ = new yy.StyleWhereYield($expression, $assignment_list, $assignment_list1); }
+		{ $$ = ['s-w-y', $expression, $assignment_list, $assignment_list1]; }
 	| WHERE assignment_list YIELD assignment_list
-		{ $$ = new yy.StyleWhereYield(null, $assignment_list, $assignment_list1); }
+		{ $$ = ['s-w-y', null, $assignment_list, $assignment_list1]; }
 	| STYLE expression
-		{ $$ = new yy.StyleWhereYield($expression, null, null); }
+		{ $$ = ['s-w-y', $expression, null, null]; }
 	| YIELD assignment_list
-		{ $$ = new yy.StyleWhereYield(null, null, $assignment_list); };
+		{ $$ = ['s-w-y', null, null, $assignment_list]; };
 		
 tuplevarlist
 	: id COMMA tuplevarlist
@@ -187,14 +208,14 @@ typedef
 
 sdef
 	: SETSTART id TYPIFY id SETEND assignment_list
-		{ $$ = new yy.SetDef($id, $4, $assignment_list); }
+		{ $$ = ['setdef', $2, $4, $assignment_list]; }
 	| SETSTART id SETEND assignment_list
-		{ $$ = new yy.SetDef($id, $id, $assignment_list); }
+		{ $$ = ['setdef', $id, $id, $assignment_list]; }
 	;
 	
 fdef
-	: FUNCTION id LPAREN paramlist? RPAREN IMPLICATION INDENT expression DEDENT
-		{ $$ = new yy.FnDef($id, $3, null, $expression); }
+	: FUNCTION id LPAREN paramlist? RPAREN IMPLICATION expression EOL
+		{ $$ = ['fn', $id, $4, null /* return types unsupported, for now */, $expression]; }
 	;
 	
 lside
@@ -206,7 +227,7 @@ lside
 	
 assignment
 	: lside ASSIGN expression
-		{  $$ = new yy.Assignment($lside, $3); }
+		{  $$ = ['=', $lside, $3]; }
 	;
 	
 assignment_list
@@ -219,7 +240,7 @@ assignment_list
 caseassignment
 	: assignment
 	| lside CASEASSIGN caselist
-		{ $$ = new yy.CaseAssignment($lside, $3); }
+		{ $$ = ['@=', $lside, $3]; }
 	;
 		
 caseassignment_list
@@ -231,15 +252,15 @@ caseassignment_list
 	
 
 caselist
-	: casedef caselist
+	: casedef COMMA caselist
 		{ $$ = $caselist; $caselist.unshift($casedef); }
-	|
-		{ $$ = []; }
+	| casedef
+		{ $$ = [$casedef]; }
 	;
 
 casedef
 	: id IMPLICATION expression
-		{ $$ = new yy.CaseDef($id, $expression); }
+		{ $$ = ['?->', $id, $expression]; }
 	;
 
 arglist
@@ -250,7 +271,7 @@ arglist
 	;
 	
 argdef
-	: expression
+	: expression 
 //	| assignment 
 	;
 	
@@ -258,7 +279,8 @@ paramlist
 	: id
 		{ $$ = [$id]; }
 	| paramlist COMMA id
-		{ $$ = $paramlist.unshift($id); };
+		{ $$ = $paramlist; $$.push($id); }
+	;
 	
 boollit
 	: TRUE
@@ -307,7 +329,9 @@ postfix_expression
 	| postfix_expression DOT id
 		{ $$ = ['.', $1, $3]; }
 	| postfix_expression LPAREN arglist RPAREN
-		{ $$ = ['fn', $1, $3]; }
+		{ $$ = ['()', $1, $3]; }
+	| postfix_expression LPAREN RPAREN
+		{ $$ = ['()', $1, null]; }
 	;
 			
 unary_expression : unary_op? postfix_expression
@@ -335,7 +359,7 @@ shift_expression
 	: additive_expression
 		{ $$ = $1; }
 	| shift_expression shift_op additive_expression
-		{ $$ = new yy.BinaryOpExp($1, $2, $3); }; 
+		{ $$ = [$2, $1, $3]; }; 
 	
 relational_expression
 	: shift_expression
@@ -350,9 +374,9 @@ equivalence_expression
 		{ $$ = [$2, $1, $3]; };
 		
 and_expression
-	: relational_expression
+	: equivalence_expression
 		{ $$ = $1; }
-	| and_expression B_AND relational_expression
+	| and_expression B_AND equivalence_expression
 		{ $$ = [$2, $1, $3]; };
 
 xor_expression
@@ -365,41 +389,44 @@ ior_expression
 	: xor_expression
 		{ $$ = $1; }
 	| ior_expression B_OR xor_expression
-		{ $$ = new yy.BinaryOpExp($1, $2, $3); };
+		{ $$ = [$2, $1, $3]; };
 		
 logical_and_expression
 	: ior_expression
 		{ $$ = $1; }
 	| logical_and_expression AND ior_expression
-		{ $$ = new yy.BinaryOpExp($1, $2, $3); };
+		{ $$ = [$2, $1, $3]; };
 	
 logical_or_expression
 	: logical_and_expression
 		{ $$ = $1; }
 	| logical_or_expression OR logical_and_expression
-		{ $$ = new yy.BinaryOpExp($1, $2, $3); };
+		{ $$ = [$2, $1, $3]; };
 
 in_expression
 	: logical_or_expression
 		{ $$ = $1; }
 	| in_expression IN logical_or_expression
-		{ $$ = new yy.BinaryOpExp($1, $2, $3); };
+		{ $$ = [$2, $1, $3]; };
 
 ifnull_expression
 	: in_expression
 		{ $$ = $1; }
 	| ifnull_expression IFNULL in_expression
-		{ $$ = new yy.BinaryOpExp($1, $2, $3); };
+		{ $$ = [$2, $1, $3]; };
 	
 test_expression
-	: IF expression THEN block_expression ELSE block_expression ENDIF
-		{ $$ = new yy.TestExp([[$expression, $block_expression], [true, $6]]); }
+	: ifnull_expression
+		{ $$ = $1; }
+	| IF expression THEN block_expression ELSE block_expression ENDIF
+		{ $$ = ['test', [[$expression, $block_expression], [true, $6]]]; }
 	| IF expression THEN block_expression elseif_list ENDIF
-		{ $$ = new yy.TestExp($elseif_list.unshift([$expression, $block_expression])); }
+		{ $$ = ['test', $elseif_list.unshift([$expression, $block_expression])]; }
 	| IF expression THEN block_expression elseif_list ELSE block_expression ENDIF
-		{ $$ = new yy.TestExp($elseif_list.unshift([$expression, $block_expression], [true, $7])); }  
+		{ $$ = ['test', $elseif_list.unshift([$expression, $block_expression], [true, $7])]; }  
 	| IF expression THEN block_expression ENDIF
-		{ $$ = new yy.TestExp([[$expression, $block_expression]]); };
+		{ $$ = ['test', [[$expression, $block_expression]]]; }
+	;
 		
 elseif_list
 	: ELSEIF expression THEN block_expression
@@ -407,8 +434,23 @@ elseif_list
 	| elseif_list ELSEIF expression THEN block_expression
 		{ $$ = $elseif_list.push([$expression, $block_expression]); }
 	;
+	
+lambda_expression
+	: test_expression
+		{ $$ = $1; }
+	| LAMBDA paramlist LAMBDADEF expression
+		{ $$ = ['lambda', $paramlist, $expression]; }
+	;
+	
+within_expression
+	: lambda_expression
+		{ $$ = $1; }
+	| WITHIN expression LBRACE expression RBRACE
+		{ $$ = ['within', $2, $4]; }
+	;
 
-expression : test_expression | ifnull_expression
+expression 
+	: within_expression
 	{ $$ = $1; };
 
 block_expression
@@ -445,9 +487,34 @@ bool
 	
 array : ARRAY_LBRACKET (expression (COMMA expression)*)? RBRACKET;
 	
+dict_comprehension
+	: dict_but
+	| dict_with
+	| dict_keep
+	;
+	
+dict_but
+	: LBRACE FROM expression BUT assignment_list RBRACE
+		{ $$ = ['but_dict', $expression, $assignment_list]; }
+	;
+	
+dict_with
+	: LBRACE FROM expression WITH lambda_expression RBRACE
+		{ $$ = ['with_dict', $expression, $lambda_expression]; }
+	;
+	
+dict_keep
+	: LBRACE FROM expression KEEP expression RBRACE
+		{ $$ = ['keep_dict', $3, $5]; }
+	;
+	
 dict
-	: LBRACE ddeflist RBRACE
+	: dict_comprehension
+		{ $$ = $1; }
+	| LBRACE ddeflist RBRACE
 	 	{ $$ = $ddeflist; }
+	| LBRACE RBRACE
+		{ $$ = {}; }
 	;
 			
 ddeflist

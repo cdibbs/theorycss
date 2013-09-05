@@ -2,21 +2,17 @@ namespace Website
 	theory main
 		[[html]]
 			[[div]]
-				is gradientSibs(0xff0000, 0x00ff00);
+				is gradientSet(0xff0000, 0x00ff00);
 				[[div]]
 				[[div]]
 				[[div]]
 				[[div]]
 				[[div]]
 
-		ff gradientSibs(color1, color2) ->
-			where count = 2, index = 1
+		ff gradientSet(color1, color2) ->
+			where count = 0, index = 0
 			((any))
-				((any))
-					v style { 'background-color' : color1 };
+					-> yield count = this.children.count
 				((...))
-					v yield count = count + 1;
-					^ style { 'background-color' : (color1 + color2) * index / count + color1 }
+					v style if (this.name == 'div') then { 'background-color' : (color1 + color2) * index / count + color1 } else {} endif
 						yield index = index + 1;
-				((any))
-					^ style { 'background-color' : color2 };

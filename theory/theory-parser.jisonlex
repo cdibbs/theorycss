@@ -1,16 +1,19 @@
-esc                         "\\"
 int                         "-"?(?:[0-9]|[1-9][0-9]+)
 exp                         (?:[eE][-+]?[0-9]+)
 hex							[0-9A-Fa-f]+
 bin							[0-1]+
 frac                        (?:\.[0-9]+)
-id							[a-zA-Z][a-zA-Z0-9]*
+id							[a-zA-Z][a-zA-Z0-9_']*
 float						"-"?(?:[0-9]|[1-9][0-9]+)("f"|"."[0-9]*"f"?)
 spc							[\t \u00a0\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u200b\u2028\u2029\u3000]
 str							\"[^\"]*\"|\'[^\']*\'
 imp							"->"
 revimp						"<-"
 
+%s PAREN
+%s BRACE
+%s WSBLOCK // block inside of which whitespace is non-semantic
+%s FN
 %s FF
 %s FFBLOCK
 %s FFFUNC
@@ -29,7 +32,7 @@ revimp						"<-"
 "image"			return 'IMAGE';
 "data"			return 'DATA';
 "needs"			return 'NEEDS';
-"fn"			return 'FUNCTION';
+"fn"			%{ this.begin('FN'); return 'FUNCTION'; %};
 "ff"			%{
 					this.begin('FF');
 					return 'FRAGFUNC';
@@ -90,8 +93,10 @@ revimp						"<-"
 "is"			return 'IS';
 <FFBLOCK>"(("			this.begin('FFNODE'); return 'LFFNODE';
 <FFNODE>"))"			this.popState(); return 'RFFNODE';
-"\\"			return 'ESCAPE';	
+"\\"			return 'LAMBDA';
 "..."			return 'ELLIPSIS';
+".."			return 'RANGE';
+"=>"			return 'LAMBDADEF';
 "eq"|"=="		return 'EQ';
 "neq"|"!="		return 'NEQ';
 "gte"|">="		return 'GTE';
@@ -102,7 +107,7 @@ revimp						"<-"
 ">>"			return 'SHIFTR';
 "::"			return 'TYPIFY';
 "="				return 'ASSIGN';
-"@="			return 'CASEASSIGN';
+"@="			%{ this.begin('WSBLOCK'); return 'CASEASSIGN'; %};
 "@"				return 'AT';
 "+"				return 'PLUS';
 "-"				return 'MINUS';
@@ -120,16 +125,24 @@ revimp						"<-"
 "?!"			return 'EXCUSEME';
 "??"			return 'IFNULL';
 "?"				return 'QUESTION';
-"{"				return 'LBRACE';
-"}"				return 'RBRACE';
-"("				return 'LPAREN';
-")"				return 'RPAREN';
+"{"				%{ this.begin('BRACE'); return 'LBRACE'; %};
+"}"				%{ this.popState(); return 'RBRACE'; %};
+<BRACE>\s+		/* ignore whitespace in dictionary definitions */
+"("				%{ this.begin('PAREN'); return 'LPAREN'; %};
+")"				%{ this.popState(); return 'RPAREN'; %};
+<PAREN>\s+		/* ignore whitespace in parenthetic expressions */
 " ["			return 'ARRAY_LBRACKET';
 "["				return 'LBRACKET';
 "]"				return 'RBRACKET';
 ":"				return 'COLON';
+<FN>";"			%{ this.popState(); return 'EOL'; %};
+<FN>\s+			/* ignore whitespace within functions */
 ";"				return 'EOL';
 ","				return 'COMMA';
+"but"			return 'BUT';
+"within"		return 'WITHIN';
+"from"			return 'FROM';
+"keep"			return 'KEEP';
 {str}			yytext = yytext.substr(1,yyleng-2); return 'STRING_LIT';
 "."				return 'DOT';
 \s*<<EOF>>		%{

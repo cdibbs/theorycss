@@ -20,7 +20,7 @@ exports.main = function() {
     if (opts.file) {
         var raw = fs.readFileSync(path.normalize(opts.file), 'utf8');
         parser.yy = compiler;
-        console.log(JSON.stringify(parser.parse(raw), null, 4));
+        console.log(JSON.stringify(parser.parse(raw), null, 2));
     }
 };
 
