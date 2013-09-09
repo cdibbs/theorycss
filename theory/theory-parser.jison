@@ -9,7 +9,7 @@
 
 file
 	: (namespace | NEWLINE)* ENDOFFILE
-		{ return new yy.Program($$); }
+		{ return ['program', $$]; }
 	;
 	
 namespace

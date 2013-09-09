@@ -12,7 +12,8 @@ revimp						"<-"
 
 %s PAREN
 %s BRACE
-%s WSBLOCK // block inside of which whitespace is non-semantic
+/* block inside of which whitespace is non-semantic */
+%s WSBLOCK
 %s FN
 %s FF
 %s FFBLOCK
@@ -108,6 +109,7 @@ revimp						"<-"
 "::"			return 'TYPIFY';
 "="				return 'ASSIGN';
 "@="			%{ this.begin('WSBLOCK'); return 'CASEASSIGN'; %};
+<WSBLOCK>\s+	/* ignore whitespace in certain blocks of code to give the programmer more freedom */
 "@"				return 'AT';
 "+"				return 'PLUS';
 "-"				return 'MINUS';
