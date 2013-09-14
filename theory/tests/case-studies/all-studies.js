@@ -19,3 +19,6 @@ for (var i=0, l=srcs.length; i<l; i++) {
 }
 
 exports["test Theory source case studies"] = srcTests;
+
+if (require.main === module)
+    require("test").run(exports);

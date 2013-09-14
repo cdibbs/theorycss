@@ -304,7 +304,7 @@ atom
 	| bool
 		{ $$ = ['bool', $bool]; }
 	| STRING_LIT
-		{ $$ = ['str', $yytext]; }
+		{ $$ = ['str', $1]; }
 	| LPAREN expression RPAREN
 		{ $$ = $expression; }
 	| dict

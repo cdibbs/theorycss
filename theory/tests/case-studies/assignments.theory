@@ -1,5 +1,6 @@
 namespace TheoryTests
 	theory Main
+
 		a = 1;
 		b = 1 * 2 + a;
 		c = 3.14 * (something + 
