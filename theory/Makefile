@@ -5,4 +5,4 @@ theory:
 	mv theory-parser.js lib/
 
 test:
-	node tests/all-tests.js
+	node tests/all.js

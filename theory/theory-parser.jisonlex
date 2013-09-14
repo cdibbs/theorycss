@@ -63,6 +63,7 @@ revimp						"<-"
 <FFFUNC>";"		%{
 					while(this.topState() === 'FFFUNC') { this.popState(); };
 				%};
+<FFFUNC>\s+		/* ignore whitespace within frag functions */
 "style"			return 'STYLE';
 "where"			return 'WHERE';
 "yield"			return 'YIELD';

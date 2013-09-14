@@ -3,6 +3,7 @@ namespace Website
 		[[html]]
 			[[body]]
 				[[div.navbar]]
+					when :hover
 					is { 'z-index' : "103" };
 					@tablet is fixedbar('top', '32px') + { 'happy' : 'joy' };
 					@mobile is gone;

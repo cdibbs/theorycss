@@ -167,11 +167,10 @@ ffbtfdef
 	;
 
 fragexprblock
-	: INDENT fragexpr DEDENT
+	: fragexpr EOL
 		{ $$ = $fragexpr; }
-	| fragexpr
-		{ $$ = $fragexpr; };
-	
+	;
+		
 fragexpr
 	: STYLE expression WHERE assignment_list YIELD assignment_list
 		{ $$ = ['s-w-y', $expression, $assignment_list, $assignment_list1]; }

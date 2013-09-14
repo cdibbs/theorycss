@@ -1,0 +1,32 @@
+namespace TheoryTests
+	theory Functions
+
+		basic_func_as_1st_class = \x, y => (x + y) * (x - y);
+
+		fn normalFunc() -> if this then that else dunno endif;
+		fn normalFunc(a, b, c', d) -> if we then
+			span_multiple_lines
+			else we_err()
+			endif;
+
+		ff fragMeBro(a, b, c) ->
+			where we = initialize, some = things
+			((...))
+				-> style before_we_recurse(chris)
+					where chris = me
+					yield me = me;
+				<- style after_we_recurse()
+					where we = have, some = new, things = 4*u;
+				((div))
+					-> style { having : "a lonely little div somewhere" };
+		
+		ff noWhere(a, b) ->
+			((something))
+				((beautiful))
+					v style "before breadth first recursive call";
+					^ style "after that call, and we have more info";
+		
+		
+		fn applyInside() -> (\x -> x * x)(25);
+
+		fn lambdaWithinDict() -> within myDict { \use -> variables added to scope };
