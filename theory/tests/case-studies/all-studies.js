@@ -3,6 +3,7 @@ var parser = require("../../lib/theory-parser").parser,
 	fs = require("fs"), path = require("path");
 
 // look for .theory files in this directory and add a test for each one
+if (typeof path.sep === "undefined") path.sep = "/";
 
 var srcTests = {};
 var srcs = fs.readdirSync(__dirname)

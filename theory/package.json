@@ -7,11 +7,14 @@
   "description": "The Theory CSS metaprogramming language",
   "main": "lib/theory-compiler",
   "bin" : "lib/cli.js",
-  "scripts": { "test": "node tests/all.js" },
   "devDependencies": {
 	  "jison": "0.4.x",
 	  "nomnom": "1.5.2",
-	  "test" : "0.4.4"
+	  "test" : "0.6.0",
+	  "path" : "0.4.9"
+  },
+  "scripts" : {
+    "test" : "node tests/all.js"
   },
   "repository": "",
   "keywords": [
