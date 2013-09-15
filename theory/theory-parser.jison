@@ -172,22 +172,16 @@ fragexprblock
 	;
 		
 fragexpr
-	: STYLE expression WHERE assignment_list YIELD assignment_list
-		{ $$ = ['s-w-y', $expression, $assignment_list, $assignment_list1]; }
-	| WHERE assignment_list INDENT YIELD assignment_list DEDENT
-		{ $$ = ['s-w-y', null, $assignment_list, $assignment_list1]; }
+	: STYLE expression
+		{ $$ = ['s-w-y', $expression, null, null]; }
 	| STYLE expression YIELD assignment_list
 		{ $$ = ['s-w-y', $expression, null, $assignment_list]; }
-	| STYLE expression INDENT YIELD assignment_list DEDENT
-		{ $$ = ['s-w-y', $expression, null, $assignment_list]; }
-	| STYLE expression INDENT WHERE assignment_list DEDENT
+	| STYLE expression WHERE assignment_list
 		{ $$ = ['s-w-y', $expression, $assignment_list, null]; }
-	| STYLE expression INDENT WHERE assignment_list YIELD assignment_list DEDENT
+	| STYLE expression WHERE assignment_list YIELD assignment_list
 		{ $$ = ['s-w-y', $expression, $assignment_list, $assignment_list1]; }
 	| WHERE assignment_list YIELD assignment_list
 		{ $$ = ['s-w-y', null, $assignment_list, $assignment_list1]; }
-	| STYLE expression
-		{ $$ = ['s-w-y', $expression, null, null]; }
 	| YIELD assignment_list
 		{ $$ = ['s-w-y', null, null, $assignment_list]; };
 		
@@ -444,7 +438,7 @@ lambda_expression
 within_expression
 	: lambda_expression
 		{ $$ = $1; }
-	| WITHIN expression LBRACE expression RBRACE
+	| WITHIN expression COLON expression
 		{ $$ = ['within', $2, $4]; }
 	;
 

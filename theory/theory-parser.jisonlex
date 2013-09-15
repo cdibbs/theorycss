@@ -62,6 +62,7 @@ revimp						"<-"
 				%};
 <FFFUNC>";"		%{
 					while(this.topState() === 'FFFUNC') { this.popState(); };
+					return 'EOL';
 				%};
 <FFFUNC>\s+		/* ignore whitespace within frag functions */
 "style"			return 'STYLE';
@@ -111,6 +112,7 @@ revimp						"<-"
 "="				return 'ASSIGN';
 "@="			%{ this.begin('WSBLOCK'); return 'CASEASSIGN'; %};
 <WSBLOCK>\s+	/* ignore whitespace in certain blocks of code to give the programmer more freedom */
+<WSBLOCK>";" %{ this.popState(); return 'EOL'; %};
 "@"				return 'AT';
 "+"				return 'PLUS';
 "-"				return 'MINUS';
@@ -152,20 +154,19 @@ revimp						"<-"
 					// remaining DEDENTs implied by EOF, regardless of tabs/spaces
 					var tokens = [];
 				
-				    while (0 < _iemitstack[0]) {
-				    	this.popState();
-				        tokens.push("DEDENT");
-				        _iemitstack.shift();
+				    while (this._iemitstack[0]) {
+				          tokens.unshift("DEDENT");
+				          this._iemitstack.shift();
 				    }
-				    tokens.push("ENDOFFILE");
+				    tokens.unshift("ENDOFFILE");
 				    
 				    if (tokens.length) return tokens;
 				%}
 [\n\r]+{spc}*/![^\n\r]		/* eat blank lines */
 [\n\r]{spc}*		%{
 					var indentation = yytext.length - yytext.search(/\s/) - 1;
-				    if (indentation > _iemitstack[0]) {
-				        _iemitstack.unshift(indentation);
+				    if (indentation > this._iemitstack[0]) {
+				        this._iemitstack.unshift(indentation);
 				        console.log(this.topState(), "INDENT", this.stateStackSize());
 				        this.begin(this.topState()); // deepen our current state
 				        return 'INDENT';
@@ -173,11 +174,11 @@ revimp						"<-"
 				
 				    var tokens = [];
 				
-				    while (indentation < _iemitstack[0]) {
+				    while (indentation < this._iemitstack[0]) {
 				    	this.popState();
 				    	console.log(this.topState(), "DEDENT", this.stateStackSize());
 				        tokens.push("DEDENT");
-				        _iemitstack.shift();
+				        this._iemitstack.shift();
 				    }
 				    if (tokens.length) return tokens;
 				%}
@@ -185,4 +186,8 @@ revimp						"<-"
 {id}			return 'ID';
 
 %%
-_iemitstack = [0];
+jisonLexerFn = lexer.setInput;
+lexer.setInput = function(input) {
+	this._iemitstack = [0];
+	return jisonLexerFn.call(this, input);
+};

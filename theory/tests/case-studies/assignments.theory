@@ -6,15 +6,16 @@ namespace TheoryTests
 		c = 3.14 * (something + 
 			parenthetic - ignoring
 		* indentation);
+		d = (\x => x * x)(25);
 
 		dict = { a : 1, b : 2, c : 3 };
 
-		d = within dict {
+		d = within dict: (
 			// ignores newlines within {}
 			(a * b * c) / (a + b + c)
-		};
+		);
 
-		complicated = (if within dict { a != c }
+		complicated = (if within dict: a != c
 			then 'okay'
 			else 'nopers' endif);
 
