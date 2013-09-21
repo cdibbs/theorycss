@@ -1,0 +1,40 @@
+namespace Website
+	theory Main
+		[[html]]
+			[[body]]
+			[[second.child]]
+		[[first.level]]
+		[[yet.another]]
+			[[lets]]
+				[[go]]
+					[[deeper]]
+					[[please]]
+				[[back.again]]
+				
+				[[a.little.break]]
+				
+			[[follow.by.dedent]]
+			
+			
+			[[coolness]]
+		[[whats.up.now]]
+			[[huh]]
+			
+	theory ApplyingFragFunctions
+		[[html]]
+			is { inline : goodness };
+			is { even : on,
+				multiple : lines };
+			[[body]]
+				is functional(with, params, 25);
+				is with(), many(25, 26), funcs(a, b, c);
+				[[nav.bar]]
+					@mobile is hidden; // plain dictionary
+					@desktop is fixedbar(25);
+				[[main.area]]
+					is mixinmatch();
+					@mobile is right;
+				[[footer]]
+					@thesefirst is somethingelse();
+					is thenthese;
+					

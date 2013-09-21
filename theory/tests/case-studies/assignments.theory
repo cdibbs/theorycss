@@ -6,6 +6,7 @@ namespace TheoryTests
 		c = 3.14 * (something + 
 			parenthetic - ignoring
 		* indentation);
+		
 		d = (\x => x * x)(25);
 
 		dict = { a : 1, b : 2, c : 3 };

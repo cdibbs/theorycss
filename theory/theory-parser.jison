@@ -78,10 +78,10 @@ tf_islist
 	;
 
 tf_is
-	: AT id IS expression EOL
-	{ $$ = ['tfis', $id, $expression]; }
-	| IS expression EOL
-	{ $$ = ['tfis', null, $expression]; }
+	: AT id IS arglist EOL
+	{ $$ = ['tfis', $id, $arglist]; }
+	| IS arglist EOL
+	{ $$ = ['tfis', null, $arglist]; }
 	;
 	
 fragfunc 
@@ -240,15 +240,15 @@ caseassignment_list
 	: caseassignment
 		{ $$ = [ $caseassignment ]; }
 	| caseassignment COMMA caseassignment_list
-		{ $$ = $caseassignment_list; $$.unshift($assignment); }
+		{ $$ = $2; $$.unshift($caseassignment); }
 	;
 	
 
 caselist
-	: casedef COMMA caselist
-		{ $$ = $caselist; $caselist.unshift($casedef); }
-	| casedef
+	: casedef
 		{ $$ = [$casedef]; }
+	| casedef COMMA caselist
+		{ $$ = $caselist; $$.unshift($casedef); }
 	;
 
 casedef
@@ -260,7 +260,7 @@ arglist
 	: argdef
 		{ $$ = [ $argdef ]; }
 	| arglist COMMA argdef
-		{ $$ = $arglist.unshift($argdef); }
+		{ $$ = $arglist; $$.unshift($argdef); }
 	;
 	
 argdef

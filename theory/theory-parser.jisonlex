@@ -1,9 +1,9 @@
-int                         "-"?(?:[0-9]|[1-9][0-9]+)
+id							[a-zA-Z][a-zA-Z0-9_']*
+int                         "-"?(?:[1-9][0-9]+|[0-9])
 exp                         (?:[eE][-+]?[0-9]+)
 hex							[0-9A-Fa-f]+
 bin							[0-1]+
 frac                        (?:\.[0-9]+)
-id							[a-zA-Z][a-zA-Z0-9_']*
 float						"-"?(?:[0-9]|[1-9][0-9]+)("f"|"."[0-9]*"f"?)
 spc							[\t \u00a0\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u200b\u2028\u2029\u3000]
 str							\"[^\"]*\"|\'[^\']*\'
@@ -65,21 +65,17 @@ revimp						"<-"
 					return 'EOL';
 				%};
 <FFFUNC>\s+		/* ignore whitespace within frag functions */
+"but"			return 'BUT';
+"within"		return 'WITHIN';
+"from"			return 'FROM';
+"keep"			return 'KEEP';
 "style"			return 'STYLE';
 "where"			return 'WHERE';
 "yield"			return 'YIELD';
 "in"			return 'IN';
 "map"			return 'MAP';
-"for"			return 'FOR';
-"null"			return 'NULL';
-{float}{id}		return 'FLOAT_UNITS';
-{float}			return 'FLOAT';
-{int}{id}		return 'INT_UNITS';
-{int}			return 'INTEGER';
-"0x"{hex}		return 'HEXNATLITERAL';
-{bin}"b"		return 'BINNATLITERAL';
-"#"{hex}		return 'HEXCOLOR';
 "reduce"		return 'REDUCE';
+"for"			return 'FOR';
 "if"			return 'IF';
 "then"			return 'THEN';
 "int"			return 'INT';
@@ -89,11 +85,22 @@ revimp						"<-"
 "else"			return 'ELSE';
 "else"\s+"if"	return 'ELSEIF';
 "endif"			return 'ENDIF'; 
+"is"			return 'IS';
+
+{id}			return 'ID';
+
+"null"			return 'NULL';
+{float}{id}		return 'FLOAT_UNITS';
+{float}			return 'FLOAT';
+{int}{id}		return 'INT_UNITS';
+{int}			return 'INTEGER';
+"0x"{hex}		return 'HEXNATLITERAL';
+{bin}"b"		return 'BINNATLITERAL';
+"#"{hex}		return 'HEXCOLOR';
 "[--"			return 'SETSTART';
 "--]"			return 'SETEND';
 "[["			return 'XPATHSTART';
 "]]"			return 'XPATHEND';
-"is"			return 'IS';
 <FFBLOCK>"(("			this.begin('FFNODE'); return 'LFFNODE';
 <FFNODE>"))"			this.popState(); return 'RFFNODE';
 "\\"			return 'LAMBDA';
@@ -144,10 +151,6 @@ revimp						"<-"
 <FN>\s+			/* ignore whitespace within functions */
 ";"				return 'EOL';
 ","				return 'COMMA';
-"but"			return 'BUT';
-"within"		return 'WITHIN';
-"from"			return 'FROM';
-"keep"			return 'KEEP';
 {str}			yytext = yytext.substr(1,yyleng-2); return 'STRING_LIT';
 "."				return 'DOT';
 \s*<<EOF>>		%{
@@ -183,7 +186,6 @@ revimp						"<-"
 				    if (tokens.length) return tokens;
 				%}
 {spc}+			/* ignore whitespace */
-{id}			return 'ID';
 
 %%
 jisonLexerFn = lexer.setInput;

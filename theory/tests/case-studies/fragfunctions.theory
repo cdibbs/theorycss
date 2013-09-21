@@ -1,0 +1,39 @@
+/*
+ *Some comments littering the file
+ */
+namespace Website
+	// comments, comments
+	///// totally necessary
+	theory ffexplorations
+		
+		// this function does what you'd expect... precisely zilch //
+		ff basicNoOp() ->
+			((this))
+				((wouldbe))
+					((fun))
+				((...))
+				
+		/* and this one only has Depth-First traversal logic */
+		ff DFTrav() ->
+			((this))
+				-> style { some : things }
+					where y'all = cool
+					yield nothing = null;
+				<- style { on : the }
+					where way = back(), up = the * tree;
+				((...))
+					-> style { ellipsis : 'represent the general case' }
+						where indented_ellipses = 'represent N descendents';
+				((misc))
+				((...))
+					<- style only + on'the'way'back;
+					
+					
+		// While this one uses the bread-first syntax //
+		ff BFTrav() ->
+			((block))
+				v style prior'to'iteration;
+			((...))
+				^ yield on = the, way = back, up = doStuff();
+			((endingblock))
+			
