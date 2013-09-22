@@ -68,7 +68,7 @@ tf_list
 	{ $$ = []; }
 	;
 	
-leafid : (id | DOT)+;
+leafid : (id | DOT | POUND)+;
 
 tf_islist
 	: 

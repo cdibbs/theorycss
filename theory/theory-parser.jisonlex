@@ -97,6 +97,7 @@ revimp						"<-"
 "0x"{hex}		return 'HEXNATLITERAL';
 {bin}"b"		return 'BINNATLITERAL';
 "#"{hex}		return 'HEXCOLOR';
+"#"				return 'POUND';
 "[--"			return 'SETSTART';
 "--]"			return 'SETEND';
 "[["			return 'XPATHSTART';

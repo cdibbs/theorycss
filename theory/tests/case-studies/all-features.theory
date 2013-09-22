@@ -1,0 +1,45 @@
+namespace Bob
+	theory Main
+		[[html]]
+			is cornucopia();
+			[[body]]
+				[[header :: Header]]
+				[[main :: MainArea]]
+				[[footer :: Footer]]
+		
+		ff cornucopia() ->
+			where rgb = 0x000000
+			((...))
+				-> style { 'background-color' : rgb }
+					yield rgb = rgb + (0xff / 4);
+		
+		
+	theory Header
+		[[div#header]]
+			is fixedbar(32px, 'top');
+			[[a]]
+				[[img#logo]]
+			[[.title]]
+			
+		boxSides = { top:0, right:0, bottom:0, left: 0 };
+			
+		ff fixedbar(side, thickness) -> 
+			((block))
+				-> style (fixed + (boxSides - boxSides.opposite(side)));
+				<- style if t?! then { 'axis' : t } else nothing endif
+					where axis = if (side in array('top', 'bottom')) then 'height' else 'width' endif
+					yield thickness = t;
+				((...)) // e.g., bootstrap-y .container, .row, .row-fluid, etc
+					((a))
+						((img))
+							<- yield t = if (thickness!) then
+									thickness
+								else
+									if (align in array('top', 'bottom')) then
+										img.height
+									else
+										img.width
+									endif
+								endif;
+								
+	
