@@ -1,9 +1,9 @@
 namespace Website
 	theory Chris
 		verbose_name = { my : 1, cool : 2, friends : '3' };
-		verbose_name' = within verbose_name {
-			\x, y => (x + my) * (y + cool) * friends
-		};
-		fn dostuff() -> if (within verbose_name { my == 1 && cool == 2 || friends == 3 })
-			then stuff()
-			else bob() endif;
+		verbose_name' = (within verbose_name:
+			\x, y => (x + my) * (y + cool) * friends);
+		fn dostuff() -> if (within verbose_name:
+					my == 1 && cool == 2 || friends == 3)
+				then stuff()
+				else bob() endif;

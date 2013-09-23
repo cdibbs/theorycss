@@ -1,4 +1,4 @@
-var Parser = require("../../lib/theory-parser").Parser,
+var Parser = require("../../../lib/theory-parser").Parser,
 	assert = require("assert"),
 	fs = require("fs"), path = require("path");
 
@@ -15,7 +15,7 @@ for (var i=0, l=srcs.length; i<l; i++) {
 			var src = fs.readFileSync(path, "utf8");
 			var parser = new Parser();
 			assert.ok(parser.parse(src));
-		}
+		};
 	})(__dirname + path.sep + srcs[i]);
 }
 

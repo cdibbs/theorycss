@@ -12,7 +12,7 @@ namespace Website
 		ff gradientSet(color1, color2) ->
 			where count = 0, index = 0
 			((any))
-					-> yield count = this.children.count
+					-> yield count = this.children.count;
 				((...))
 					v style if (this.name == 'div') then { 'background-color' : (color1 + color2) * index / count + color1 } else {} endif
 						yield index = index + 1;
