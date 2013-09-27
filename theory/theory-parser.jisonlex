@@ -4,7 +4,7 @@ exp                         (?:[eE][-+]?[0-9]+)
 hex							[0-9A-Fa-f]+
 bin							[0-1]+
 frac                        (?:\.[0-9]+)
-float						"-"?(?:[0-9]|[1-9][0-9]+)("f"|"."[0-9]*"f"?)
+float						"-"?(?:[0-9]|[1-9][0-9]+)("."[0-9]*)
 spc							[\t \u00a0\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u200b\u2028\u2029\u3000]
 str							\"[^\"]*\"|\'[^\']*\'
 imp							"->"
@@ -24,6 +24,7 @@ revimp						"<-"
 "//".*					/* ignore comment */
 "/*"(.|\n|\r)*?"*/"		/* ignore comment */
 "theory"				return 'THEORY';
+"library"				return 'LIBRARY';
 "extends"				return 'EXTENDS';
 "uses"			return 'USES';
 "true"			return 'TRUE';
@@ -90,10 +91,13 @@ revimp						"<-"
 {id}			return 'ID';
 
 "null"			return 'NULL';
-{float}{id}		return 'FLOAT_UNITS';
-{float}			return 'FLOAT';
-{int}{id}		return 'INT_UNITS';
-{int}			return 'INTEGER';
+({float})"_"?({id})		%{
+						yytext = { type: 'fl_', val: parseFloat(yy.lexer.matches[1]), units: yy.lexer.matches[2]] };
+						return 'FLOAT_UNITS';
+						%};
+{float}			%{ yytext = parseFloat(yytext); return 'FLOAT'; %};
+{int}"_"?{id}		return 'INT_UNITS';
+{int}				%{ yytext = parseInt(yytext); return 'INTEGER'; %};
 "0x"{hex}		return 'HEXNATLITERAL';
 {bin}"b"		return 'BINNATLITERAL';
 "#"{hex}		return 'HEXCOLOR';

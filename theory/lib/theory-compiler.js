@@ -2,6 +2,11 @@ var theoryCompiler = (function(){
 //	"use strict";
 	
 	var compiler = {};
+
+	var evalExpr = function(ast) {
+		
+	};
+
 	var Program = function(namespaces) {
 		this.Namespaces = namespaces;
 	};

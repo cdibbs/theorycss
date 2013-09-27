@@ -18,16 +18,28 @@ namespace
 	;
 	
 namespace_def
+	: namespace_item
+		{ $$ = [$namespace_item]; }
+	| namespace_def namespace_item
+		{ $$ = $namespace_def; $$.push($namespace_item); }
+	;
+
+namespace_item
 	: theory
-		{ $$ = [$theory]; }
 	| data
-		{ $$ = [$data]; }
-	| namespace_def theory
-		{ $$ = $namespace_def; $$.push($theory); }
-	| namespace_def data
-		{ $$ = $namespace_def; $$.push($data); }
+	| library
 	;
 	
+library
+	: LIBRARY id INDENT libbody DEDENT
+	{ $$ = ['lib', $2, $libbody]; }
+	;
+
+libbody
+	: (libdef | NEWLINE)*;
+
+libdef
+	: vdef { $$ = $1; } | fdef { $$ = $1; } | fragfunc { $$ = $1; };
 	
 theory
 	: THEORY id INDENT theorybody DEDENT
@@ -78,7 +90,11 @@ tf_islist
 	;
 
 tf_is
-	: AT id IS arglist EOL
+	: COLON id AT id IS arglist EOL
+	{ $$ = ['tfis', $4, $arglist, $2]; }
+	| COLON id IS arglist EOL
+	{ $$ = ['tfis', null, $arglist, $2]; }
+	| AT id IS arglist EOL
 	{ $$ = ['tfis', $id, $arglist]; }
 	| IS arglist EOL
 	{ $$ = ['tfis', null, $arglist]; }
