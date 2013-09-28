@@ -92,20 +92,20 @@ revimp						"<-"
 
 "null"			return 'NULL';
 ({float})"_"?({id})		%{
-						yytext = { type: 'fl_', val: parseFloat(yy.lexer.matches[1]), units: yy.lexer.matches[2]] };
+						yytext = { type: 'fl_', val: parseFloat(yy.lexer.matches[1]), units: yy.lexer.matches[2] };
 						return 'FLOAT_UNITS';
 						%};
 {float}			%{ yytext = parseFloat(yytext); return 'FLOAT'; %};
-{int}"_"?{id}		return 'INT_UNITS';
+"0x"({hex})			%{ yytext = parseInt(yy.lexer.matches[1], 16); return 'HEXNATLITERAL'; %};
+({int})"_"?({id})	%{ yytext = { type: 'int_', val : parseInt(yy.lexer.matches[1]), units: yy.lexer.matches[2] }; return 'INT_UNITS'; %};
 {int}				%{ yytext = parseInt(yytext); return 'INTEGER'; %};
-"0x"{hex}		return 'HEXNATLITERAL';
-{bin}"b"		return 'BINNATLITERAL';
-"#"{hex}		return 'HEXCOLOR';
-"#"				return 'POUND';
-"[--"			return 'SETSTART';
-"--]"			return 'SETEND';
-"[["			return 'XPATHSTART';
-"]]"			return 'XPATHEND';
+({bin})"b"			%{ yytext = parseInt(yy.lexer.matches[1], 2); return 'BINNATLITERAL'; %};
+"#"({hex})			%{ yytext = parseInt(yy.lexer.matches[1]); return 'HEXCOLOR'; %};
+"#"					return 'POUND';
+"[--"				return 'SETSTART';
+"--]"				return 'SETEND';
+"[["				return 'XPATHSTART';
+"]]"				return 'XPATHEND';
 <FFBLOCK>"(("			this.begin('FFNODE'); return 'LFFNODE';
 <FFNODE>"))"			this.popState(); return 'RFFNODE';
 "\\"			return 'LAMBDA';
@@ -175,7 +175,7 @@ revimp						"<-"
 					var indentation = yytext.length - yytext.search(/\s/) - 1;
 				    if (indentation > this._iemitstack[0]) {
 				        this._iemitstack.unshift(indentation);
-				        console.log(this.topState(), "INDENT", this.stateStackSize());
+				        this._log(this.topState(), "INDENT", this.stateStackSize());
 				        this.begin(this.topState()); // deepen our current state
 				        return 'INDENT';
 				    }
@@ -184,7 +184,7 @@ revimp						"<-"
 				
 				    while (indentation < this._iemitstack[0]) {
 				    	this.popState();
-				    	console.log(this.topState(), "DEDENT", this.stateStackSize());
+				    	this._log(this.topState(), "DEDENT", this.stateStackSize());
 				        tokens.push("DEDENT");
 				        this._iemitstack.shift();
 				    }
@@ -195,6 +195,8 @@ revimp						"<-"
 %%
 jisonLexerFn = lexer.setInput;
 lexer.setInput = function(input) {
+	var debug = false;
 	this._iemitstack = [0];
+	this._log = function() { if (debug) console.log.apply(arguments); };
 	return jisonLexerFn.call(this, input);
 };

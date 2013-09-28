@@ -1,5 +1,6 @@
 var assert = require("assert"),
-	compiler = require("../../lib/theory-compiler").Compiler;
+	compiler = require("../../lib/theory-compiler").Compiler,
+	parser = require("../../lib/theory-parser").parser;
 
 var exprTests = {};
 exprTests["test basic arithmetic"] = function() {
@@ -8,7 +9,17 @@ exprTests["test basic arithmetic"] = function() {
 
 	var answer = compiler.evalExpr(expr);
 
-	assert.equal(184, answer);
+	assert.equal(answer, 192);
+}
+
+exprTests["test integration math expression"] = function() {
+	var src =
+		"namespace Website\n"
+		+ "  theory Main\n"
+		+ "    expr = (5 + 3) * (2 + 0x16);\n\n";
+		
+	var ast = parser.parse(src);
+	console.log("%j", ast);
 }
 
 exports["test Theory compiler expressions"] = exprTests;
