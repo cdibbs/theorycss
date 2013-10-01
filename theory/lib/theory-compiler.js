@@ -63,11 +63,11 @@ var theoryCompiler = (function(){
 						var mainScope = rootScope.getEntry();
 						var mainAST = mainScope.getAST();
 						return evalMainTheory(mainAST, mainScope);
-					} else {
-						return rootScope;
 					}		
 				}
 			}
+			
+			return rootScope;
 		};
 		
 		var ops = {
@@ -127,16 +127,18 @@ var theoryCompiler = (function(){
 			return scope;
 		};
 		StateManager.prototype.addSymbol = function(id, val, ast, lazy) {
-			this[id] = { val : val, ast : ast, lazy : lazy };
+			stack[id] = { val : val, ast : ast, lazy : lazy };
 		};
 		StateManager.prototype.resolve = function(id) {
-			for (var i = stack.length - 1; i >= 0; i--) {
-				console.log(stack[i]);
-				if (typeof stack[i][id] !== 'undefined') {
-					return stack[i][id];
+			if (typeof stack[id] === 'undefined') {
+				if (parentScope) {
+					return parentScope.resolve(id);
+				} else {
+					return StateManager.undefined;
 				}
 			}
-			return StateManager.undefined;
+			
+			return stack[id];
 		};
 		StateManager.prototype.setEntry = function(scope) { self.entry = scope;	};
 		StateManager.prototype.hasEntry = function() { return self.entry != null; };
@@ -144,6 +146,9 @@ var theoryCompiler = (function(){
 		StateManager.prototype.getAST = function() { return _ast; };
 		StateManager.prototype.getOutput = function() { return output; };		
 		StateManager.prototype.getParentScope = function() {  return parentScope; };
+		StateManager.prototype.dump = function() {
+			stack.forEach(function(i) { console.log(i); });
+		};
 	}
 
 	['push', 'unshift', 'reverse', 'splice'].forEach(function(x){

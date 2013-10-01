@@ -11,7 +11,7 @@ exprTests["test basic arithmetic"] = function() {
 	var answer = compiler.evalExpr(expr);
 
 	assert.equal(answer, 192);
-}
+};
 
 exprTests["test integration math expression"] = function() {
 	var src =
@@ -22,8 +22,11 @@ exprTests["test integration math expression"] = function() {
 	var ast = parser.parse(src);
 	var compiler = new Compiler();
 	var result = compiler.compile(ast);
-	console.log("%j", result.resolve("Website"));
-}
+	var exprAST = result.resolve("Website").val.resolve("Main").val.resolve("expr").ast;
+	var answer = compiler.evalExpr(exprAST[0]);
+	
+	assert.equal(answer, 192);
+};
 
 exports["test Theory compiler expressions"] = exprTests;
 
