@@ -81,13 +81,25 @@ var theoryCompiler = (function(){
 					return a * b;
 				}
 			},
+			'/' : function(p1, p2, e) {
+				var a = e(p1), b = e(p2);
+				if (typeof a === 'number' && typeof b === 'number') {
+					return a / b;
+				}
+			},
 			'+' : function(p1, p2, e) {
 				var a = e(p1), b = e(p2);
 				if (typeof a === 'number' && typeof b === 'number') {
 					return a + b;
 				}
 			},
-			
+			'-' : function(p1, p2, e) {
+				var a = e(p1), b = e(p2);
+				if (typeof a === 'number' && typeof b === 'number') {
+					return a + b;
+				}
+			},
+			'tf' : evalTreeFrag
 		};
 		Compiler.prototype.evalExpr = function(ast) {
 			if (ast instanceof Array && ast.length > 0) {
@@ -113,6 +125,17 @@ var theoryCompiler = (function(){
 		function err(m) {
 			throw new Exception(m);
 		}
+	};
+	
+	function evalTreeFrag(rootNode, nodeDefBlock) {
+		if (rootNode[0] === 'tfnode') {
+			var leafDict = new LeafDict(rootNode[0], rootNode[1]);
+			return leafDict;
+		}
+	}
+	
+	function LeafDict() {
+		
 	}
 	
 	function StateManager(type, name, _ast, parentScope) {
