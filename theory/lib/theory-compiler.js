@@ -111,6 +111,45 @@ var theoryCompiler = (function(){
 			return ast;
 		};
 		
+		function evalTreeFrag(rootNode, nodeDefBlock) {
+			if (rootNode[0] === 'tfnode') {
+				var leafDict = new LeafDict(rootNode[0], rootNode[1], nodeDefBlock);
+				return leafDict;
+			}
+		}
+		
+		function LeafDict(nodeId, nodeDef, nodeDefBlock) {
+			var self = this;
+			var isList = nodeDef[0];
+			var children = nodeDef[1];
+			var css = {};
+			
+			self.genCSS = function genCSS(sm, recurs) {
+				isList.every(function(isdef) {
+					css[isdef[1]] = [isdef[2], isdef[4]?isdef[4]:null, self.evalDefList(isdef[2])];
+					return true;
+				});
+				
+				if (recurs) {
+					//nodeDefBlock
+				}
+				
+				return css;
+			}
+			
+			self.evalDefList = function evalDefList(defList) {
+				var props = {};
+				defList.every(function(def) {
+					var defprops = compiler.evalExpr(def);
+					if (! defprops instanceof Object) {
+						throw new Exception("Not a dictionary.");
+					}
+					for(var prop in defprops) { props[prop] = defprops[prop]; }
+				});
+				return props;
+			}
+		}
+		
 		function isLiteral(p) {
 			if (p instanceof Array) {
 				if (p.length > 0) {
@@ -126,17 +165,6 @@ var theoryCompiler = (function(){
 			throw new Exception(m);
 		}
 	};
-	
-	function evalTreeFrag(rootNode, nodeDefBlock) {
-		if (rootNode[0] === 'tfnode') {
-			var leafDict = new LeafDict(rootNode[0], rootNode[1]);
-			return leafDict;
-		}
-	}
-	
-	function LeafDict() {
-		
-	}
 	
 	function StateManager(type, name, _ast, parentScope) {
 		var self = this;
