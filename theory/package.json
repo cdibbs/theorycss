@@ -1,6 +1,6 @@
 {
   "bugs": {
-	"url": "http://github.com//jison/issues"  
+	"url": "http://github.com/cdibbs/theory"  
   },
   "name": "theory",
   "version": "0.1.0",
@@ -11,10 +11,14 @@
 	  "jison": "0.4.x",
 	  "nomnom": "1.5.2",
 	  "test" : "0.6.0",
-	  "path" : "0.4.9"
+	  "path" : "0.4.9",
+	  "vows" : "latest",
+	  "browserify" : "latest",
+	  "underscore" : "latest"
   },
   "scripts" : {
-    "test" : "node tests/all.js"
+    "test" : "nodejs tests/all.js",
+    "ctest" : "vows --spec tests/compiler/*"
   },
   "repository": "",
   "keywords": [
