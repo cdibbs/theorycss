@@ -109,57 +109,10 @@ var theoryCompiler = (function(){
 			}
 		}
 		
-		function isLiteral(p) {
-			if (p instanceof Array) {
-				if (p.length > 0) {
-					return (p[0] === 'num' || p[0] === 'str');
-				}
-				return false;
-			} else {
-				return true;
-			}
-		}
-		
 		function err(m) {
 			throw new Exception(m);
 		}
 	};
-	
-	function StateManager(type, name, _ast, parentScope) {
-		var self = this;
-		var stack = [];
-		var entry = null;
-		var output = "";
-			
-		StateManager.prototype.undefined = 'undefined';
-		StateManager.prototype.createScope = function(type, name, ast) {
-			var scope = new StateManager(type, name, ast, this);
-			return scope;
-		};
-		StateManager.prototype.addSymbol = function(id, val, ast, lazy) {
-			stack[id] = { val : val, ast : ast, lazy : lazy };
-		};
-		StateManager.prototype.resolve = function(id) {
-			if (typeof stack[id] === 'undefined') {
-				if (parentScope) {
-					return parentScope.resolve(id);
-				} else {
-					return StateManager.undefined;
-				}
-			}
-			
-			return stack[id];
-		};
-		StateManager.prototype.setEntry = function(scope) { self.entry = scope;	};
-		StateManager.prototype.hasEntry = function() { return self.entry != null; };
-		StateManager.prototype.getEntry = function() { return self.entry; };
-		StateManager.prototype.getAST = function() { return _ast; };
-		StateManager.prototype.getOutput = function() { return output; };		
-		StateManager.prototype.getParentScope = function() {  return parentScope; };
-		StateManager.prototype.dump = function() {
-			stack.forEach(function(i) { console.log(i); });
-		};
-	}
 
 	['push', 'unshift', 'reverse', 'splice'].forEach(function(x){
 	    Array.prototype['i'+x] = function() {
