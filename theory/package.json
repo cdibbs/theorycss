@@ -17,8 +17,7 @@
 	  "underscore" : "latest"
   },
   "scripts" : {
-    "test" : "nodejs tests/all.js",
-    "ctest" : "vows --spec tests/compiler/*"
+    "test" : "vows --spec tests/compiler/expressions.js"
   },
   "repository": "",
   "keywords": [
