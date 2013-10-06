@@ -22,7 +22,7 @@ var Compiler = function(opts) {
 			if (ast[0] === 'program') {
 				var namespaces = ast[1];
 				namespaces.forEach(function(ns) {
-					rootScope.addSymbol(ns[1], self.evalNamespace(ns.slice(1), rootScope));
+					rootScope.addSymbol(ns[1], 'ns', self.evalNamespace(ns.slice(1), rootScope));
 				});
 				
 				// if a main theory was found, go ahead and generate the CSS, else return the rootScope.
@@ -42,7 +42,7 @@ var Compiler = function(opts) {
 		
 		nsAST[1].forEach(function(symbol) {
 			if (symbol.length >= 3 && symbol[0] === 'theory') {
-				var theoryScope = nsscope.addSymbol(symbol[1], self.evalTheory(symbol.slice(1), nsscope));
+				var theoryScope = nsscope.addSymbol(symbol[1], 'theory', self.evalTheory(symbol.slice(1), nsscope));
 				if (symbol[1].toLowerCase() === 'main') {
 					if (! rootScope.hasEntry()) {
 						rootScope.setEntry(theoryScope);
@@ -64,10 +64,10 @@ var Compiler = function(opts) {
 		theoryAST[1].forEach(function(tdef) {
 			if (tdef[0] === '=' || tdef[0] === 'ff' || tdef[0] === 'fn' || tdef[0] === '@=') {
 				// for now, lazily evaluate everything. 
-				theoryScope.addSymbol(tdef[1], null, tdef.slice(2), true);
+				theoryScope.addSymbol(tdef[1], tdef[0], null, tdef.slice(2), true);
 			} else if (tdef[0] === 'tf') {
 				// the treefrag drives compilation; lazily evaluate it.
-				var theoryEntry = theoryScope.addSymbol('__treefrag', tdef.slice(1), true);
+				var theoryEntry = theoryScope.addSymbol('__treefrag', 'tf', null, tdef.slice(1), true);
 				theoryScope.setEntry(theoryEntry);
 			}
 		});

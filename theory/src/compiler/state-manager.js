@@ -11,8 +11,8 @@ function StateManager(type, name, _ast, parentScope) {
 		var scope = new StateManager(type, name, ast, this);
 		return scope;
 	};
-	self.addSymbol = function(id, val, ast, lazy) {
-		stack[id] = { val : val, ast : ast, lazy : lazy };
+	self.addSymbol = function(id, type, val, ast, lazy) {
+		stack[id] = { val : val, ast : ast, lazy : lazy, type : type };
 	};
 	self.resolve = function(id) {
 		if (typeof stack[id] === 'undefined') {
