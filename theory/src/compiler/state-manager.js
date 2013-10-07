@@ -6,20 +6,19 @@ function StateManager(type, name, _ast, parentScope) {
 	var entry = null;
 	var output = "";
 		
-	self.undefined = 'undefined';
 	self.createScope = function(type, name, ast) {
 		var scope = new StateManager(type, name, ast, this);
 		return scope;
 	};
-	self.addSymbol = function(id, type, val, ast, lazy) {
-		stack[id] = { val : val, ast : ast, lazy : lazy, type : type };
+	self.addSymbol = function(id, type, val, ast, lazy, scope) {
+		stack[id] = { val : val, ast : ast, lazy : lazy, type : type, scope : scope };
 	};
 	self.resolve = function(id) {
 		if (typeof stack[id] === 'undefined') {
 			if (parentScope) {
 				return parentScope.resolve(id);
 			} else {
-				return StateManager.undefined;
+				return { 'undefined' : 'undefined' };
 			}
 		}
 		

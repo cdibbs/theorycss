@@ -1,10 +1,10 @@
 id							[a-zA-Z][a-zA-Z0-9_']*
-int                         "-"?(?:[1-9][0-9]+|[0-9])
+int                         (?:[1-9][0-9]+|[0-9])
 exp                         (?:[eE][-+]?[0-9]+)
 hex							[0-9A-Fa-f]+
 bin							[0-1]+
 frac                        (?:\.[0-9]+)
-float						"-"?(?:[0-9]|[1-9][0-9]+)("."[0-9]*)
+float						(?:[0-9]|[1-9][0-9]+)("."[0-9]*)
 spc							[\t \u00a0\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u200b\u2028\u2029\u3000]
 str							\"[^\"]*\"|\'[^\']*\'
 imp							"->"
@@ -83,14 +83,14 @@ revimp						"<-"
 "long"			return 'LONG';
 "float"			return 'FLOAT';
 "double"		return 'DOUBLE';
+"elif"	return 'ELSEIF';
 "else"			return 'ELSE';
-"else"\s+"if"	return 'ELSEIF';
 "endif"			return 'ENDIF'; 
 "is"			return 'IS';
-
 {id}			return 'ID';
-
 "null"			return 'NULL';
+"+"				return 'PLUS';
+"-"				return 'MINUS';
 ({float})"_"?({id})		%{
 						yytext = { type: 'fl_', val: parseFloat(yy.lexer.matches[1]), units: yy.lexer.matches[2] };
 						return 'FLOAT_UNITS';
@@ -126,8 +126,6 @@ revimp						"<-"
 <WSBLOCK>\s+	/* ignore whitespace in certain blocks of code to give the programmer more freedom */
 <WSBLOCK>";" %{ this.popState(); return 'EOL'; %};
 "@"				return 'AT';
-"+"				return 'PLUS';
-"-"				return 'MINUS';
 "**"			return 'POWER';
 "*"				return 'TIMES';
 "/"				return 'DIVIDE';

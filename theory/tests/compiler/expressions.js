@@ -16,8 +16,13 @@ var src =
 	+ "    d = (1/2) * ((50 + 30) * (20 + 0x160));\n"
 	+ "    e = 1 + 5 * 3 / 2 - 8 * 9 + 14;\n"
 	+ "    e' = 1 + 5 * 3 / 2 - 8 * 9 * c + 14 - e;\n"
+	+ "    iffy = if 5 == 3 then 1 else 0 endif;\n"
+	+ "    iffy2 = if iffy + c == 777 then a else b endif;\n"
+	+ "    iffy3 = if (0 == 5) then 0 elif (1 == 5) then 1 elif (2 == 5) then 2 elif (5 == 5) then 5 else -1 endif;\n"
 	+ "    f = basicFn();\n"
 	+ "    fn basicFn() -> 1771;\n"
+	+ "    g = basicFn * recursiveFn(5);\n"
+	+ "    fn recursiveFn(i) -> if i == 0 then 0 else i + recursiveFn(i-1) endif;\n"
 	+ "\n\n";
 var ast = new Compiler().compile(parser.parse(src))
 	.resolve("Website").val
@@ -76,8 +81,36 @@ vows.describe("Expressions class").addBatch({
 				assert.equal(topic, -55872);
 			}
 		},
+		'a conditional expression with constants' : {
+			topic : function(expr) { return expr.evaluate(ast.resolve("iffy").ast[0], ast); },
+			
+			'we get the right result' : function(topic) {
+				assert.equal(topic, 0);
+			}
+		},
+		'a conditional expression with variables' : {
+			topic : function(expr) { return expr.evaluate(ast.resolve("iffy2").ast[0], ast); },
+			
+			'we get the right result' : function(topic) {
+				assert.equal(topic, 0x12345);
+			}
+		},
+		'a conditional expression with many else-ifs' : {
+			topic : function(expr) { return expr.evaluate(ast.resolve("iffy3").ast[0], ast); },
+			
+			'we get the right result' : function(topic) {
+				assert.equal(topic, 5);
+			}
+		},
 		'a simple function call' : {
 			topic : function(expr) { return expr.evaluate(ast.resolve("f").ast[0], ast); },
+			
+			'we get the result of the function' : function(topic) {
+				assert.equal(topic, 1771);
+			}
+		},
+		'two function calls, one recursive' : {
+			topic : function(expr) { return expr.evaluate(ast.resolve("g").ast[0], ast); },
 			
 			'we get the result of the function' : function(topic) {
 				assert.equal(topic, 1771);

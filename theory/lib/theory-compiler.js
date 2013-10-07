@@ -1405,15 +1405,21 @@ var Expressions = function Expressions() {
 		'num' : function(p1, e) { return p1; },
 		'id' : function(id, e, scope) {
 			var val = scope.resolve(id);
+						
 			if (val.type === 'fn')
 				return val;
-			if (val.val == null && val.lazy)
+				
+			if (val.val == null && val.lazy) {
+				if (val.scope) { // if the variable has a scope assoc with it, use that
+					return e(val.ast[0], val.scope);
+				}
 				return e(val.ast[0], scope);
-			else
+			} else {
 				return val.val;
+			}
 		},
 		'()' : function(fn, args, e, scope) {
-			var fndef = e(fn, e, scope);
+			var fndef = e(fn, scope);
 			if (typeof fndef === 'object' && fndef.type === 'fn') {
 				var params = fndef.ast[0];
 				if (args.length > params.length)
@@ -1421,20 +1427,31 @@ var Expressions = function Expressions() {
 					
 				var fnscope = scope.createScope('fn', 'function', [fn, args]);
 				for(var i=0, l=args.length; i<l; i++) {
-					fnscope.addSymbol(params[i], 'param', null, args[i], true);
+					fnscope.addSymbol(params[i], 'param', null, [args[i]], true, scope);
 				}
-				
-				return e(fndef.ast[2], e, fnscope);
+				return e(fndef.ast[2], fnscope);
 			} else {
 				throw new Exception("Not sure what's going on, here.");
 			}
 		},
 		'lambda' : function(paramlist, expr, e, scope) {
 			return { type : 'fn', ast : [paramlist, null, expr], val : null, lazy : true };
-		}, 
+		},
+		'test' : function(condList, e, scope) {
+			if (condList == 5) console.log("whatever, man");
+			for (var i=0, l=condList.length; i<l; i++) {
+				if (e(condList[i][0], scope)) {
+					console.log("returning %j", e(condList[i][1], scope));
+					return e(condList[i][1], scope);
+				}
+			}
+		},
 		'=' : function(id, expr, e, scope) {
 			scope.addSymbol(id, expr); // lazily eval?
-		}, 
+		},
+		'==' : function(a, b, e, scope) {
+			return e(a, scope) == e(b, scope);
+		},
 		'*' : function(p1, p2, e, scope) {
 			var a = e(p1, scope), b = e(p2, scope);
 			if (typeof a === 'number' && typeof b === 'number') {
@@ -1472,20 +1489,19 @@ function StateManager(type, name, _ast, parentScope) {
 	var entry = null;
 	var output = "";
 		
-	self.undefined = 'undefined';
 	self.createScope = function(type, name, ast) {
 		var scope = new StateManager(type, name, ast, this);
 		return scope;
 	};
-	self.addSymbol = function(id, type, val, ast, lazy) {
-		stack[id] = { val : val, ast : ast, lazy : lazy, type : type };
+	self.addSymbol = function(id, type, val, ast, lazy, scope) {
+		stack[id] = { val : val, ast : ast, lazy : lazy, type : type, scope : scope };
 	};
 	self.resolve = function(id) {
 		if (typeof stack[id] === 'undefined') {
 			if (parentScope) {
 				return parentScope.resolve(id);
 			} else {
-				return StateManager.undefined;
+				return { 'undefined' : 'undefined' };
 			}
 		}
 		

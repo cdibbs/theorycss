@@ -224,7 +224,7 @@ sdef
 	
 fdef
 	: FUNCTION id LPAREN paramlist? RPAREN IMPLICATION expression EOL
-		{ $$ = ['fn', $id, $4, null /* return types unsupported, for now */, $expression]; }
+		{ $$ = ['fn', $id, $4 ? $4 : [], null /* return types unsupported, for now */, $expression]; }
 	;
 	
 lside
@@ -340,7 +340,7 @@ postfix_expression
 	| postfix_expression LPAREN arglist RPAREN
 		{ $$ = ['()', $1, $3]; }
 	| postfix_expression LPAREN RPAREN
-		{ $$ = ['()', $1, null]; }
+		{ $$ = ['()', $1, []]; }
 	;
 			
 unary_expression : unary_op? postfix_expression
@@ -441,7 +441,7 @@ elseif_list
 	: ELSEIF expression THEN block_expression
 		{ $$ = [[$expression, $block_expression]]; }
 	| elseif_list ELSEIF expression THEN block_expression
-		{ $$ = $elseif_list.push([$expression, $block_expression]); }
+		{ $$ = $elseif_list; $$.push([$expression, $block_expression]); }
 	;
 	
 lambda_expression
@@ -449,6 +449,8 @@ lambda_expression
 		{ $$ = $1; }
 	| LAMBDA paramlist LAMBDADEF expression
 		{ $$ = ['lambda', $paramlist, $expression]; }
+	| LAMBDA LAMBDADEF expression
+		{ $$ = ['lambda', [], $expression]; }
 	;
 	
 within_expression
@@ -468,7 +470,7 @@ block_expression
 	| expression
 		{ $$ = $expression; };
 	
-unary_op : NOT;
+unary_op : NOT | MINUS;
 
 equiv_op : EQ | NEQ;
 
