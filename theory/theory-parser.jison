@@ -321,7 +321,6 @@ atom
 		{ $$ = ['dict', $dict]; }
 	;
 
-
 postfix_expression
 	: atom
 		{ $$ = $1; }

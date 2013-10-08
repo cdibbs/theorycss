@@ -31,15 +31,15 @@ namespace Website
 			
 		ff gradientSibs(color1, color2) ->
 			where bg = 'background-color'
-			((any))
-				((any))
+			((block))
+				((one))
 					v style { bg : color1 }
 						yield count = 2;
 				((...))
 					v yield count = count + 1;
-					^ style { bg : (color1 + color2) / index + color1 }
+					^ style { bg : (color1 + color2) * index / count + color1 }
 						where index = index + 1;
-				((any))
+				((one))
 					^ style { bg : color2 }
 						yield index = 1;
 				
@@ -51,7 +51,7 @@ namespace Website
 					yield thickness = t;
 				((...)) // e.g., bootstrap-y .container, .row, .row-fluid, etc
 					((a))
-						((img))
+						((sizeable))
 							<- yield t = if (thickness!) then
 									thickness
 								else
