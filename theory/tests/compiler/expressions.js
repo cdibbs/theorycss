@@ -1,7 +1,7 @@
 var assert = require("assert"),
 	Expressions = require("../../src/compiler/expressions").Expressions,
 	Compiler = require("../../lib/theory-compiler").Compiler,
-	parser = require("../../lib/theory-parser").parser
+	parser = require("../../lib/theory-parser").parser,
 	vows = require("vows");
 	
 
@@ -21,8 +21,10 @@ var src =
 	+ "    iffy3 = if (0 == 5) then 0 elif (1 == 5) then 1 elif (2 == 5) then 2 elif (5 == 5) then 5 else -1 endif;\n"
 	+ "    f = basicFn();\n"
 	+ "    fn basicFn() -> 1771;\n"
-	+ "    g = basicFn * recursiveFn(5);\n"
+	+ "    g = basicFn() * recursiveFn(5);\n"
 	+ "    fn recursiveFn(i) -> if i == 0 then 0 else i + recursiveFn(i-1) endif;\n"
+	+ "    pow = (2 ** 8 << 4 * 3) >> 5;\n"
+	+ "    bitwise = (0x123 & 255) | 256;\n"	
 	+ "\n\n";
 var ast = new Compiler().compile(parser.parse(src))
 	.resolve("Website").val
@@ -113,7 +115,21 @@ vows.describe("Expressions class").addBatch({
 			topic : function(expr) { return expr.evaluate(ast.resolve("g").ast[0], ast); },
 			
 			'we get the result of the function' : function(topic) {
-				assert.equal(topic, 1771);
+				assert.equal(topic, 26565);
+			}
+		},
+		'exponentiation, shift, and multiplication order of ops' : {
+			topic : function(expr) { return expr.evaluate(ast.resolve("pow").ast[0], ast); },
+			
+			'we get the result of the function' : function(topic) {
+				assert.equal(topic, 32768);
+			}
+		},
+		'bitwise and, or operations' : {
+			topic : function(expr) { return expr.evaluate(ast.resolve("bitwise").ast[0], ast); },
+			
+			'we get the result of the function' : function(topic) {
+				assert.equal(topic, 291);
 			}
 		},
 	}

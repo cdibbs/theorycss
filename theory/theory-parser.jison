@@ -429,9 +429,9 @@ test_expression
 	| IF expression THEN block_expression ELSE block_expression ENDIF
 		{ $$ = ['test', [[$expression, $block_expression], [true, $6]]]; }
 	| IF expression THEN block_expression elseif_list ENDIF
-		{ $$ = ['test', $elseif_list.unshift([$expression, $block_expression])]; }
+		{ $elseif_list.unshift([$expression, $block_expression]); $$ = ['test', $elseif_list]; }
 	| IF expression THEN block_expression elseif_list ELSE block_expression ENDIF
-		{ $$ = ['test', $elseif_list.unshift([$expression, $block_expression], [true, $7])]; }  
+		{ $elseif_list.unshift([$expression, $block_expression, [true, $7]]); $$ = ['test', $elseif_list]; }  
 	| IF expression THEN block_expression ENDIF
 		{ $$ = ['test', [[$expression, $block_expression]]]; }
 	;

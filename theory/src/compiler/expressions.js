@@ -6,7 +6,7 @@ var Expressions = function Expressions() {
 	self.evaluate = function(ast, scope) {
 		if (ast instanceof Array && ast.length > 0) {
 			if (typeof self.ops[ast[0]] !== 'undefined') {
-				var params = ast.slice(1).ipush(self.evaluate, scope);
+				var params = ast.slice(1).ipush(self.evaluate, scope, ast[0]);
 				return self.ops[ast[0]].apply(this, params); 
 			}
 		}
@@ -21,6 +21,23 @@ var Expressions = function Expressions() {
 			return false;
 		} else {
 			return true;
+		}
+	};
+	
+	self.genericNumericOp = function(a, b, e, scope, op) {
+		var a = e(a, scope), b = e(b, scope);
+		if (typeof a === 'number' && typeof b === 'number') {
+			switch(op) {
+			case '/':	return a / b;
+			case '**':	return Math.pow(a, b);
+			case '|':	return a | b;
+			case '&':	return a & b;
+			case '<<':	return a << b;
+			case '>>':	return a >> b;
+			case '&&':	return a && b;
+			case '||':	return a || b;
+			case '^':	return a ^ b;
+			}
 		}
 	};
 	
@@ -61,10 +78,8 @@ var Expressions = function Expressions() {
 			return { type : 'fn', ast : [paramlist, null, expr], val : null, lazy : true };
 		},
 		'test' : function(condList, e, scope) {
-			if (condList == 5) console.log("whatever man");
 			for (var i=0, l=condList.length; i<l; i++) {
 				if (e(condList[i][0], scope)) {
-					console.log("returning %j", e(condList[i][1], scope));
 					return e(condList[i][1], scope);
 				}
 			}
@@ -79,26 +94,35 @@ var Expressions = function Expressions() {
 			var a = e(p1, scope), b = e(p2, scope);
 			if (typeof a === 'number' && typeof b === 'number') {
 				return a * b;
+			} else if (typeof a === 'string' && typeof b === 'number') {
+				// TODO: replicate the string? ?? ??? :-)
 			}
 		},
-		'/' : function(p1, p2, e, scope) {
-			var a = e(p1, scope), b = e(p2, scope);
-			if (typeof a === 'number' && typeof b === 'number') {
-				return a / b;
-			}
-		},
+		'/' : self.genericNumericOp,
 		'+' : function(p1, p2, e, scope) {
 			var a = e(p1, scope), b = e(p2, scope);
 			if (typeof a === 'number' && typeof b === 'number') {
 				return a + b;
+			} else if (typeof a === 'object' && typeof b === 'object') {
+				// TODO: concat dictionaries
 			}
 		},
 		'-' : function(p1, p2, e, scope) {
 			var a = e(p1, scope), b = e(p2, scope);
 			if (typeof a === 'number' && typeof b === 'number') {
 				return a - b;
+			} else if (typeof a === 'object' && typeof b === 'object') {
+				// TODO: subtract keys
 			}
-		}
+		},
+		'<<' : self.genericNumericOp,
+		'>>' : self.genericNumericOp,
+		'**' : self.genericNumericOp,
+		'|' : self.genericNumericOp,
+		'&' : self.genericNumericOp,
+		'&&': self.genericNumericOp,
+		'||': self.genericNumericOp,
+		'^': self.genericNumericOp
 	};
 };
 

@@ -111,6 +111,8 @@ revimp						"<-"
 "\\"			return 'LAMBDA';
 "..."			return 'ELLIPSIS';
 ".."			return 'RANGE';
+"<<"			return 'SHIFTL';
+">>"			return 'SHIFTR';
 "=>"			return 'LAMBDADEF';
 "eq"|"=="		return 'EQ';
 "neq"|"!="		return 'NEQ';
@@ -118,8 +120,6 @@ revimp						"<-"
 "lte"|"<="		return 'LTE';
 "gt"|">"		return 'GT';
 "lt"|"<"		return 'LT';
-"<<"			return 'SHIFTL';
-">>"			return 'SHIFTR';
 "::"			return 'TYPIFY';
 "="				return 'ASSIGN';
 "@="			%{ this.begin('WSBLOCK'); return 'CASEASSIGN'; %};
@@ -131,7 +131,6 @@ revimp						"<-"
 "/"				return 'DIVIDE';
 "%"|"mod"		return 'MOD';
 "||"|"or"		return 'OR';
-"|"				return 'PIPE';
 "&&"|"and"		return 'AND';
 "&"				return 'B_AND';
 "|"				return 'B_OR';
