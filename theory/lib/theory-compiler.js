@@ -1358,17 +1358,6 @@ var Compiler = function(opts) {
 	self.evaluateExpression = new Expressions().evaluate;
 };
 
-// declare some immutable helpers
-var arrayHelpers = ['push', 'unshift', 'reverse', 'splice']
-arrayHelpers.forEach(function(x){
-    Array.prototype['i'+x] = function() {
-        var na = this.splice(0)
-          , args = Array.prototype.slice.call(arguments, 0);
-        na[x].apply(na, args);
-        return na;
-    }
-});
-
 function debug() { if (debugMode) console.log.apply(this, arguments); }
 
 if (typeof require !== 'undefined' && typeof exports !== 'undefined') {
@@ -1376,14 +1365,14 @@ if (typeof require !== 'undefined' && typeof exports !== 'undefined') {
 }
 },{"./expressions":3,"./state-manager":4,"underscore":1}],3:[function(require,module,exports){
 "use static";
-	 	
+var u = require('../util').u;	 	
 var Expressions = function Expressions() {
 	var self = this;
 	
 	self.evaluate = function(ast, scope) {
 		if (ast instanceof Array && ast.length > 0) {
 			if (typeof self.ops[ast[0]] !== 'undefined') {
-				var params = ast.slice(1).ipush(self.evaluate, scope, ast[0]);
+				var params = u.ipush(ast.slice(1), self.evaluate, scope, ast[0]);
 				return self.ops[ast[0]].apply(this, params); 
 			}
 		}
@@ -1402,7 +1391,7 @@ var Expressions = function Expressions() {
 	};
 	
 	self.genericNumericOp = function(a, b, e, scope, op) {
-		var a = e(p1, scope), b = e(p2, scope);
+		var a = e(a, scope), b = e(b, scope);
 		if (typeof a === 'number' && typeof b === 'number') {
 			switch(op) {
 			case '/':	return a / b;
@@ -1416,7 +1405,7 @@ var Expressions = function Expressions() {
 			case '^':	return a ^ b;
 			}
 		}
-	}; 
+	};
 	
 	self.ops = {
 		'num' : function(p1, e) { return p1; },
@@ -1480,16 +1469,44 @@ var Expressions = function Expressions() {
 			var a = e(p1, scope), b = e(p2, scope);
 			if (typeof a === 'number' && typeof b === 'number') {
 				return a + b;
-			} else if (typeof a === 'object' && typeof b === 'object') {
-				// TODO: concat dictionaries
+			} else if (a instanceof Array && b instanceof Array) {
+				if (a[0] === 'dict' && b[0] === 'dict') {
+					var c = u.clone(a), d = u.clone(b);
+					for (var key in d[1]) { c[1][key] = d[1][key]; }
+					return c;
+				} else if (a[0] === 'array' && b[0] === 'array') {
+					return ['array', a[1].concat(b[1])];
+				} else if (a[0] === 'array') {
+					return ['array', u.ipush(a[1], b)];
+				}
 			}
 		},
 		'-' : function(p1, p2, e, scope) {
 			var a = e(p1, scope), b = e(p2, scope);
 			if (typeof a === 'number' && typeof b === 'number') {
 				return a - b;
-			} else if (typeof a === 'object' && typeof b === 'object') {
-				// TODO: subtract keys
+			} else if (a instanceof Array && b instanceof Array) {
+				if (a[0] === 'dict' && b[0] === 'dict') {
+					var c = ['dict', {}];
+					for (var key in a[1]) {
+						if (typeof b[1][key] === 'undefined')
+							c[1][key] = b[1][key];
+					}
+					return c;
+				} else if (a[0] === 'dict' && b[0] === 'array') {
+					var c = u.clone(a);
+					for (var i=0,l=b[1].length; i<l; i++) {
+						if (typeof c[1][b[1][i]] !== 'undefined')
+							delete c[1][b[1][i]];
+					}
+					console.log(c);
+					return c;
+				} else if (a[0] === 'array' && b[0] === 'array') {
+					var c = u.clone(a);
+					c = c[1].filter(function(el) { return !(b[1].indexOf(el) > -1); });
+					console.log(c);
+					return c;
+				}
 			}
 		},
 		'<<' : self.genericNumericOp,
@@ -1504,7 +1521,7 @@ var Expressions = function Expressions() {
 };
 
 exports.Expressions = Expressions;
-},{}],4:[function(require,module,exports){
+},{"../util":5}],4:[function(require,module,exports){
 "use strict";
 
 function StateManager(type, name, _ast, parentScope) {
@@ -1543,6 +1560,54 @@ function StateManager(type, name, _ast, parentScope) {
 }
 
 exports.StateManager = StateManager;
+},{}],5:[function(require,module,exports){
+"use strict";
+
+var Util = function() {};
+Util.prototype.clone = 	function clone(a) {
+	// FIXME: handle recursive references, somehow?
+	// keep meta-data with object, each time object is added to object?
+	if (a instanceof Array) {
+		var c = [];
+		for(var i=0, l=a.length; i<l; i++) {
+			if (typeof a[i] === 'object') {
+				c.push(this.clone(a[i]));
+			} else {
+				c.push(a[i]);
+			}
+		}
+		return c;
+	} else if (typeof a === 'object') {
+		var c = {};
+		for (var key in a) {
+			if (typeof a[key] === 'object') {
+				c[key] = this.clone(a[key]);
+			} else {
+				c[key] = a[key];
+			}
+		}
+		return c;
+	}
+	throw new Exception("Unknown Type", typeof a);
+};
+Util.prototype.ipush = function(arr) {
+	var narr = arr.splice(0);
+	var args = Array.prototype.slice.call(arguments, 1);
+	narr.push.apply(narr, args);
+	return narr;
+};
+
+exports.u = new Util();
+
+/*['push', 'unshift', 'reverse', 'splice'].forEach(function(x){
+    Util.prototype['i'+x] = function() {
+        var na = this.splice(0)
+          , args = Array.prototype.slice.call(arguments, 0);
+        na[x].apply(na, args);
+        return na;
+    }
+});*/
+
 },{}]},{},[2])
 (2)
 });

@@ -66,6 +66,7 @@ revimp						"<-"
 					return 'EOL';
 				%};
 <FFFUNC>\s+		/* ignore whitespace within frag functions */
+"this"			return 'THIS';
 "but"			return 'BUT';
 "within"		return 'WITHIN';
 "from"			return 'FROM';
@@ -87,8 +88,8 @@ revimp						"<-"
 "else"			return 'ELSE';
 "endif"			return 'ENDIF'; 
 "is"			return 'IS';
-{id}			return 'ID';
 "null"			return 'NULL';
+{id}			return 'ID';
 "+"				return 'PLUS';
 "-"				return 'MINUS';
 ({float})"_"?({id})		%{
@@ -145,7 +146,6 @@ revimp						"<-"
 "("				%{ this.begin('PAREN'); return 'LPAREN'; %};
 ")"				%{ this.popState(); return 'RPAREN'; %};
 <PAREN>\s+		/* ignore whitespace in parenthetic expressions */
-" ["			return 'ARRAY_LBRACKET';
 "["				return 'LBRACKET';
 "]"				return 'RBRACKET';
 ":"				return 'COLON';

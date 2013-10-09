@@ -1,3 +1,5 @@
+var u = require("./util").u;
+
 var theoryCompiler = (function(){
 	"use strict";
 	var debugMode = true;
@@ -113,15 +115,6 @@ var theoryCompiler = (function(){
 			throw new Exception(m);
 		}
 	};
-
-	['push', 'unshift', 'reverse', 'splice'].forEach(function(x){
-	    Array.prototype['i'+x] = function() {
-	        var na = this.splice(0)
-	          , args = Array.prototype.slice.call(arguments, 0);
-	        na[x].apply(na, args);
-	        return na;
-	    }
-	});
 	
 	function debug() { if (debugMode) console.log.apply(this, arguments); }
 

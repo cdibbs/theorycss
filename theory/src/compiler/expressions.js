@@ -1,12 +1,12 @@
 "use static";
-	 	
+var u = require('../util').u;	 	
 var Expressions = function Expressions() {
 	var self = this;
 	
 	self.evaluate = function(ast, scope) {
 		if (ast instanceof Array && ast.length > 0) {
 			if (typeof self.ops[ast[0]] !== 'undefined') {
-				var params = ast.slice(1).ipush(self.evaluate, scope, ast[0]);
+				var params = u.ipush(ast.slice(1), self.evaluate, scope, ast[0]);
 				return self.ops[ast[0]].apply(this, params); 
 			}
 		}
@@ -43,6 +43,7 @@ var Expressions = function Expressions() {
 	
 	self.ops = {
 		'num' : function(p1, e) { return p1; },
+		'str' : function(p1, e) { return p1; },
 		'id' : function(id, e, scope) {
 			var val = scope.resolve(id);
 						
@@ -98,23 +99,53 @@ var Expressions = function Expressions() {
 				// TODO: replicate the string? ?? ??? :-)
 			}
 		},
-		'/' : self.genericNumericOp,
 		'+' : function(p1, p2, e, scope) {
 			var a = e(p1, scope), b = e(p2, scope);
 			if (typeof a === 'number' && typeof b === 'number') {
 				return a + b;
-			} else if (typeof a === 'object' && typeof b === 'object') {
-				// TODO: concat dictionaries
+			} else if (a instanceof Array && b instanceof Array) {
+				if (a[0] === 'dict' && b[0] === 'dict') {
+					var c = u.clone(a), d = u.clone(b);
+					for (var key in d[1]) { c[1][key] = d[1][key]; }
+					return c;
+				} else if (a[0] === 'array' && b[0] === 'array') {
+					var c = ['array', a[1].concat(b[1])];
+					return c;
+				} else if (a[0] === 'array') {
+					return ['array', u.ipush(a[1], b)];
+				}
 			}
 		},
 		'-' : function(p1, p2, e, scope) {
 			var a = e(p1, scope), b = e(p2, scope);
 			if (typeof a === 'number' && typeof b === 'number') {
 				return a - b;
-			} else if (typeof a === 'object' && typeof b === 'object') {
-				// TODO: subtract keys
+			} else if (a instanceof Array && b instanceof Array) {
+				if (a[0] === 'dict' && b[0] === 'dict') {
+					var c = ['dict', {}];
+					for (var key in a[1]) {
+						if (typeof b[1][key] === 'undefined')
+							c[1][key] = b[1][key];
+					}
+					return c;
+				} else if (a[0] === 'dict' && b[0] === 'array') {
+					var c = u.clone(a);
+					for (var i=0,l=b[1].length; i<l; i++) {
+						var key = e(b[1][i], scope);
+						console.log(key);
+						if (typeof c[1][key] !== 'undefined') {
+							delete c[1][key];
+						}
+					}
+					return c;
+				} else if (a[0] === 'array' && b[0] === 'array') {
+					var c = u.clone(a);
+					c[1] = c[1].filter(function(el) { return !(b[1].indexOf(el) > -1); });
+					return c;
+				}
 			}
 		},
+		'/' : self.genericNumericOp,
 		'<<' : self.genericNumericOp,
 		'>>' : self.genericNumericOp,
 		'**' : self.genericNumericOp,

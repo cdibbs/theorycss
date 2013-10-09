@@ -78,17 +78,6 @@ var Compiler = function(opts) {
 	self.evaluateExpression = new Expressions().evaluate;
 };
 
-// declare some immutable helpers
-var arrayHelpers = ['push', 'unshift', 'reverse', 'splice']
-arrayHelpers.forEach(function(x){
-    Array.prototype['i'+x] = function() {
-        var na = this.splice(0)
-          , args = Array.prototype.slice.call(arguments, 0);
-        na[x].apply(na, args);
-        return na;
-    }
-});
-
 function debug() { if (debugMode) console.log.apply(this, arguments); }
 
 if (typeof require !== 'undefined' && typeof exports !== 'undefined') {

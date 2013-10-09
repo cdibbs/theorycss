@@ -8,14 +8,14 @@ namespace Website
 		
 		// this function does what you'd expect... precisely zilch //
 		ff basicNoOp() ->
-			((this))
-				((wouldbe))
+			((thiswould))
+				((be))
 					((fun))
 				((...))
 				
 		/* and this one only has Depth-First traversal logic */
 		ff DFTrav() ->
-			((this))
+			((hereare))
 				-> style { some : things }
 					where y'all = cool
 					yield nothing = null;

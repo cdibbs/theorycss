@@ -298,48 +298,69 @@ boollit
 		{ $$ = false; }
 	;
 	
-elist
-	: expression COMMA elist
-		{ $$ = $elist; $$.unshift($e); }
-	| expression
-		{ $$ = [ $e ]; }
-	|
-	;
-
 atom
-	: id
-		{ $$ = ['id', $1]; }
+	: THIS
+		{ $$ = ['this']; }
+	| NULL
+		{ $$ = ['null']; }
+	| bool
+		{ $$ = ['bool', $bool]; }	
 	| number
 		{ $$ = ['num', $number]; }
-	| bool
-		{ $$ = ['bool', $bool]; }
 	| STRING_LIT
 		{ $$ = ['str', $1]; }
+	| id
+		{ $$ = ['id', $1]; }	
 	| LPAREN expression RPAREN
 		{ $$ = $expression; }
+	| array
+		{ $$ = $1; }
+	;
+	
+complex_atom
+	: atom
+		{ $$ = $1; }
 	| dict
 		{ $$ = ['dict', $dict]; }
 	;
-
-postfix_expression
-	: atom
+	
+left_side_expr
+	: call_expr
 		{ $$ = $1; }
-	| postfix_expression LBRACKET expression RBRACKET
-		{ $$ = ['[]', $1, $3]; } 
-	| postfix_expression INC_OP
-		{ $$ = ['++', $1]; }
-	| postfix_expression DEC_OP
-		{ $$ = ['--', $1]; }
-	| postfix_expression EXCUSEME
-		{ $$ = ['!?', $1]; }
-	| postfix_expression NOT
-		{ $$ = ['!', $1]; }
-	| postfix_expression DOT id
-		{ $$ = ['.', $1, $3]; }
+	| new_expr
+		{ $$ = $1; }
+	;
+	
+call_expr
+	: complex_atom
+		{ $$ = $1; }
+	| member_op
+		{ $$ = $1; }
 	| postfix_expression LPAREN arglist RPAREN
 		{ $$ = ['()', $1, $3]; }
 	| postfix_expression LPAREN RPAREN
 		{ $$ = ['()', $1, []]; }
+	;
+	
+new_expr
+	: NEW atom LPAREN arglist RPAREN
+		{ $$ = ['new', $2, $3]; }
+	;
+
+member_op
+	: postfix_expression LBRACKET expression RBRACKET
+		{ $$ = ['[]', $1, $3]; }
+	| postfix_expression DOT id
+		{ $$ = ['.', $1, $3]; }
+	;
+	
+postfix_expression
+	: left_side_expr
+		{ $$ = $1; } 
+	| postfix_expression EXCUSEME // important! and not null
+		{ $$ = ['!?', $1]; }
+	| postfix_expression NOT // important!
+		{ $$ = ['!', $1]; }
 	;
 			
 unary_expression : unary_op? postfix_expression
@@ -495,7 +516,20 @@ bool
 	| FALSE
 		{ $$ = true; };
 	
-array : ARRAY_LBRACKET (expression (COMMA expression)*)? RBRACKET;
+array
+	: LBRACKET array_terms RBRACKET
+		{ $$ = ['array', $2]; }
+	| LBRACKET RBRACKET
+		{ $$ = ['array', []]; }
+	;
+		
+	
+array_terms
+	: expression
+		{ $$ = [$expression]; }
+	| array_terms COMMA expression
+		{ $$ = $array_terms; $$.push($expression); }
+	;
 	
 dict_comprehension
 	: dict_but
@@ -526,7 +560,7 @@ dict
 	| LBRACE RBRACE
 		{ $$ = {}; }
 	;
-			
+				
 ddeflist
 	: dictdef
 		{ $$ = { }; $$[$1[0]] = $1[1]; }

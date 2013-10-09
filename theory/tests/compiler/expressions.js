@@ -24,7 +24,12 @@ var src =
 	+ "    g = basicFn() * recursiveFn(5);\n"
 	+ "    fn recursiveFn(i) -> if i == 0 then 0 else i + recursiveFn(i-1) endif;\n"
 	+ "    pow = (2 ** 8 << 4 * 3) >> 5;\n"
-	+ "    bitwise = (0x123 & 255) | 256;\n"	
+	+ "    bitwise = (0x123 & 255) | 256;\n"
+	+ "    dictadd = { abc : '123', cde : '456', 'key' : 'value' } + { fgh : '789', 'abc' : 999 };\n"
+	+ "    dictsub = { abc : '123', cde : '456'} - { 'cde' : 456 };\n"
+	+ "    dictsubarr = { abc : '123', cde : '456', efg : 789 } - ['cde', 'abc'];\n"
+	+ "    arrsubarr = [123, 456, 789] - [456, 789];\n"
+	+ "    arrplusarr = [123, 456] + [789];\n"
 	+ "\n\n";
 var ast = new Compiler().compile(parser.parse(src))
 	.resolve("Website").val
@@ -130,6 +135,41 @@ vows.describe("Expressions class").addBatch({
 			
 			'we get the result of the function' : function(topic) {
 				assert.equal(topic, 291);
+			}
+		},
+		'dictionary addition' : {
+			topic : function(expr) { return expr.evaluate(ast.resolve("dictadd").ast[0], ast); },
+			
+			'we get the result of the function' : function(topic) {
+				assert.deepEqual(topic, [ 'dict', {
+					key: [ 'str', 'value' ], 
+					cde: [ 'str', '456' ], 
+					abc: [ 'num', 999 ], 
+					fgh: [ 'str', '789' ] 
+			      }]);
+			}
+		},
+		'dictionary minus an array of keys' : {
+			topic : function(expr) { return expr.evaluate(ast.resolve("dictsubarr").ast[0], ast); },
+			
+			'we get the result of the function' : function(topic) {
+				assert.deepEqual(topic, ['dict', {
+					efg : ['num', 789]
+				}]);
+			}
+		},
+		'array minus an array' : {
+			topic : function(expr) { return expr.evaluate(ast.resolve("arrsubarr").ast[0], ast); },
+			
+			'we get the result of the function' : function(topic) {
+				assert.deepEqual(topic, 291);
+			}
+		},
+		'array plus an array' : {
+			topic : function(expr) { return expr.evaluate(ast.resolve("arrplusarr").ast[0], ast); },
+			
+			'we get the result of the function' : function(topic) {
+				assert.deepEqual(topic, [ 'array', [ [ 'num', 123 ], [ 'num', 456 ], [ 'num', 789 ] ] ]);
 			}
 		},
 	}
