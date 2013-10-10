@@ -138,10 +138,8 @@ var Expressions = function Expressions() {
 						}
 					}
 					return c;
-				} else if (a[0] === 'array' && b[0] === 'array') {
-					var c = u.clone(a);
-					c[1] = c[1].filter(function(el) { return !(b[1].indexOf(el) > -1); });
-					return c;
+				} else {
+					throw new Exception("Operation not valid for data types " + a[0] + " and " + b[0]);
 				}
 			}
 		},

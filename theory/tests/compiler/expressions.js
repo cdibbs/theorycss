@@ -159,16 +159,16 @@ vows.describe("Expressions class").addBatch({
 			}
 		},
 		'array minus an array' : {
-			topic : function(expr) { return expr.evaluate(ast.resolve("arrsubarr").ast[0], ast); },
+			topic : ast.resolve("arrsubarr").ast[0],
 			
-			'we get the result of the function' : function(topic) {
-				assert.deepEqual(topic, 291);
+			'throws a type error' : function(topic) {
+				assert.throws(function() { expr.evaluate(ast.resolve("arrsubarr").ast[0], ast); }, Error);
 			}
 		},
 		'array plus an array' : {
 			topic : function(expr) { return expr.evaluate(ast.resolve("arrplusarr").ast[0], ast); },
 			
-			'we get the result of the function' : function(topic) {
+			'we get a new array containing the elements from both' : function(topic) {
 				assert.deepEqual(topic, [ 'array', [ [ 'num', 123 ], [ 'num', 456 ], [ 'num', 789 ] ] ]);
 			}
 		},
