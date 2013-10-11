@@ -141,21 +141,21 @@ vows.describe("Expressions class").addBatch({
 			topic : function(expr) { return expr.evaluate(ast.resolve("dictadd").ast[0], ast); },
 			
 			'we get the result of the function' : function(topic) {
-				assert.deepEqual(topic, [ 'dict', {
+				assert.deepEqual(topic[1], {
 					key: [ 'str', 'value' ], 
 					cde: [ 'str', '456' ], 
 					abc: [ 'num', 999 ], 
 					fgh: [ 'str', '789' ] 
-			      }]);
+			      });
 			}
 		},
 		'dictionary minus an array of keys' : {
 			topic : function(expr) { return expr.evaluate(ast.resolve("dictsubarr").ast[0], ast); },
 			
 			'we get the result of the function' : function(topic) {
-				assert.deepEqual(topic, ['dict', {
+				assert.deepEqual(topic[1], {
 					efg : ['num', 789]
-				}]);
+				});
 			}
 		},
 		'array minus an array' : {
@@ -169,7 +169,7 @@ vows.describe("Expressions class").addBatch({
 			topic : function(expr) { return expr.evaluate(ast.resolve("arrplusarr").ast[0], ast); },
 			
 			'we get a new array containing the elements from both' : function(topic) {
-				assert.deepEqual(topic, [ 'array', [ [ 'num', 123 ], [ 'num', 456 ], [ 'num', 789 ] ] ]);
+				assert.deepEqual(topic[1], [ [ 'num', 123 ], [ 'num', 456 ], [ 'num', 789 ] ]);
 			}
 		},
 	}

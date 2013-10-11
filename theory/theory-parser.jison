@@ -43,9 +43,9 @@ libdef
 	
 theory
 	: THEORY id INDENT theorybody DEDENT
-		{ $$ = ['theory', $2, $theorybody]; }
+		{ $$ = ['theory', $2, $theorybody, null, { loc : @$ }]; }
 	| THEORY id EXTENDS id INDENT theorybody DEDENT
-		{ $$ = ['theory', $2, $theorybody, $4]; }	
+		{ $$ = ['theory', $2, $theorybody, $4, { loc : @$ }]; }	
 	;
 	
 theorybody : (def | NEWLINE)*;
@@ -59,12 +59,12 @@ vdef
 	
 treefrag
 	: tf_node tf_defblock
-	{ $$ = ['tf', $tf_node, $tf_defblock]; }
+	{ $$ = ['tf', $tf_node, $tf_defblock, { loc : @$ }]; }
 	;
 
 tf_node
 	: XPATHSTART leafid (TYPIFY id)? XPATHEND
-	{ $$ = ['tfnode', $leafid, $3]; }
+	{ $$ = ['tfnode', $leafid, $3, { loc : @$ }]; }
 	;
 
 tf_defblock
@@ -91,20 +91,20 @@ tf_islist
 
 tf_is
 	: COLON id AT id IS arglist EOL
-	{ $$ = ['tfis', $4, $arglist, $2]; }
+	{ $$ = ['tfis', $4, $arglist, $2, { loc : @$ }]; }
 	| COLON id IS arglist EOL
-	{ $$ = ['tfis', null, $arglist, $2]; }
+	{ $$ = ['tfis', null, $arglist, $2, { loc : @$ }]; }
 	| AT id IS arglist EOL
-	{ $$ = ['tfis', $id, $arglist]; }
+	{ $$ = ['tfis', $id, $arglist, { loc : @$ }]; }
 	| IS arglist EOL
-	{ $$ = ['tfis', null, $arglist]; }
+	{ $$ = ['tfis', null, $arglist, { loc : @$ }]; }
 	;
 	
 fragfunc 
 	: FRAGFUNC id LPAREN RPAREN IMPLICATION ffactionblock
-		{ $$ = ['ff', $id, [], $ffactionblock]; } 
+		{ $$ = ['ff', $id, [], $ffactionblock, { loc : @$ }]; } 
 	| FRAGFUNC id LPAREN paramlist RPAREN IMPLICATION ffactionblock
-		{ $$ = ['ff', $id, $paramlist, $ffactionblock]; };
+		{ $$ = ['ff', $id, $paramlist, $ffactionblock, { loc : @$ }]; };
 		
 ffactionblock
 	: INDENT ffaction DEDENT
@@ -115,9 +115,9 @@ ffactionblock
 		
 ffaction
 	: ffcasetreelist
-		{ $$ = ['ffaction', $ffcasetreelist, null]; }
+		{ $$ = ['ffaction', $ffcasetreelist, null, { loc : @$ }]; }
 	| WHERE assignment_list ffcasetreelist
-		{ $$ = ['ffaction', $ffcasetreelist, $assignment_list]; }
+		{ $$ = ['ffaction', $ffcasetreelist, $assignment_list, { loc : @$ }]; }
 	;
 	
 ffcasetreelist
@@ -129,9 +129,9 @@ ffcasetreelist
 	
 ffcasetree
 	: ffnode ffcasetree_nodedefblock
-		{ $$ = ['ffcasetree', $1, $2]; }
+		{ $$ = ['ffcasetree', $1, $2, { loc : @$ }]; }
 	| ffnode
-		{ $$ = ['ffcasetree', $1, null]; }
+		{ $$ = ['ffcasetree', $1, null, { loc : @$ }]; }
 	;
 
 ffcasetree_nodedefblock
@@ -141,19 +141,19 @@ ffcasetree_nodedefblock
 
 ffcasetree_nodedef
 	: ffdtfdef ffbtfdef ffcasetreelist
-		{ $$ = ['ffnodedef', $1, $2, $3, 'depth-first']; }
+		{ $$ = ['ffnodedef', $1, $2, $3, 'depth-first', { loc : @$ }]; }
 	| ffbtfdef ffdtfdef ffcasetreelist
-		{ $$ = ['ffnodedef', $1, $2, $3, 'breadth-first']; }
+		{ $$ = ['ffnodedef', $1, $2, $3, 'breadth-first', { loc : @$ }]; }
 	| ffdtfdef ffcasetreelist
-		{ $$ = ['ffnodedef', $1, null, $2]; }
+		{ $$ = ['ffnodedef', $1, null, $2, 'df', { loc : @$ }]; }
 	| ffbtfdef ffcasetreelist
-		{ $$ = ['ffnodedef', null, $1, $2]; }
+		{ $$ = ['ffnodedef', null, $1, $2, 'bf', { loc : @$ }]; }
 	| ffdtfdef
-		{ $$ = ['ffnodedef', $1, null, null]; }
+		{ $$ = ['ffnodedef', $1, null, null, 'df', { loc : @$ }]; }
 	| ffbtfdef
-		{ $$ = ['ffnodedef', null, $1, null]; }
+		{ $$ = ['ffnodedef', null, $1, null, 'bf', { loc : @$ }]; }
 	| ffcasetreelist
-		{ $$ = ['ffnodedef', null, $1]; }
+		{ $$ = ['ffnodedef', null, $1, null, '', { loc : @$ }]; }
 	;
 	
 ffnode : LFFNODE ffid RFFNODE
@@ -165,21 +165,21 @@ ffid : (leafid | ELLIPSIS)
 // depth traversal functions - the logic to apply before and after the depth-recursive call
 ffdtfdef
 	: IMPLICATION fragexprblock REVIMPLICATION fragexprblock
-		{ $$ = ['nodefn', $2, $4]; }
+		{ $$ = ['nodefn', $2, $4, { loc : @$ }]; }
 	| IMPLICATION fragexprblock
-		{ $$ = ['nodefn', $2, null]; }
+		{ $$ = ['nodefn', $2, null, { loc : @$ }]; }
 	| REVIMPLICATION fragexprblock
-		{ $$ = ['nodefn', null, $2]; }
+		{ $$ = ['nodefn', null, $2, { loc : @$ }]; }
 	;
 	
 // breadth traversal functions - the logic to apply before and after the breadth-recursive call
 ffbtfdef
 	: DOWN fragexprblock UP fragexprblock
-		{ $$ = ['nodefn', $2, $4]; }
+		{ $$ = ['nodefn', $2, $4, { loc : @$ }]; }
 	| UP fragexprblock
-		{ $$ = ['nodefn', $2, null]; }
+		{ $$ = ['nodefn', $2, null, { loc : @$ }]; }
 	| DOWN fragexprblock
-		{ $$ = ['nodefn', null, $2]; }
+		{ $$ = ['nodefn', null, $2, { loc : @$ }]; }
 	;
 
 fragexprblock
@@ -189,17 +189,17 @@ fragexprblock
 		
 fragexpr
 	: STYLE expression
-		{ $$ = ['s-w-y', $expression, null, null]; }
+		{ $$ = ['s-w-y', $expression, null, null, { loc : @$ }]; }
 	| STYLE expression YIELD assignment_list
-		{ $$ = ['s-w-y', $expression, null, $assignment_list]; }
+		{ $$ = ['s-w-y', $expression, null, $assignment_list, { loc : @$ }]; }
 	| STYLE expression WHERE assignment_list
-		{ $$ = ['s-w-y', $expression, $assignment_list, null]; }
+		{ $$ = ['s-w-y', $expression, $assignment_list, null, { loc : @$ }]; }
 	| STYLE expression WHERE assignment_list YIELD assignment_list
-		{ $$ = ['s-w-y', $expression, $assignment_list, $assignment_list1]; }
+		{ $$ = ['s-w-y', $expression, $assignment_list, $assignment_list1, { loc : @$ }]; }
 	| WHERE assignment_list YIELD assignment_list
-		{ $$ = ['s-w-y', null, $assignment_list, $assignment_list1]; }
+		{ $$ = ['s-w-y', null, $assignment_list, $assignment_list1, { loc : @$ }]; }
 	| YIELD assignment_list
-		{ $$ = ['s-w-y', null, null, $assignment_list]; };
+		{ $$ = ['s-w-y', null, null, $assignment_list, { loc : @$ }]; };
 		
 tuplevarlist
 	: id COMMA tuplevarlist
@@ -217,14 +217,14 @@ typedef
 
 sdef
 	: SETSTART id TYPIFY id SETEND assignment_list
-		{ $$ = ['setdef', $2, $4, $assignment_list]; }
+		{ $$ = ['setdef', $2, $4, $assignment_list, { loc : @$ }]; }
 	| SETSTART id SETEND assignment_list
-		{ $$ = ['setdef', $id, $id, $assignment_list]; }
+		{ $$ = ['setdef', $id, $id, $assignment_list, { loc : @$ }]; }
 	;
 	
 fdef
 	: FUNCTION id LPAREN paramlist? RPAREN IMPLICATION expression EOL
-		{ $$ = ['fn', $id, $4 ? $4 : [], null /* return types unsupported, for now */, $expression]; }
+		{ $$ = ['fn', $id, $4 ? $4 : [], null /* return types unsupported, for now */, $expression, { loc : @$ }]; }
 	;
 	
 lside
@@ -236,7 +236,7 @@ lside
 	
 assignment
 	: lside ASSIGN expression
-		{  $$ = ['=', $lside, $3]; }
+		{  $$ = ['=', $lside, $3, { loc : @$ }]; }
 	;
 	
 assignment_list
@@ -249,7 +249,7 @@ assignment_list
 caseassignment
 	: assignment
 	| lside CASEASSIGN caselist
-		{ $$ = ['@=', $lside, $3]; }
+		{ $$ = ['@=', $lside, $3, { loc : @$ }]; }
 	;
 		
 caseassignment_list
@@ -269,7 +269,7 @@ caselist
 
 casedef
 	: id IMPLICATION expression
-		{ $$ = ['?->', $id, $expression]; }
+		{ $$ = ['?->', $id, $expression, { loc : @$ }]; }
 	;
 
 arglist
@@ -299,9 +299,7 @@ boollit
 	;
 	
 atom
-	: THIS
-		{ $$ = ['this']; }
-	| NULL
+	: NULL
 		{ $$ = ['null']; }
 	| bool
 		{ $$ = ['bool', $bool]; }	
@@ -309,19 +307,21 @@ atom
 		{ $$ = ['num', $number]; }
 	| STRING_LIT
 		{ $$ = ['str', $1]; }
-	| id
-		{ $$ = ['id', $1]; }	
-	| LPAREN expression RPAREN
-		{ $$ = $expression; }
 	| array
 		{ $$ = $1; }
-	;
-	
+	| THIS
+		{ $$ = ['this']; }
+	| id
+		{ $$ = ['id', $1]; }
+	;	
+
 complex_atom
 	: atom
 		{ $$ = $1; }
 	| dict
-		{ $$ = ['dict', $dict]; }
+		{ $$ = ['dict', $dict, { loc : @$ }]; }
+	| LPAREN expression RPAREN
+		{ $$ = $expression; }
 	;
 	
 left_side_expr
@@ -337,30 +337,30 @@ call_expr
 	| member_op
 		{ $$ = $1; }
 	| postfix_expression LPAREN arglist RPAREN
-		{ $$ = ['()', $1, $3]; }
+		{ $$ = ['()', $1, $3, { loc : @$ }]; }
 	| postfix_expression LPAREN RPAREN
-		{ $$ = ['()', $1, []]; }
+		{ $$ = ['()', $1, [], { loc : @$ }]; }
 	;
 	
 new_expr
 	: NEW atom LPAREN arglist RPAREN
-		{ $$ = ['new', $2, $3]; }
+		{ $$ = ['new', $2, $3, { loc : @$ }]; }
 	;
 
 member_op
 	: postfix_expression LBRACKET expression RBRACKET
-		{ $$ = ['[]', $1, $3]; }
+		{ $$ = ['[]', $1, $3, { loc : @$ }]; }
 	| postfix_expression DOT id
-		{ $$ = ['.', $1, $3]; }
+		{ $$ = ['.', $1, $3, { loc : @$ }]; }
 	;
 	
 postfix_expression
 	: left_side_expr
 		{ $$ = $1; } 
 	| postfix_expression EXCUSEME // important! and not null
-		{ $$ = ['!?', $1]; }
+		{ $$ = ['!?', $1, { loc : @$ }]; }
 	| postfix_expression NOT // important!
-		{ $$ = ['!', $1]; }
+		{ $$ = ['!', $1, { loc : @$ }]; }
 	;
 			
 unary_expression : unary_op? postfix_expression
@@ -370,91 +370,91 @@ power_expression
 	: unary_expression
 		{ $$ = $1; }
 	| power_expression POWER unary_expression
-		{ $$ = [$2, $1, $3]; };
+		{ $$ = [$2, $1, $3, { loc : @$ }]; };
 
 multiplicative_expression
 	: power_expression
 		{ $$ = $1; }
 	| multiplicative_expression muldivmod_op power_expression
-		{ $$ = [$2, $1, $3]; };
+		{ $$ = [$2, $1, $3, { loc : @$ }]; };
 	
 additive_expression
 	: multiplicative_expression
 		{ $$ = $1; }
 	| additive_expression addsub_op multiplicative_expression
-		{ $$ = [$2, $1, $3]; };
+		{ $$ = [$2, $1, $3, { loc : @$ }]; };
 	
 shift_expression
 	: additive_expression
 		{ $$ = $1; }
 	| shift_expression shift_op additive_expression
-		{ $$ = [$2, $1, $3]; }; 
+		{ $$ = [$2, $1, $3, { loc : @$ }]; }; 
 	
 relational_expression
 	: shift_expression
 		{ $$ = $1; }
 	| relational_expression compare_op shift_expression
-		{ $$ = [$2, $1, $3]; };
+		{ $$ = [$2, $1, $3, { loc : @$ }]; };
 
 equivalence_expression
 	: relational_expression
 		{ $$ = $1; }
 	| equivalence_expression equiv_op relational_expression
-		{ $$ = [$2, $1, $3]; };
+		{ $$ = [$2, $1, $3, { loc : @$ }]; };
 		
 and_expression
 	: equivalence_expression
 		{ $$ = $1; }
 	| and_expression B_AND equivalence_expression
-		{ $$ = [$2, $1, $3]; };
+		{ $$ = [$2, $1, $3, { loc : @$ }]; };
 
 xor_expression
 	: and_expression
 		{ $$ = $1; }
 	| xor_expression XOR and_expression
-		{ $$ = [$2, $1, $3]; };
+		{ $$ = [$2, $1, $3, { loc : @$ }]; };
 		
 ior_expression
 	: xor_expression
 		{ $$ = $1; }
 	| ior_expression B_OR xor_expression
-		{ $$ = [$2, $1, $3]; };
+		{ $$ = [$2, $1, $3, { loc : @$ }]; };
 		
 logical_and_expression
 	: ior_expression
 		{ $$ = $1; }
 	| logical_and_expression AND ior_expression
-		{ $$ = [$2, $1, $3]; };
+		{ $$ = [$2, $1, $3, { loc : @$ }]; };
 	
 logical_or_expression
 	: logical_and_expression
 		{ $$ = $1; }
 	| logical_or_expression OR logical_and_expression
-		{ $$ = [$2, $1, $3]; };
+		{ $$ = [$2, $1, $3, { loc : @$ }]; };
 
 in_expression
 	: logical_or_expression
 		{ $$ = $1; }
 	| in_expression IN logical_or_expression
-		{ $$ = [$2, $1, $3]; };
+		{ $$ = [$2, $1, $3, { loc : @$ }]; };
 
 ifnull_expression
 	: in_expression
 		{ $$ = $1; }
 	| ifnull_expression IFNULL in_expression
-		{ $$ = [$2, $1, $3]; };
+		{ $$ = [$2, $1, $3, { loc : @$ }]; };
 	
 test_expression
 	: ifnull_expression
 		{ $$ = $1; }
 	| IF expression THEN block_expression ELSE block_expression ENDIF
-		{ $$ = ['test', [[$expression, $block_expression], [true, $6]]]; }
+		{ $$ = ['test', [[$expression, $block_expression], [true, $6]], { loc : @$ }]; }
 	| IF expression THEN block_expression elseif_list ENDIF
-		{ $elseif_list.unshift([$expression, $block_expression]); $$ = ['test', $elseif_list]; }
+		{ $elseif_list.unshift([$expression, $block_expression]); $$ = ['test', $elseif_list, { loc : @$ }]; }
 	| IF expression THEN block_expression elseif_list ELSE block_expression ENDIF
-		{ $elseif_list.unshift([$expression, $block_expression, [true, $7]]); $$ = ['test', $elseif_list]; }  
+		{ $elseif_list.unshift([$expression, $block_expression, [true, $7]]); $$ = ['test', $elseif_list, { loc : @$ }]; }  
 	| IF expression THEN block_expression ENDIF
-		{ $$ = ['test', [[$expression, $block_expression]]]; }
+		{ $$ = ['test', [[$expression, $block_expression]], { loc : @$ }]; }
 	;
 		
 elseif_list
@@ -468,16 +468,16 @@ lambda_expression
 	: test_expression
 		{ $$ = $1; }
 	| LAMBDA paramlist LAMBDADEF expression
-		{ $$ = ['lambda', $paramlist, $expression]; }
+		{ $$ = ['lambda', $paramlist, $expression, { loc : @$ }]; }
 	| LAMBDA LAMBDADEF expression
-		{ $$ = ['lambda', [], $expression]; }
+		{ $$ = ['lambda', [], $expression, { loc : @$ }]; }
 	;
 	
 within_expression
 	: lambda_expression
 		{ $$ = $1; }
 	| WITHIN expression COLON expression
-		{ $$ = ['within', $2, $4]; }
+		{ $$ = ['within', $2, $4, { loc : @$ }]; }
 	;
 
 expression 
@@ -517,18 +517,18 @@ bool
 		{ $$ = true; };
 	
 array
-	: LBRACKET array_terms RBRACKET
-		{ $$ = ['array', $2]; }
+	: LBRACKET expression_list RBRACKET
+		{ $$ = ['array', $2, { loc : @$ }]; }
 	| LBRACKET RBRACKET
-		{ $$ = ['array', []]; }
+		{ $$ = ['array', [], { loc : @$ }]; }
 	;
 		
 	
-array_terms
+expression_list
 	: expression
 		{ $$ = [$expression]; }
-	| array_terms COMMA expression
-		{ $$ = $array_terms; $$.push($expression); }
+	| expression_list COMMA expression
+		{ $$ = $expression_list; $$.push($expression); }
 	;
 	
 dict_comprehension
@@ -536,29 +536,52 @@ dict_comprehension
 	| dict_with
 	| dict_keep
 	;
-	
+		
 dict_but
-	: LBRACE FROM expression BUT assignment_list RBRACE
-		{ $$ = ['but_dict', $expression, $assignment_list]; }
+	: dict_left BUT assignment_list RBRACE
+		{ $$ = ['but_dict', $dict_left, $assignment_list, { loc : @$ }]; }
 	;
 	
 dict_with
-	: LBRACE FROM expression WITH lambda_expression RBRACE
-		{ $$ = ['with_dict', $expression, $lambda_expression]; }
+	: dict_left WITH lambda_expression RBRACE
+		{ $$ = ['with_dict', $dict_left, $lambda_expression, { loc : @$ }]; }
 	;
 	
 dict_keep
-	: LBRACE FROM expression KEEP expression RBRACE
-		{ $$ = ['keep_dict', $3, $5]; }
+	: dict_left KEEP expression RBRACE
+		{ $$ = ['keep_dict', $1, $3, { loc : @$ }]; }
 	;
-	
+		
 dict
 	: dict_comprehension
 		{ $$ = $1; }
-	| LBRACE ddeflist RBRACE
-	 	{ $$ = $ddeflist; }
 	| LBRACE RBRACE
 		{ $$ = {}; }
+	| dict_start RBRACE
+		{ $$ = {}; $$[$dict_start[0]] = $$[$dict_start[1]]; }
+	| dict_start COMMA ddeflist RBRACE
+	 	{ $$ = $ddeflist; $$[$dict_start[0]] = $dict_start[1]; }
+	| fordict_start dict_for IN expression RBRACE
+		{ $$ = ['{for}', $dict_start, $dict_for, $expression, { loc : @$ }]; }
+	;
+	
+dict_start
+	: LBRACE ddatom COLON expression
+		{ $$ = [ $1, $3 ]; }
+	;
+	
+fordict_start
+	: dict_start
+		{ $$ = $1; }
+	| LBRACE id COLON expression
+		{ $$ = [ $1, $3 ]; }
+	;
+
+dict_for
+	: FOR id
+		{ $$ = [$1, null]; }
+	| FOR id COMMA id
+		{ $$ = [$1, $4]; }
 	;
 				
 ddeflist

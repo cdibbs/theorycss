@@ -69,7 +69,7 @@ revimp						"<-"
 "this"			return 'THIS';
 "but"			return 'BUT';
 "within"		return 'WITHIN';
-"from"			return 'FROM';
+"with"			return 'WITH';
 "keep"			return 'KEEP';
 "style"			return 'STYLE';
 "where"			return 'WHERE';

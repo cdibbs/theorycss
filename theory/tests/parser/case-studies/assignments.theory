@@ -12,9 +12,13 @@ namespace TheoryTests
 		dict = { a : 1, b : 2, c : 3 };
 
 		d = within dict: (
-			// ignores newlines within {}
+			// ignores newlines within ()
 			(a * b * c) / (a + b + c)
 		);
+		
+		/*comp1 = { dict but a = 3 };
+		comp2 = { dict with \k, v => v * v };
+		comp3 = { dict keep ['a', 'b'] };*/
 
 		complicated = (if within dict: a != c
 			then 'okay'

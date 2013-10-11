@@ -26,8 +26,8 @@ namespace Website
 			is { even : on,
 				multiple : lines };
 			[[body]]
-				is functional(with, params, 25);
-				is with(), many(25, 26), funcs(a, b, c);
+				is functional(andwith, params, 25);
+				is using(), many(25, 26), funcs(a, b, c);
 				[[nav.bar]]
 					@mobile is hidden; // plain dictionary
 					@desktop is fixedbar(25);
