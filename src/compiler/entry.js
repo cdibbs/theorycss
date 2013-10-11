@@ -2,6 +2,7 @@
 var _ = require("underscore");
 var Expressions = require('./expressions').Expressions;
 var StateManager = require('./state-manager').StateManager;
+var TreeFrags = require('./tree-fragments').TreeFragments;
 var debugMode = true;
 
 var defaultOptions = {
@@ -27,14 +28,22 @@ var Compiler = function(opts) {
 				
 				// if a main theory was found, go ahead and generate the CSS, else return the rootScope.
 				if (rootScope.hasEntry()) { 
-					var mainScope = rootScope.getEntry();
-					var mainAST = mainScope.getAST();
-					return self.mevalMainTheory(mainAST, mainScope);
-				}		
+					return self.evalMainTheory(mainAST, rootScope);
+				}
 			}
 		}
 		
 		return rootScope;
+	};
+	
+	self.evalMainTheory = function evalMainTheory(ast, scope) {
+		var tf = new TreeFrag(scope);
+		var main = scope.getEntry(); // for now, always a treefrag
+		if (main.type === 'tf') {
+			return tf.processTree(main);
+		} else {
+			throw new Error('Unimplemented main entry type.');
+		}
 	};
 	
 	self.evalNamespace = function evalNamespace(nsAST, scope) {
@@ -56,7 +65,7 @@ var Compiler = function(opts) {
 		});
 		
 		return nsscope;	
-	}
+	};
 		
 	self.evalTheory = function evalTheory(theoryAST, nsscope) {
 		var theoryScope = nsscope.createScope('theory', theoryAST[0], theoryAST[1]);
@@ -73,7 +82,7 @@ var Compiler = function(opts) {
 		});
 		
 		return theoryScope;
-	}
+	};
 	
 	self.evaluateExpression = new Expressions().evaluate;
 };

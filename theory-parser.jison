@@ -156,8 +156,12 @@ ffcasetree_nodedef
 		{ $$ = ['ffnodedef', null, $1, null, '', { loc : @$ }]; }
 	;
 	
-ffnode : LFFNODE ffid RFFNODE
-	{ $$ = $ffid; };
+ffnode
+	: LFFNODE ffid RFFNODE
+		{ $$ = $ffid; }
+	| LFFNODE ffid TYPIFY id RFFNODE
+		{ $$ = [$ffid, $id]; }
+	;
 
 ffid : (leafid | ELLIPSIS)
 	{ $$ = $1; };
@@ -223,8 +227,13 @@ sdef
 	;
 	
 fdef
-	: FUNCTION id LPAREN paramlist? RPAREN IMPLICATION expression EOL
-		{ $$ = ['fn', $id, $4 ? $4 : [], null /* return types unsupported, for now */, $expression, { loc : @$ }]; }
+	: FUNCTION id LPAREN paramlist? RPAREN IMPLICATION expression where_expression? EOL
+		{ $$ = ['fn', $id, $4 ? $4 : [], null /* return types unsupported, for now */, $expression, $8, { loc : @$ }]; }
+	;
+	
+where_expression
+	: WHERE assignment_list
+		{ $$ = $2; }
 	;
 	
 lside
@@ -538,42 +547,37 @@ dict_comprehension
 	;
 		
 dict_but
-	: dict_left BUT assignment_list RBRACE
-		{ $$ = ['but_dict', $dict_left, $assignment_list, { loc : @$ }]; }
+	: LBRACE expr_but assignment_list RBRACE
+		{ $$ = ['{but}', $expr_but, $assignment_list, { loc : @$ }]; }
 	;
 	
 dict_with
-	: dict_left WITH lambda_expression RBRACE
-		{ $$ = ['with_dict', $dict_left, $lambda_expression, { loc : @$ }]; }
+	: LBRACE expr_with lambda_expression RBRACE
+		{ $$ = ['{with}', $expr_with, $lambda_expression, { loc : @$ }]; }
 	;
 	
 dict_keep
-	: dict_left KEEP expression RBRACE
-		{ $$ = ['keep_dict', $1, $3, { loc : @$ }]; }
+	: LBRACE expr_keep expression RBRACE
+		{ $$ = ['{keep}', $1, $3, { loc : @$ }]; }
 	;
+	
+expr_but : FROM expression BUT { $$ = $1; };
+expr_with : FROM expression WITH { $$ = $1; };
+expr_keep : FROM expression KEEP { $$ = $1; };
 		
 dict
 	: dict_comprehension
 		{ $$ = $1; }
 	| LBRACE RBRACE
 		{ $$ = {}; }
-	| dict_start RBRACE
-		{ $$ = {}; $$[$dict_start[0]] = $$[$dict_start[1]]; }
-	| dict_start COMMA ddeflist RBRACE
-	 	{ $$ = $ddeflist; $$[$dict_start[0]] = $dict_start[1]; }
+	| LBRACE ddeflist RBRACE
+	 	{ $$ = $ddeflist; }
 	| fordict_start dict_for IN expression RBRACE
-		{ $$ = ['{for}', $dict_start, $dict_for, $expression, { loc : @$ }]; }
-	;
-	
-dict_start
-	: LBRACE ddatom COLON expression
-		{ $$ = [ $1, $3 ]; }
+		{ $$ = ['{for}', $fordict_start, $dict_for, $expression, { loc : @$ }]; }
 	;
 	
 fordict_start
-	: dict_start
-		{ $$ = $1; }
-	| LBRACE id COLON expression
+	: LBRACE SET expression COLON expression
 		{ $$ = [ $1, $3 ]; }
 	;
 

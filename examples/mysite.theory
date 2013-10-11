@@ -44,8 +44,8 @@ namespace Website
 						yield index = 1;
 				
 		ff fixedbar(side, thickness) -> 
-			((block))
-				-> style (fixed + (boxSides - boxSides.opposite(side)));
+			((block :: innerHeight))
+				-> style (fixed + (boxSides - oppositeSide(side)));
 				<- style if t?! then { 'axis' : t } else nothing endif
 					where axis = if (side in array('top', 'bottom')) then 'height' else 'width' endif
 					yield thickness = t;
@@ -61,6 +61,10 @@ namespace Website
 										img.width
 									endif
 								endif;
+								
+		fn oppositeSide(side) -> 
+			sides[(sides.indexOf(side) + 2) % 4]
+			where sides = ['top', 'right', 'bottom', 'left'];
 
 	library Palette
 		Background = 3**(2*5+3);

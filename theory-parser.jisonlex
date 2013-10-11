@@ -78,6 +78,8 @@ revimp						"<-"
 "map"			return 'MAP';
 "reduce"		return 'REDUCE';
 "for"			return 'FOR';
+"from"			return 'FROM';
+"set"			return 'SET';
 "if"			return 'IF';
 "then"			return 'THEN';
 "int"			return 'INT';

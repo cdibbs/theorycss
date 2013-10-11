@@ -12,6 +12,7 @@ function StateManager(type, name, _ast, parentScope) {
 	};
 	self.addSymbol = function(id, type, val, ast, lazy, scope) {
 		stack[id] = { val : val, ast : ast, lazy : lazy, type : type, scope : scope };
+		return stack[id];
 	};
 	self.resolve = function(id) {
 		if (typeof stack[id] === 'undefined') {
