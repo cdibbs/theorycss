@@ -1,5 +1,7 @@
 namespace Website
 	theory Chris
+		[[lets.begin.witha.tf]]	
+	
 		verbose_name = { my : 1, cool : 2, friends : '3' };
 		verbose_name' = (within verbose_name:
 			\x, y => (x + my) * (y + cool) * friends);

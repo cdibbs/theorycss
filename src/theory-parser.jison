@@ -42,15 +42,15 @@ libdef
 	: vdef { $$ = $1; } | fdef { $$ = $1; } | fragfunc { $$ = $1; };
 	
 theory
-	: THEORY id INDENT theorybody DEDENT
-		{ $$ = ['theory', $2, $theorybody, null, { loc : @$ }]; }
-	| THEORY id EXTENDS id INDENT theorybody DEDENT
-		{ $$ = ['theory', $2, $theorybody, $4, { loc : @$ }]; }	
+	: THEORY id INDENT treefrag theorybody DEDENT
+		{ $$ = ['theory', $2, null, $treefrag, $theorybody, { loc : @$ }]; }
+	| THEORY id EXTENDS id INDENT treefrag theorybody DEDENT
+		{ $$ = ['theory', $2, $4, $treefrag, $theorybody, { loc : @$ }]; }	
 	;
 	
 theorybody : (def | NEWLINE)*;
 	
-def : vdef { $$ = $1; } | fdef { $$ = $1; } | fragfunc { $$ = $1; } | treefrag { $$ = $1; };
+def : vdef { $$ = $1; } | fdef { $$ = $1; } | fragfunc { $$ = $1; };
 
 vdef
 	: caseassignment EOL
@@ -63,9 +63,15 @@ treefrag
 	;
 
 tf_node
-	: XPATHSTART leafid (TYPIFY id)? XPATHEND
-	{ $$ = ['tfnode', $leafid, $3, { loc : @$ }]; }
+	: XPATHSTART leafid tf_typify XPATHEND
+	{ $$ = ['tfnode', $leafid, $tf_typify, { loc : @$ }]; }
 	;
+	
+tf_typify
+	: TYPIFY paramlist
+		{ $$ = $paramlist; }
+	| { $$ = null; }
+	; 
 
 tf_defblock
 	: INDENT tf_islist tf_list DEDENT
@@ -285,7 +291,7 @@ arglist
 	: argdef
 		{ $$ = [ $argdef ]; }
 	| arglist COMMA argdef
-		{ $$ = $arglist; $$.unshift($argdef); }
+		{ $$ = $arglist; $$.push($argdef); }
 	;
 	
 argdef

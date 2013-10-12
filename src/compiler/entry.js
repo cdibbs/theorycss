@@ -16,7 +16,12 @@ var Compiler = function(opts) {
 	
 	var rootScope = null;
 	
-	self.compile = function(ast) {
+	/**
+	 * Compiles Theory source into CSS.
+ 	 * @param {Array} ast - the abstract syntax tree to compile
+	 * @param {Boolean} pp - true = preprocess only; builds and returns root scope
+	 */
+	self.compile = function(ast, pp) {
 		rootScope = new StateManager('prog', 'prog');
 		
 		if (ast instanceof Array && ast.length > 0) {
@@ -27,8 +32,10 @@ var Compiler = function(opts) {
 				});
 				
 				// if a main theory was found, go ahead and generate the CSS, else return the rootScope.
-				if (rootScope.hasEntry()) { 
-					return self.evalMainTheory(mainAST, rootScope);
+				if (rootScope.hasEntry() && !pp) { 
+					return self.evalMain(rootScope);
+				} else {
+					return rootScope;
 				}
 			}
 		}
@@ -36,11 +43,11 @@ var Compiler = function(opts) {
 		return rootScope;
 	};
 	
-	self.evalMainTheory = function evalMainTheory(ast, scope) {
-		var tf = new TreeFrag(scope);
-		var main = scope.getEntry(); // for now, always a treefrag
-		if (main.type === 'tf') {
-			return tf.processTree(main);
+	self.evalMain = function evalMain(scope) {
+		var main = scope.getEntry(); // for now, always a theory
+		if (main.type === 'theory') {
+			var tf = new TreeFrags(scope);
+			return tf.processTree(main[0]);
 		} else {
 			throw new Error('Unimplemented main entry type.');
 		}
@@ -69,17 +76,18 @@ var Compiler = function(opts) {
 		
 	self.evalTheory = function evalTheory(theoryAST, nsscope) {
 		var theoryScope = nsscope.createScope('theory', theoryAST[0], theoryAST[1]);
-		
-		theoryAST[1].forEach(function(tdef) {
+		theoryAST[3].forEach(function(tdef) {
 			if (tdef[0] === '=' || tdef[0] === 'ff' || tdef[0] === 'fn' || tdef[0] === '@=') {
 				// for now, lazily evaluate everything. 
 				theoryScope.addSymbol(tdef[1], tdef[0], null, tdef.slice(2), true);
-			} else if (tdef[0] === 'tf') {
-				// the treefrag drives compilation; lazily evaluate it.
-				var theoryEntry = theoryScope.addSymbol('__treefrag', 'tf', null, tdef.slice(1), true);
-				theoryScope.setEntry(theoryEntry);
+			} else {
+				throw new Error("Unimplemented construct " + tdef[0]);
 			}
 		});
+		
+		// the treefrag drives compilation; lazily evaluate it.
+		var theoryEntry = theoryScope.addSymbol('__treefrag', 'tf', null, theoryAST[2], true);
+		theoryScope.setEntry(theoryEntry);
 		
 		return theoryScope;
 	};

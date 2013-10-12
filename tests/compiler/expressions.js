@@ -9,6 +9,7 @@ var exprTests = {};
 var src =
 	"namespace Website\n"
 	+ "  theory Main\n"
+	+ "    [[athingy]]\n"
 	+ "    a = 0x12345;\n"
 	+ "    a'= a;\n"
 	+ "    b = 17 + 732;\n"
@@ -31,7 +32,7 @@ var src =
 	+ "    arrsubarr = [123, 456, 789] - [456, 789];\n"
 	+ "    arrplusarr = [123, 456] + [789];\n"
 	+ "\n\n";
-var ast = new Compiler().compile(parser.parse(src))
+var ast = new Compiler().compile(parser.parse(src), true)
 	.resolve("Website").val
 	.resolve("Main").val;
 		

@@ -2,9 +2,10 @@ namespace Website
 	theory Main
 		[[html]]
 			[[body]]
-			[[second.child]]
-		[[first.level]]
-		[[yet.another]]
+				[[child]]
+				[[second.child]]
+			[[first.level]]
+				[[yet.another]]
 			[[lets]]
 				[[go]]
 					[[deeper]]
@@ -17,7 +18,7 @@ namespace Website
 			
 			
 			[[coolness]]
-		[[whats.up.now]]
+				[[whats.up.now]]
 			[[huh]]
 			
 	theory ApplyingFragFunctions

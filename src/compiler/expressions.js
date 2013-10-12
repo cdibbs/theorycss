@@ -1,5 +1,7 @@
-"use static";
-var u = require('../util').u;	 	
+"use strict";
+var u = require('../util').u,
+	err = require('./errors').Err;
+	 	
 var Expressions = function Expressions() {
 	var self = this;
 	
@@ -74,6 +76,16 @@ var Expressions = function Expressions() {
 			} else {
 				throw new Exception("Not sure what's going on, here.");
 			}
+		},
+		'ff' : function(id, paramlist, actionblock, meta, e, scope) {
+			// TODO: actually, they can be. They can return a dictionary (tuple with named values)
+			// in their last yield. Those values could be meaningfully used within an outer expression.
+			
+			// 1. look up treefrag 'this' object which gets set during its evaluation
+			// 2. use the node referenced by 'this' to begin processing the treefrag
+			// 3. return the final 'tuple' from the frag function
+			
+			throw new err.UsageError("Frag functions cannot be used within expressions.", meta);
 		},
 		'lambda' : function(paramlist, meta, expr, e, scope) {
 			return { type : 'fn', ast : [paramlist, null, expr], val : null, lazy : true };

@@ -1,10 +1,17 @@
-var u = require('../util').u;
+var u = require('../util').u,
+	Expressions = require('./expressions').Expressions;
 
-function LeafDict(nodeId, nodeDef, nodeDefBlock) {
+/**
+ * Represents a single node in a tree fragment
+ * @param {String} nodeId - the CSS identifier for this node
+ * @param {Array} typeList - the list of Theories that apply to this node
+ * @param {Array} isList - the list of 'is' clauses to be applied to this node
+ * @param {Array} children - tree frags that have this node as their parent
+ */
+function LeafDict(nodeId, typeList, isList) {
 	var self = this;
-	var isList = nodeDef[0];
-	var children = nodeDef[1];
 	var css = {};
+	var children = [];
 	
 	self.genCSSProperties = function genCSSProperties(sm, recurs) {
 		isList.every(function(isdef) {
@@ -19,10 +26,22 @@ function LeafDict(nodeId, nodeDef, nodeDefBlock) {
 		return css;
 	};
 	
+	self.getNodeId = function getNodeId() { return nodeId; };
+	
+	self.addChild = function addChild(leafDict) {
+		children.push(leafDict);
+	};
+	
+	/**
+	 * Within an 'is' definition, evaluates the array of expressions.
+ 	 * @param {Array} defList
+ 	 * @throws Error if any expression does not return a property dictionary.
+	 */
 	self.evalDefList = function evalDefList(defList) {
+		var expr = new Expressions();
 		var props = {};
 		defList.every(function(def) {
-			var defprops = compiler.evalExpr(def);
+			var defprops = expr.evaluate(def);
 			if (! defprops instanceof Object) {
 				throw new Exception("Not a dictionary.");
 			}

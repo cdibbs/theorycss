@@ -1,5 +1,6 @@
 namespace TheoryTests
 	theory Main
+		[[alwaysneedtf]]
 
 		a = 1;
 		b = 1 * 2 + a;
