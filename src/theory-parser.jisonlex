@@ -9,6 +9,7 @@ spc							[\t \u00a0\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009
 str							\"[^\"]*\"|\'[^\']*\'
 imp							"->"
 revimp						"<-"
+units						(?:[a-zA-Z][a-zA-Z0-9]*|\%)
 
 %s PAREN
 %s BRACE
@@ -68,13 +69,13 @@ revimp						"<-"
 <FFFUNC>\s+		/* ignore whitespace within frag functions */
 "+"				return 'PLUS';
 "-"				return 'MINUS';
-({float})"_"?({id})		%{
-						yytext = { type: 'fl_', val: parseFloat(yy.lexer.matches[1]), units: yy.lexer.matches[2] };
+({float})"_"?({units})		%{
+						yytext = { type: 'fl_', val: parseFloat(yy.lexer.matches[1]), units: yy.lexer.matches[4] };
 						return 'FLOAT_UNITS';
 						%};
 {float}			%{ yytext = parseFloat(yytext); return 'FLOAT'; %};
 "0x"({hex})			%{ yytext = parseInt(yy.lexer.matches[1], 16); return 'HEXNATLITERAL'; %};
-({int})"_"?({id})	%{ yytext = { type: 'int_', val : parseInt(yy.lexer.matches[1]), units: yy.lexer.matches[2] }; return 'INT_UNITS'; %};
+({int})"_"?({units})	%{ yytext = { type: 'int_', val : parseInt(yy.lexer.matches[1]), units: yy.lexer.matches[4] }; return 'INT_UNITS'; %};
 {int}				%{ yytext = parseInt(yytext); return 'INTEGER'; %};
 ({bin})"b"			%{ yytext = parseInt(yy.lexer.matches[1], 2); return 'BINNATLITERAL'; %};
 "#"({hex})			%{ yytext = parseInt(yy.lexer.matches[1]); return 'HEXCOLOR'; %};

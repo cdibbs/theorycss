@@ -17,8 +17,8 @@ function parseSnippet(srcFrag) {
 	return ast;
 }
 		
-vows.describe("TreeFrags class").addBatch({
-	'evaluating' : {
+vows.describe("TreeFrags").addBatch({
+	'preprocessing' : {
 		'basic AST' : {
 			topic : function() {
 				var snippet =
@@ -27,22 +27,32 @@ vows.describe("TreeFrags class").addBatch({
 					+ '      :pseudoel @somemedia is someOtherThings;\n'
 					+ '      [[andKids]]\n'
 					+ '        [[andgrandkids]]\n'
-					+ '      [[ohsomany]]\n';
+					+ '      [[ohsomany]]\n\n'
+					+ '    someVar = { "background-color" : "red" };\n'
+					+ '    fn func() -> { "font-size" : 12pt };\n'
+					+ '    somemedia = "width > 500px";\n'
+					+ '    someOtherThings = { "color" : "gray" };\n';
 				return parseSnippet(snippet);
 			},
 			'has expected format' : function(topic) {
 				var ast = topic.getEntry().ast;
 				assert.equal(ast[0], "tf");
 				assert.equal(ast[1][0], "tfnode");
-				assert.equal(ast[1][1][0], "div");
+				assert.equal(ast[1][1], "div");
 				assert.equal(ast[1][2], "OtherTheory");
 				assert.equal(ast[2][0][0][0], "tfis");
 			},
 			'processTree() produces valid LeafDict' : function(topic) {
 				var ast = topic.getEntry().ast;
 				var tf = new TreeFrags(topic);
-				var ld = tf.processTree(ast);
+				var ld = tf.buildTree(ast);
 				assert.instanceOf(ld, LeafDict);
+			},
+			'evaluating definition list produces correct styles' : function(topic) {
+				var ast = topic.getEntry().ast;
+				var tf = new TreeFrags(topic);
+				var ld = tf.processTree(ast);
+				assert.instanceOf(ld, LeafDict);				
 			}
 		}
 	}

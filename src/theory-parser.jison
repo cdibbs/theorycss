@@ -64,7 +64,7 @@ treefrag
 
 tf_node
 	: XPATHSTART leafid tf_typify XPATHEND
-	{ $$ = ['tfnode', $leafid, $tf_typify, { loc : @$ }]; }
+	{ $$ = ['tfnode', $leafid.join(''), $tf_typify, { loc : @$ }]; }
 	;
 	
 tf_typify

@@ -31,6 +31,9 @@ var src =
 	+ "    dictsubarr = { abc : '123', cde : '456', efg : 789 } - ['cde', 'abc'];\n"
 	+ "    arrsubarr = [123, 456, 789] - [456, 789];\n"
 	+ "    arrplusarr = [123, 456] + [789];\n"
+	+ "    myunits = 500px + 277px;\n"
+	+ "    myfloatu = 3.141px + 3.141px;\n"
+	+ "    warnunits = 3.141px + 3.141%;\n"
 	+ "\n\n";
 var ast = new Compiler().compile(parser.parse(src), true)
 	.resolve("Website").val
@@ -66,6 +69,20 @@ vows.describe("Expressions class").addBatch({
 			
 			'we get the sum of the two terms' : function(topic) {
 				assert.equal(topic, 777);
+			}
+		},
+		'addition of integers with same units' : {
+			topic : function(expr) { return expr.evaluate(ast.resolve("myunits").ast[0], ast); },
+			
+			'we get the sum of the constants, and no errors' : function(topic) {
+				assert.deepEqual(topic, { type : 'int_', val : 777, units : 'px' });
+			}
+		},
+		'addition of floats with same units' : {
+			topic : function(expr) { return expr.evaluate(ast.resolve("myfloatu").ast[0], ast); },
+			
+			'we get the sum of the constants, and no errors' : function(topic) {
+				assert.deepEqual(topic, { type : 'fl_', val : 6.282, units : 'px' });
 			}
 		},
 		'complex arithmetic involving constants' : {

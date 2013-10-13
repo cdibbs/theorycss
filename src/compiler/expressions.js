@@ -1,6 +1,7 @@
 "use strict";
 var u = require('../util').u,
-	err = require('./errors').Err;
+	err = require('./errors').err,
+	warn = require('./errors').warn;
 	 	
 var Expressions = function Expressions() {
 	var self = this;
@@ -26,20 +27,44 @@ var Expressions = function Expressions() {
 		}
 	};
 	
+	self.isNumber = function isNumber(p) {
+		return (typeof p === 'number') || (p && typeof p === 'object' && (p.type === 'int_' || p.type ==='fl_'));
+	};
+	self.hasUnits = function hasUnits(a) {
+		return a !== null && (typeof a === 'object' && a.units);
+	};
+	
 	self.genericNumericOp = function(a, b, meta, e, scope, op) {
+		var origa = a, origb = b;
 		var a = e(a, scope), b = e(b, scope);
-		if (typeof a === 'number' && typeof b === 'number') {
+		if (self.isNumber(a) && self.isNumber(b)) {
+			var answer;
+			var p1 = self.hasUnits(a) ? a.val : a;
+			var p2 = self.hasUnits(b) ? b.val : b; 
 			switch(op) {
-			case '/':	return a / b;
-			case '**':	return Math.pow(a, b);
-			case '|':	return a | b;
-			case '&':	return a & b;
-			case '<<':	return a << b;
-			case '>>':	return a >> b;
-			case '&&':	return a && b;
-			case '||':	return a || b;
-			case '^':	return a ^ b;
+				case '+': 	answer = p1 + p2; break;
+				case '-': 	answer = p1 - p2; break;
+				case '*': 	answer = p1 * p2; break;
+				case '/': 	answer = p1 / p2; break;
+				case '**':	answer = Math.pow(p1, p2); break;
+				case '|':	answer = p1 | p2; break;
+				case '&':	answer = p1 & p2; break;
+				case '<<':	answer = p1 << p2; break;
+				case '>>':	answer = p1 >> p2; break;
+				case '&&':	answer = p1 && p2; break;
+				case '||':	answer = p1 || p2; break;
+				case '^':	answer = p1 ^ p2;
 			}
+			if (self.hasUnits(a) || self.hasUnits(b)) {
+				if (a.units !== b.units)
+					warn.IncompatibleUnits('Arithmetic with unequal units', meta);
+				
+				return { type : a.type, val : answer, units : a.units };
+			} else {
+				return answer;
+			}
+		} else {
+			throw new err.NotANumber('Not a number', meta);
 		}
 	};
 	
@@ -78,14 +103,13 @@ var Expressions = function Expressions() {
 			}
 		},
 		'ff' : function(id, paramlist, actionblock, meta, e, scope) {
+			throw new err.UsageError("Frag functions cannot be used within expressions.", meta);
 			// TODO: actually, they can be. They can return a dictionary (tuple with named values)
 			// in their last yield. Those values could be meaningfully used within an outer expression.
 			
 			// 1. look up treefrag 'this' object which gets set during its evaluation
 			// 2. use the node referenced by 'this' to begin processing the treefrag
-			// 3. return the final 'tuple' from the frag function
-			
-			throw new err.UsageError("Frag functions cannot be used within expressions.", meta);
+			// 3. return the final 'tuple' from the frag function			
 		},
 		'lambda' : function(paramlist, meta, expr, e, scope) {
 			return { type : 'fn', ast : [paramlist, null, expr], val : null, lazy : true };
@@ -105,16 +129,16 @@ var Expressions = function Expressions() {
 		},
 		'*' : function(p1, p2, meta, e, scope) {
 			var a = e(p1, scope), b = e(p2, scope);
-			if (typeof a === 'number' && typeof b === 'number') {
-				return a * b;
+			if (self.isNumber(a) && self.isNumber(b)) {
+				return self.genericNumericOp(a, b, meta, e, scope, '*');
 			} else if (typeof a === 'string' && typeof b === 'number') {
 				// TODO: replicate the string? ?? ??? :-)
 			}
 		},
 		'+' : function(p1, p2, meta, e, scope) {
 			var a = e(p1, scope), b = e(p2, scope);
-			if (typeof a === 'number' && typeof b === 'number') {
-				return a + b;
+			if (self.isNumber(a) && self.isNumber(b)) {
+				return self.genericNumericOp(a, b, meta, e, scope, '+');
 			} else if (a instanceof Array && b instanceof Array) {
 				if (a[0] === 'dict' && b[0] === 'dict') {
 					var c = u.clone(a);
@@ -130,8 +154,8 @@ var Expressions = function Expressions() {
 		},
 		'-' : function(p1, p2, meta, e, scope) {
 			var a = e(p1, scope), b = e(p2, scope);
-			if (typeof a === 'number' && typeof b === 'number') {
-				return a - b;
+			if (self.isNumber(a) && self.isNumber(b)) {
+				return self.genericNumericOp(a, b, meta, e, scope, '-');
 			} else if (a instanceof Array && b instanceof Array) {
 				if (a[0] === 'dict' && b[0] === 'dict') {
 					var c = ['dict', {}, meta];
