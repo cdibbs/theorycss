@@ -37,7 +37,8 @@ and ordinary properties and methods.
 		theory Banner
 			...
 
-##Frag Functions - these are declarative, inherently recursive functions for dealing with TreeFrags more concisely.
+##Frag Functions
+These are declarative, inherently recursive functions for dealing with TreeFrags more concisely.
 
 
 # Usage
