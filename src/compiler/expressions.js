@@ -6,10 +6,10 @@ var u = require('../util').u,
 var Expressions = function Expressions() {
 	var self = this;
 	
-	self.evaluate = function(ast, scope) {
+	self.evaluate = function(ast, scope, lazy) {
 		if (ast instanceof Array && ast.length > 0) {
 			if (typeof self.ops[ast[0]] !== 'undefined') {
-				var params = u.ipush(ast.slice(1), self.evaluate, scope, ast[0]);
+				var params = u.ipush(ast.slice(1), self.evaluate, scope, ast[0], lazy);
 				return self.ops[ast[0]].apply(this, params); 
 			}
 		}
@@ -35,12 +35,11 @@ var Expressions = function Expressions() {
 	};
 	
 	self.genericNumericOp = function(a, b, meta, e, scope, op) {
-		var origa = a, origb = b;
 		var a = e(a, scope), b = e(b, scope);
 		if (self.isNumber(a) && self.isNumber(b)) {
 			var answer;
 			var p1 = self.hasUnits(a) ? a.val : a;
-			var p2 = self.hasUnits(b) ? b.val : b; 
+			var p2 = self.hasUnits(b) ? b.val : b;
 			switch(op) {
 				case '+': 	answer = p1 + p2; break;
 				case '-': 	answer = p1 - p2; break;
@@ -56,10 +55,10 @@ var Expressions = function Expressions() {
 				case '^':	answer = p1 ^ p2;
 			}
 			if (self.hasUnits(a) || self.hasUnits(b)) {
-				if (a.units !== b.units)
+				if ((self.hasUnits(a) && self.hasUnits(b)) && a.units !== b.units)
 					warn.IncompatibleUnits('Arithmetic with unequal units', meta);
 				
-				return { type : a.type, val : answer, units : a.units };
+				return { type : a.type || b.type, val : answer, units : a.units || b.units };
 			} else {
 				return answer;
 			}
@@ -71,33 +70,35 @@ var Expressions = function Expressions() {
 	self.ops = {
 		'num' : function(p1, e) { return p1; },
 		'str' : function(p1, e) { return p1; },
-		'id' : function(id, e, scope) {
+		'id' : function(id, e, scope, lazy) {
 			var val = scope.resolve(id);
-						
 			if (val.type === 'fn')
 				return val;
+			
+			if (val['undefined'] === 'undefined')
+				throw new Error('Variable ' + id + ' undefined');
 				
-			if (val.val == null && val.lazy) {
+			if (val.val == null && val.ast) {
 				if (val.scope) { // if the variable has a scope assoc with it, use that
-					return e(val.ast[0], val.scope);
+					return e(val.ast[0], val.scope, lazy);
 				}
-				return e(val.ast[0], scope);
+				return e(val.ast[0], scope, lazy);
 			} else {
 				return val.val;
 			}
 		},
-		'()' : function(fn, args, meta, e, scope) {
+		'()' : function(fn, args, meta, e, scope, lazy) {
 			var fndef = e(fn, scope);
 			if (typeof fndef === 'object' && fndef.type === 'fn') {
 				var params = fndef.ast[0];
 				if (args.length > params.length)
 					throw new Exception('Too many arguments');
-					
 				var fnscope = scope.createScope('fn', 'function', [fn, args]);
 				for(var i=0, l=args.length; i<l; i++) {
 					fnscope.addSymbol(params[i], 'param', null, [args[i]], true, scope);
 				}
-				return e(fndef.ast[2], fnscope);
+				var result = e(fndef.ast[2], fnscope, lazy);
+				return result;
 			} else {
 				throw new Exception("Not sure what's going on, here.");
 			}
@@ -120,6 +121,22 @@ var Expressions = function Expressions() {
 					return e(condList[i][1], scope);
 				}
 			}
+		},
+		'within' : function(dictexpr, wexpr, meta, e, scope, lazy) {
+			var wscope = scope.createScope('within', 'within', [wexpr, dictexpr]);
+			// TODO need to filter/modify keys that don't conform to variable name rules
+			var dict = e(dictexpr, scope, lazy);
+			if (dict[0] !== 'dict')
+				throw new err.UsageError('Not a dictionary.', meta);
+			
+			var vars = Object.keys(dict[1]);
+			for(var i=0, l=vars.length; i<l; i++) {
+				var dscope = dict.length == 4 ? dict[3] : scope;
+				wscope.addSymbol(vars[i], 'param', null, [dict[1][vars[i]]], true, dscope);
+			}
+			
+			var result = e(wexpr, wscope, lazy);
+			return result;
 		},
 		'=' : function(id, expr, meta, e, scope) {
 			scope.addSymbol(id, expr); // lazily eval?
@@ -176,6 +193,15 @@ var Expressions = function Expressions() {
 				} else {
 					throw new Exception("Operation not valid for data types " + a[0] + " and " + b[0]);
 				}
+			}
+		},
+		'dict' : function(obj, meta, e, scope, lazy) {
+			if (!lazy) {
+				for(var key in obj) {
+					obj[key] = e(obj[key], scope, lazy);
+				}
+			} else {
+				return ['dict', obj, meta, scope];
 			}
 		},
 		'/' : self.genericNumericOp,

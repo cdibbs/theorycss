@@ -23,13 +23,14 @@ vows.describe("TreeFrags").addBatch({
 			topic : function() {
 				var snippet =
 					  '    [[div :: OtherTheory]]\n'
-					+ '      is someVar, { literal : "value" }, func();\n'
+					+ '      is someVar, { literal : "value" }, func(3);\n'
 					+ '      :pseudoel @somemedia is someOtherThings;\n'
 					+ '      [[andKids]]\n'
 					+ '        [[andgrandkids]]\n'
+					+ '          is func(5);\n'
 					+ '      [[ohsomany]]\n\n'
 					+ '    someVar = { "background-color" : "red" };\n'
-					+ '    fn func() -> { "font-size" : 12pt };\n'
+					+ '    fn func(x) -> { "font-size" : 12pt * x };\n'
 					+ '    somemedia = "width > 500px";\n'
 					+ '    someOtherThings = { "color" : "gray" };\n';
 				return parseSnippet(snippet);
@@ -52,6 +53,7 @@ vows.describe("TreeFrags").addBatch({
 				var ast = topic.getEntry().ast;
 				var tf = new TreeFrags(topic);
 				var ld = tf.processTree(ast);
+				ld.dumpTree();
 				assert.instanceOf(ld, LeafDict);				
 			}
 		}

@@ -10,18 +10,19 @@ var u = require('../util').u,
  */
 function LeafDict(nodeId, typeList, isList) {
 	var self = this;
-	var css = {};
+	var css = [];
 	var children = [];
 	
-	self.genCSSProperties = function genCSSProperties(sm, recurs) {
+	self.genCSSProperties = function genCSSProperties(scope) {
+		if (!isList) return;
 		isList.every(function(isdef) {
-			css[isdef[1]] = [isdef[2], isdef[4]?isdef[4]:null, self.evalDefList(isdef[2])];
+			css.push(
+					{ media : isdef[1],
+					  pseudoEl : isdef[3],
+					  dictionaries : self.evalDefList(isdef[2], scope)
+					});
 			return true;
 		});
-		
-		if (recurs) {
-			//nodeDefBlock
-		}
 		
 		return css;
 	};
@@ -32,22 +33,46 @@ function LeafDict(nodeId, typeList, isList) {
 		children.push(leafDict);
 	};
 	
+	self.getChildren = function getChildren() { return children; };
+	
+	self.getStyleDict = function() { return css; };
+	
 	/**
 	 * Within an 'is' definition, evaluates the array of expressions.
  	 * @param {Array} defList
  	 * @throws Error if any expression does not return a property dictionary.
 	 */
-	self.evalDefList = function evalDefList(defList) {
+	self.evalDefList = function evalDefList(defList, scope) {
 		var expr = new Expressions();
-		var props = {};
+		var dicts = [];
 		defList.every(function(def) {
-			var defprops = expr.evaluate(def);
-			if (! defprops instanceof Object) {
+			var result = expr.evaluate(def, scope, false);
+			if (! result instanceof Object) {
 				throw new Exception("Not a dictionary.");
 			}
-			for(var prop in defprops) { props[prop] = defprops[prop]; }
+			/*for (var key in result[1]) {
+				console.log(expr.evaluate(result[1][key], scope), result[1][key], false);
+				result[1][key] = expr.evaluate(result[1][key], scope, false);
+			}*/
+			dicts.push(result);
+			return true;
 		});
-		return props;
+		return dicts;
+	};
+	
+	self.dumpTree = function dumpTree() {
+		var stack = [self];
+		do {
+			var pointer = stack.pop();
+			var children = pointer.getChildren();
+			console.log(pointer.getNodeId());
+			console.log(JSON.stringify(pointer.getStyleDict(), null, 2));
+			for(var i=0, l=children.length; i<l; i++) {
+				var child = children[i];
+				stack.push(child);
+			}
+			
+		} while (stack.length);
 	};
 };
 

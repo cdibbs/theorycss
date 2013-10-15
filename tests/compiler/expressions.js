@@ -34,6 +34,10 @@ var src =
 	+ "    myunits = 500px + 277px;\n"
 	+ "    myfloatu = 3.141px + 3.141px;\n"
 	+ "    warnunits = 3.141px + 3.141%;\n"
+	+ "    fn unitsnvars(x) -> 12pt * x;\n"
+	+ "    rununitsfn = unitsnvars(5);\n"
+	+ "    fn mylazy(x) -> { bob : x * 12pt };\n"
+	+ "    unlazy = within mylazy(5): bob;"
 	+ "\n\n";
 var ast = new Compiler().compile(parser.parse(src), true)
 	.resolve("Website").val
@@ -190,6 +194,20 @@ vows.describe("Expressions class").addBatch({
 				assert.deepEqual(topic[1], [ [ 'num', 123 ], [ 'num', 456 ], [ 'num', 789 ] ]);
 			}
 		},
+		'function involving units and variables' : {
+			topic : function(expr) { return expr.evaluate(ast.resolve("rununitsfn").ast[0], ast); },
+			
+			'we get the expected number with units, in return' : function(topic) {
+				assert.deepEqual(topic, { type : 'int_', val: 60, units: 'pt' });
+			}
+		},
+		'(lazy eval) variable using function returning dict with expr' : {
+			topic : function(expr) { return expr.evaluate(ast.resolve("unlazy").ast[0], ast); },
+			
+			'we get the expected, fully-computed value' : function(topic) {
+				assert.deepEqual(topic, { type : 'int_', val: 60, units: 'pt' });
+			}
+		}
 	}
 }).export(module);
 /*exprTests["test basic arithmetic"] = function() {

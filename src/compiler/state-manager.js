@@ -7,7 +7,7 @@ function StateManager(type, name, _ast, parentScope) {
 	var output = "";
 		
 	self.createScope = function(type, name, ast) {
-		var scope = new StateManager(type, name, ast, this);
+		var scope = new StateManager(type, name, ast, self);
 		return scope;
 	};
 	self.addSymbol = function(id, type, val, ast, lazy, scope) {
@@ -32,7 +32,11 @@ function StateManager(type, name, _ast, parentScope) {
 	self.getOutput = function() { return output; };		
 	self.getParentScope = function() {  return parentScope; };
 	self.dump = function() {
-		stack.forEach(function(i) { console.log(i); });
+		var keys = Object.keys(stack);
+		console.log("keys " + keys.length);
+		for (var i=0; i<keys.length; i++) {
+			console.log(keys[i]);
+		}
 	};
 }
 

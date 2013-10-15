@@ -13,6 +13,17 @@ var TreeFragments = function TreeFragments(rootScope) {
 	
 	self.processTree = function processTree(ast) {
 		var root = self.buildTree(ast);
+		var stack = [root];
+		do {
+			var pointer = stack.pop();
+			pointer.genCSSProperties(rootScope);
+			var children = pointer.getChildren();
+			for(var i=0, l=children.length; i<l; i++) {
+				var child = children[i];
+				stack.push(child);
+			}
+			
+		} while (stack.length);
 		return root;
 	};
 	
@@ -20,7 +31,9 @@ var TreeFragments = function TreeFragments(rootScope) {
 		if (ast[0] === 'tf') {
 			var children = ast[2] ? ast[2][1] : null;
 			var isList = ast[2] ? ast[2][0] : null;
-			var leafDict = new LeafDict(ast[1][1], ast[1][2], isList, children);
+			var leafDict = (function(isList, children) {
+				return new LeafDict(ast[1][1], ast[1][2], isList, children);
+			})(isList, children);
 			if (children && children.length) {
 				for(var i=0, l=children.length; i<l; i++) {
 					leafDict.addChild(self.buildTree(children[i]));

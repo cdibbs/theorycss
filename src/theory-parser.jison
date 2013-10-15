@@ -101,9 +101,9 @@ tf_is
 	| COLON id IS arglist EOL
 	{ $$ = ['tfis', null, $arglist, $2, { loc : @$ }]; }
 	| AT id IS arglist EOL
-	{ $$ = ['tfis', $id, $arglist, { loc : @$ }]; }
+	{ $$ = ['tfis', $id, $arglist, null, { loc : @$ }]; }
 	| IS arglist EOL
-	{ $$ = ['tfis', null, $arglist, { loc : @$ }]; }
+	{ $$ = ['tfis', null, $arglist, null, { loc : @$ }]; }
 	;
 	
 fragfunc 
