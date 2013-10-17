@@ -164,10 +164,10 @@ vows.describe("Expressions class").addBatch({
 			
 			'we get the result of the function' : function(topic) {
 				assert.deepEqual(topic[1], {
-					key: [ 'str', 'value' ], 
-					cde: [ 'str', '456' ], 
-					abc: [ 'num', 999 ], 
-					fgh: [ 'str', '789' ] 
+					key: 'value' , 
+					cde: '456', 
+					abc: 999, 
+					fgh: '789' 
 			      });
 			}
 		},
@@ -176,7 +176,7 @@ vows.describe("Expressions class").addBatch({
 			
 			'we get the result of the function' : function(topic) {
 				assert.deepEqual(topic[1], {
-					efg : ['num', 789]
+					efg : 789
 				});
 			}
 		},

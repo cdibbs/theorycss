@@ -196,13 +196,10 @@ var Expressions = function Expressions() {
 			}
 		},
 		'dict' : function(obj, meta, e, scope, lazy) {
-			if (!lazy) {
-				for(var key in obj) {
-					obj[key] = e(obj[key], scope, lazy);
-				}
-			} else {
-				return ['dict', obj, meta, scope];
+			for(var key in obj) {
+				obj[key] = e(obj[key], scope, lazy);
 			}
+			return ['dict', obj, meta];
 		},
 		'/' : self.genericNumericOp,
 		'<<' : self.genericNumericOp,
