@@ -17,7 +17,7 @@
 	  "underscore" : "latest"
   },
   "scripts" : {
-    "test" : "vows --spec tests/compiler/**/*.js"
+    "test" : "vows --spec tests/compiler/*.js tests/compiler/**/*.js"
   },
   "repository": "",
   "keywords": [

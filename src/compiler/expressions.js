@@ -30,6 +30,19 @@ var Expressions = function Expressions() {
 	self.isNumber = function isNumber(p) {
 		return (typeof p === 'number') || (p && typeof p === 'object' && (p.type === 'int_' || p.type ==='fl_'));
 	};
+	
+	self.isString = function isString(p) {
+		return (typeof p === 'string');
+	};
+	
+	self.getNumber = function getNumber(p) {
+		return typeof p === 'number' ? p : p.val;
+	};
+	
+	self.getString = function(p) {
+		return typeof p === 'string' ? p : p[1];
+	};
+	
 	self.hasUnits = function hasUnits(a) {
 		return a !== null && (typeof a === 'object' && a.units);
 	};
@@ -148,8 +161,10 @@ var Expressions = function Expressions() {
 			var a = e(p1, scope), b = e(p2, scope);
 			if (self.isNumber(a) && self.isNumber(b)) {
 				return self.genericNumericOp(a, b, meta, e, scope, '*');
-			} else if (typeof a === 'string' && typeof b === 'number') {
-				// TODO: replicate the string? ?? ??? :-)
+			} else if (self.isString(a) && self.isNumber(b)) {
+				return (new Array(self.getNumber(b))).join(self.getString(a));
+			} else if (self.isString(b) && self.isNumber(a)) {
+				return (new Array(self.getNumber(a))).join(self.getString(b));
 			}
 		},
 		'+' : function(p1, p2, meta, e, scope) {
@@ -166,7 +181,9 @@ var Expressions = function Expressions() {
 					return c;
 				} else if (a[0] === 'array') {
 					return ['array', u.ipush(a[1], b), meta];
-				}
+				} /*else if (a[0] === 'str' && b[0] === 'str') {
+					//return ['str', ]
+				}*/
 			}
 		},
 		'-' : function(p1, p2, meta, e, scope) {
