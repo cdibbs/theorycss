@@ -1,0 +1,8 @@
+namespace website
+  theory main
+    [[div]]
+      is { display: 'block' };
+      [[a]]
+        is { color: 'blue' };
+
+
