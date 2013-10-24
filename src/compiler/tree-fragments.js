@@ -1,7 +1,7 @@
 "use static";
 var u = require('../util').u;	 	
 var LeafDict = require('./leafdict').LeafDict;
-var err = require('./errors').Err;
+var err = require('./errors').err;
 
 /**
  * The TreeFragments class takes care of building an understanding of
@@ -41,7 +41,7 @@ var TreeFragments = function TreeFragments(rootScope) {
 			}
 			return leafDict;
 		} else {
-			throw new err.Unsupported('Syntax unsupported.', ast[3]);
+			throw new err.Unsupported('Syntax unsupported.', ast[0]);
 		}
 	};
 

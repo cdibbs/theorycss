@@ -1,8 +1,10 @@
-namespace website
+namespace Website
   theory main
     [[div]]
       is { display: 'block' };
       [[a]]
         is { color: 'blue' };
+        @bob is { 'font-size' : 12pt };
 
+    bob = 'width > 800px';
 

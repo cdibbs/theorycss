@@ -60,19 +60,27 @@ function LeafDict(nodeId, typeList, isList) {
 		return dicts;
 	};
 	
-	self.dumpTree = function dumpTree() {
-		var stack = [self];
+	self.getTree = function getTree() {
+		// node = { expression : '', contexts : [], children : [] }
+		var tree = { 'media-queries' : {}, root : {} };
+		
+		var stack = [[self, tree.root]];
 		do {
-			var pointer = stack.pop();
+			var pointers = stack.pop();
+			var pointer = pointers[0], node = pointers[1];
 			var children = pointer.getChildren();
-			console.log(pointer.getNodeId());
-			console.log(JSON.stringify(pointer.getStyleDict(), null, 2));
+			node.expression = pointer.getNodeId();
+			node.contexts = pointer.getStyleDict();
+			node.children = [];
 			for(var i=0, l=children.length; i<l; i++) {
 				var child = children[i];
-				stack.push(child);
+				var branch = {};
+				node.children.push(branch);
+				stack.push([child, branch]);
 			}
 			
 		} while (stack.length);
+		return tree;
 	};
 };
 

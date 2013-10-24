@@ -47,7 +47,8 @@ var Compiler = function(opts) {
 		var main = scope.getEntry(); // for now, always a theory
 		if (main.type === 'theory') {
 			var tf = new TreeFrags(scope);
-			return tf.processTree(main[0]);
+			var tfAST = main.val.getEntry().ast;
+			return tf.processTree(tfAST);
 		} else {
 			throw new Error('Unimplemented main entry type.');
 		}
@@ -58,7 +59,9 @@ var Compiler = function(opts) {
 		
 		nsAST[1].forEach(function(symbol) {
 			if (symbol.length >= 3 && symbol[0] === 'theory') {
-				var theoryScope = nsscope.addSymbol(symbol[1], 'theory', self.evalTheory(symbol.slice(1), nsscope));
+				var theoryAST = symbol.slice(1);
+				var theory = self.evalTheory(theoryAST, nsscope)
+				var theoryScope = nsscope.addSymbol(symbol[1], 'theory', theory, theoryAST, true, nsscope);
 				if (symbol[1].toLowerCase() === 'main') {
 					if (! rootScope.hasEntry()) {
 						rootScope.setEntry(theoryScope);
@@ -75,7 +78,10 @@ var Compiler = function(opts) {
 	};
 		
 	self.evalTheory = function evalTheory(theoryAST, nsscope) {
-		var theoryScope = nsscope.createScope('theory', theoryAST[0], theoryAST[1]);
+		var theoryScope = nsscope.createScope('theory', theoryAST[0], theoryAST.slice(2));
+		if (theoryAST[1] != null)
+			throw new Error('Theory inheritance not implemented.');
+		
 		theoryAST[3].forEach(function(tdef) {
 			if (tdef[0] === '=' || tdef[0] === 'ff' || tdef[0] === 'fn' || tdef[0] === '@=') {
 				// for now, lazily evaluate everything. 
@@ -88,7 +94,6 @@ var Compiler = function(opts) {
 		// the treefrag drives compilation; lazily evaluate it.
 		var theoryEntry = theoryScope.addSymbol('__treefrag', 'tf', null, theoryAST[2], true);
 		theoryScope.setEntry(theoryEntry);
-		
 		return theoryScope;
 	};
 	

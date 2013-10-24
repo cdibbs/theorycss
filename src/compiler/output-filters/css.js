@@ -37,12 +37,13 @@ var Css = function Css(options) {
 	 * @returns {String}
 	 */
 	this.filter = function filter(input) {
-		var mediaQueries = input['media-queries'];
+		var tree = input.getTree();
+		var mediaQueries = tree['media-queries'];
 		var mqstr = ['', {}];
 		for (var k in mediaQueries) {
 			mqstr[1][k] = '';
 		}
-		var output = self.renderBranch([], mqstr, input['root'], mediaQueries);
+		var output = self.renderBranch([], mqstr, tree['root'], mediaQueries);
 		
 		// concatenate the different media queries together
 		var outputstring = output[0] + opts.whitespace.newline + nl(1);

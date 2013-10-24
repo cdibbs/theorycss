@@ -11,6 +11,8 @@ exports.Err = function Err() {
 			return msg + srcLocation(meta);
 		};
 	};
+	this.Unsupported.prototype = new Error();
+	
 	this.NotANumber = function(msg, meta) {
 		this.toString = function() {
 			return msg + srcLocation(meta);
@@ -30,5 +32,7 @@ exports.Warn = function Warn() {
 exports.warn = new exports.Warn();
 
 var srcLocation = function(meta) {
-	return " Line:char = " + meta.loc.first_line + ":" + meta.loc.first_column;
+	if (meta && meta.loc && meta.loc.first_line)
+		return " Line:char = " + meta.loc.first_line + ":" + meta.loc.first_column;
+	else return "";
 };
