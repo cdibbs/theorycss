@@ -3,8 +3,10 @@ namespace Website
     [[div]]
       is { display: 'block' };
       [[a]]
-        is { color: 'blue' };
+        is { color: 'blue' }, alex(5,7);
         @bob is { 'font-size' : 12pt };
 
     bob = 'width > 800px';
+
+    fn alex(a,b) -> { 'background-color' : 'rgba(' + (a*b) + ',' + (b-a) + ',' + (b**a) + ')' };
 

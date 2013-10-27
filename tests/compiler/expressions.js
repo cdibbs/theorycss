@@ -28,6 +28,8 @@ var src =
 	+ "    bitwise = (0x123 & 255) | 256;\n"
 	+ "    dictadd = { abc : '123', cde : '456', 'key' : 'value' } + { fgh : '789', 'abc' : 999 };\n"
 	+ "    dictsub = { abc : '123', cde : '456'} - { 'cde' : 456 };\n"
+	+ "    strconcat = 'rgba(' + (7*5) + ')';\n"
+	+ "    strmult = 'abc' * 5;\n"
 	+ "    dictsubarr = { abc : '123', cde : '456', efg : 789 } - ['cde', 'abc'];\n"
 	+ "    arrsubarr = [123, 456, 789] - [456, 789];\n"
 	+ "    arrplusarr = [123, 456] + [789];\n"
@@ -179,6 +181,20 @@ vows.describe("Expressions class").addBatch({
 					efg : 789
 				});
 			}
+		},
+		'string concatenation' : {
+			topic : function(expr) { return expr.evaluate(ast.resolve('strconcat').ast[0], ast) || "ERROR"; },
+			
+			'we get the concatenated result' : function(topic) {
+				assert.equal(topic, 'rgba(35)');
+			}
+		},
+		'string multiplication' : {
+			topic : function(expr) { return expr.evaluate(ast.resolve('strmult').ast[0], ast) || "ERROR"; },
+			
+			'we get the concatenated result' : function(topic) {
+				assert.equal('abcabcabcabcabc', topic);
+			}			
 		},
 		'array minus an array' : {
 			topic : ast.resolve("arrsubarr").ast[0],

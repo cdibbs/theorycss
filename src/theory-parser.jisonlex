@@ -70,12 +70,12 @@ units						(?:[a-zA-Z][a-zA-Z0-9]*|\%)
 "+"				return 'PLUS';
 "-"				return 'MINUS';
 ({float})"_"?({units})		%{
-						yytext = { type: 'fl_', val: parseFloat(yy.lexer.matches[1]), units: yy.lexer.matches[4] };
+						yytext = { type: 'fl_', val: parseFloat(yy.lexer.matches[1]), units: yy.lexer.matches[4], toString : function() { return this.val + this.units; } };
 						return 'FLOAT_UNITS';
 						%};
 {float}			%{ yytext = parseFloat(yytext); return 'FLOAT'; %};
 "0x"({hex})			%{ yytext = parseInt(yy.lexer.matches[1], 16); return 'HEXNATLITERAL'; %};
-({int})"_"?({units})	%{ yytext = { type: 'int_', val : parseInt(yy.lexer.matches[1]), units: yy.lexer.matches[4] }; return 'INT_UNITS'; %};
+({int})"_"?({units})	%{ yytext = { type: 'int_', val : parseInt(yy.lexer.matches[1]), units: yy.lexer.matches[4], toString : function() { return this.val + this.units; } }; return 'INT_UNITS'; %};
 {int}				%{ yytext = parseInt(yytext); return 'INTEGER'; %};
 ({bin})"b"			%{ yytext = parseInt(yy.lexer.matches[1], 2); return 'BINNATLITERAL'; %};
 "#"({hex})			%{ yytext = parseInt(yy.lexer.matches[1]); return 'HEXCOLOR'; %};

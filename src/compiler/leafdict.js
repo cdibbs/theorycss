@@ -11,6 +11,7 @@ var u = require('../util').u,
 function LeafDict(nodeId, typeList, isList) {
 	var self = this;
 	var css = [];
+	var mq = {};
 	var children = [];
 	
 	self.genCSSProperties = function genCSSProperties(scope) {
@@ -18,6 +19,7 @@ function LeafDict(nodeId, typeList, isList) {
 		isList.every(function(isdef) {
 			css.push(
 					{ media : isdef[1],
+					  mediaString : isdef[1] ? self.evalMediaQuery(isdef[1], scope) : null,
 					  pseudoEl : isdef[3],
 					  dictionaries : self.evalDefList(isdef[2], scope)
 					});
@@ -28,6 +30,7 @@ function LeafDict(nodeId, typeList, isList) {
 	};
 	
 	self.getNodeId = function getNodeId() { return nodeId; };
+	self.getMediaQueries = function getMediaQueries() { return mq; };
 	
 	self.addChild = function addChild(leafDict) {
 		children.push(leafDict);
@@ -36,6 +39,11 @@ function LeafDict(nodeId, typeList, isList) {
 	self.getChildren = function getChildren() { return children; };
 	
 	self.getStyleDict = function() { return css; };
+	
+	self.evalMediaQuery = function(mq, scope) {
+		return new Expressions()
+			.evaluate(['id', mq], scope, false);
+	};
 	
 	/**
 	 * Within an 'is' definition, evaluates the array of expressions.
@@ -62,7 +70,10 @@ function LeafDict(nodeId, typeList, isList) {
 	
 	self.getTree = function getTree() {
 		// node = { expression : '', contexts : [], children : [] }
-		var tree = { 'media-queries' : {}, root : {} };
+		var tree = {
+				// TODO: add meta data about this file
+				root : { }
+		};
 		
 		var stack = [[self, tree.root]];
 		do {

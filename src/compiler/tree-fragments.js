@@ -16,7 +16,8 @@ var TreeFragments = function TreeFragments(rootScope) {
 		var stack = [root];
 		do {
 			var pointer = stack.pop();
-			pointer.genCSSProperties(rootScope);
+			var scope = rootScope.getEntry().val;
+			pointer.genCSSProperties(scope);
 			var children = pointer.getChildren();
 			for(var i=0, l=children.length; i<l; i++) {
 				var child = children[i];

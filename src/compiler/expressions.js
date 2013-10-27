@@ -40,7 +40,7 @@ var Expressions = function Expressions() {
 	};
 	
 	self.getString = function(p) {
-		return typeof p === 'string' ? p : p[1];
+		return typeof p === 'string' ? p : (typeof p === 'number' ? p : p[1]);
 	};
 	
 	self.hasUnits = function hasUnits(a) {
@@ -162,9 +162,9 @@ var Expressions = function Expressions() {
 			if (self.isNumber(a) && self.isNumber(b)) {
 				return self.genericNumericOp(a, b, meta, e, scope, '*');
 			} else if (self.isString(a) && self.isNumber(b)) {
-				return (new Array(self.getNumber(b))).join(self.getString(a));
+				return (new Array(self.getNumber(b) + 1)).join(self.getString(a));
 			} else if (self.isString(b) && self.isNumber(a)) {
-				return (new Array(self.getNumber(a))).join(self.getString(b));
+				return (new Array(self.getNumber(a) + 1)).join(self.getString(b));
 			}
 		},
 		'+' : function(p1, p2, meta, e, scope) {
@@ -184,6 +184,8 @@ var Expressions = function Expressions() {
 				} /*else if (a[0] === 'str' && b[0] === 'str') {
 					//return ['str', ]
 				}*/
+			} else if (self.isString(a) || self.isString(b)) {
+				return self.getString(a) + self.getString(b);
 			}
 		},
 		'-' : function(p1, p2, meta, e, scope) {

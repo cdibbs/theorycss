@@ -17,11 +17,11 @@ var Css = function Css(options) {
 	/**
 	 * Take input of the form:
 	 * {
-	 *   media-queries: { query1: {}, query2: {}, ... },   
-	 *   root: {
+	 *   root: {   
 	 * 	   expression : 'div',
 	 *     contexts : [ {
 	 *       media: (key in media-queries),
+	 *       mediaString: "...",
 	 *       pseudoEl: (e.g., ':visited', ':hover', etc),
 	 *       dictionaries: [
 	 *         ['dict', { 'rule' : 'value', ...}, { loc: { first_line: n, ... } }],
@@ -48,7 +48,7 @@ var Css = function Css(options) {
 		// concatenate the different media queries together
 		var outputstring = output[0] + opts.whitespace.newline + nl(1);
 		for(var mq in output[1]) {
-			outputstring += '@media' + space(1) + '(' + mediaQueries[mq] + ')' + space(1) + '{' + nl(1);
+			outputstring += '@media' + space(1) + '(' + mq + ')' + space(1) + '{' + nl(1);
 			outputstring += output[1][mq] + nl(1);
 			outputstring += "}" + nl(1);
 		}
@@ -74,7 +74,7 @@ var Css = function Css(options) {
 	};	
 	
 	this.renderContext = function renderContext(ancestors, output, expr, context) {
-		var media = context.media;
+		var media = context.mediaString;
 		var pseudoEl = context.pseudoEl;
 		var cssDicts = context.dictionaries;
 		

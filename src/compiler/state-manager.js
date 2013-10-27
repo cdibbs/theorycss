@@ -11,7 +11,7 @@ function StateManager(type, name, _ast, parentScope) {
 		return scope;
 	};
 	self.addSymbol = function(id, type, val, ast, lazy, scope) {
-		stack[id] = { val : val, ast : ast, lazy : lazy, type : type, scope : scope };
+		stack[id] = { id : id, val : val, ast : ast, lazy : lazy, type : type, scope : scope };
 		return stack[id];
 	};
 	self.resolve = function(id) {
@@ -29,6 +29,7 @@ function StateManager(type, name, _ast, parentScope) {
 	self.hasEntry = function() { return self.entry != null; };
 	self.getEntry = function() { return self.entry; };
 	self.getAST = function() { return _ast; };
+	self.getName = function() { return name; };
 	self.getOutput = function() { return output; };		
 	self.getParentScope = function() {  return parentScope; };
 	self.dump = function() {
