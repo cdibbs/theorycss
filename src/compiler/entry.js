@@ -48,7 +48,8 @@ var Compiler = function(opts) {
 		if (main.type === 'theory') {
 			var tf = new TreeFrags(scope);
 			var tfAST = main.val.getEntry().ast;
-			return tf.processTree(tfAST);
+			var leafDict = tf.processTree(tfAST);
+			return leafDict.getTree();
 		} else {
 			throw new Error('Unimplemented main entry type.');
 		}

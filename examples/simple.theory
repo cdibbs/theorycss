@@ -2,11 +2,17 @@ namespace Website
   theory main
     [[div]]
       is { display: 'block' };
-      [[a]]
+      [[#ident]]
         is { color: 'blue' }, alex(5,7);
         @bob is { 'font-size' : 12pt };
+      [[child :: nother]]
 
     bob = 'width > 800px';
 
     fn alex(a,b) -> { 'background-color' : 'rgba(' + (a*b) + ',' + (b-a) + ',' + (b**a) + ')' };
+
+  theory nother
+    [[notherDiv]]
+      is { 'line-height' : 9px };
+
 

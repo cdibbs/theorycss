@@ -36,8 +36,7 @@ var Css = function Css(options) {
 	 * @param input
 	 * @returns {String}
 	 */
-	this.filter = function filter(input) {
-		var tree = input.getTree();
+	this.filter = function filter(tree) {
 		var mediaQueries = tree['media-queries'];
 		var mqstr = ['', {}];
 		for (var k in mediaQueries) {
@@ -80,7 +79,7 @@ var Css = function Css(options) {
 		
 		var o = output[0], n = opts.whitespace.n, bn = 0;
 		if (media) {
-			o = output[1][media];
+			o = output[1][media] || '';
 			bn = n;
 			n = n * 2;
 		}
@@ -99,7 +98,7 @@ var Css = function Css(options) {
 			return expr;
 		} else {
 			var id = expr;
-			for(var i=ancestors.length-1; i>0; i--) {
+			for(var i=ancestors.length-1; i>=0; i--) {
 				id = id + ' ' + ancestors[i];
 				if (ancestors[i].substr(0, 1) === '#') {
 					break;

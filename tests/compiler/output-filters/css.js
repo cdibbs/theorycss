@@ -37,7 +37,7 @@ vows.describe("CSS Output Filter").addBatch({
 			
 			'and produces correctly-formed css' : function(err, result) {
 				var expected = 'div {\n  background-color: red;\n  font-size: 12pt;\n  display: block;\n  -moz-box-shadow: 3px 3px 3px rgba(0,0,0,0.5);\n}\n\n\n';
-				assert.equal(expected, result);
+				assert.equal(result, expected);
 			}
 		},
 		
@@ -108,6 +108,7 @@ vows.describe("CSS Output Filter").addBatch({
 									contexts : [
 										{
 											media : 'small',
+											mediaString : 'width < 640px',
 											pseudoEl : null,
 											dictionaries : [
 												['dict', { 'display' : 'block' }, {}],
@@ -129,7 +130,7 @@ vows.describe("CSS Output Filter").addBatch({
 			
 			'and produces correctly-formed css' : function(err, result) {
 				var expected = 'div {\n  background-color: red;\n  font-size: 12pt;\n}\n\n\n@media (width < 640px) {\n  #myel {\n    display: block;\n    -moz-box-shadow: 3px 3px 3px rgba(0,0,0,0.5);\n  }\n\n}\n';
-				assert.equal(expected, result);
+				assert.equal(result, expected);
 			}
 		},
 	}
