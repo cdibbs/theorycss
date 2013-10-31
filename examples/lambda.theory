@@ -1,10 +1,15 @@
 namespace Website
-	theory Chris
-		[[lets.begin.witha.tf]]	
+	theory Main
+		[[lets.begin.witha.tf]]
+			is final;
+
 	
 		verbose_name = { my : 1, cool : 2, friends : '3' };
 		verbose_name' = (within verbose_name:
 			\x, y => (x + my) * (y + cool) * friends);
+
+		final = { 'background-color' : verbose_name'()(1,2) };
+
 		fn dostuff() -> if (within verbose_name:
 					my == 1 && cool == 2 || friends == 3)
 				then stuff()

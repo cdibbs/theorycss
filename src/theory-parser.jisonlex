@@ -1,4 +1,10 @@
 id							[a-zA-Z][a-zA-Z0-9_']*
+nonascii					[\240-\377]
+unicode						\\{h}{1,6}
+escape						{unicode}|\\[^\r\n\f0-9a-f]
+did_start					[_a-z]|{nonascii}|{escape}
+did_char					[_a-z0-9-]|{nonascii}|{escape}
+dict_id						"-"?{did_start}{did_char}*
 int                         (?:[1-9][0-9]+|[0-9])
 exp                         (?:[eE][-+]?[0-9]+)
 hex							[0-9A-Fa-f]+
@@ -156,6 +162,7 @@ units						(?:[a-zA-Z][a-zA-Z0-9]*|\%)
 "is"			return 'IS';
 "null"			return 'NULL';
 {id}			return 'ID';
+{dict_id}		return 'DICT_ID';
 {str}			yytext = yytext.substr(1,yyleng-2); return 'STRING_LIT';
 "."				return 'DOT';
 \s*<<EOF>>		%{

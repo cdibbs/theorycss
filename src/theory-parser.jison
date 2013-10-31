@@ -608,6 +608,7 @@ dictdef
 
 ddatom
 	: id
+	| DICT_ID
 	| number
 	| STRING_LIT
 	;

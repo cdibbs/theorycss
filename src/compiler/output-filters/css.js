@@ -37,6 +37,10 @@ var Css = function Css(options) {
 	 * @returns {String}
 	 */
 	this.filter = function filter(tree) {
+		console.log(tree);
+		if (!tree['root'])
+			return '';
+		
 		var mediaQueries = tree['media-queries'];
 		var mqstr = ['', {}];
 		for (var k in mediaQueries) {
