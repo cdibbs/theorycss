@@ -3,10 +3,14 @@ var u = require('../util').u,
 	err = require('./errors').err,
 	warn = require('./errors').warn;
 	 	
-var Expressions = function Expressions() {
+var Expressions = function Expressions(stack) {
 	var self = this;
+	var stack = stack || [];
 	
 	self.evaluate = function(ast, scope, lazy) {
+		if (ast[0] === '()')
+			console.log(ast);
+			
 		if (ast instanceof Array && ast.length > 0) {
 			if (typeof self.ops[ast[0]] !== 'undefined') {
 				var params = u.ipush(ast.slice(1), self.evaluate, scope, ast[0], lazy);
@@ -85,6 +89,7 @@ var Expressions = function Expressions() {
 		'str' : function(p1, e) { return p1; },
 		'id' : function(id, e, scope, lazy) {
 			var val = scope.resolve(id);
+			//console.log(id, " resolved as ", val)
 			if (val.type === 'fn')
 				return val;
 			
@@ -102,6 +107,7 @@ var Expressions = function Expressions() {
 		},
 		'()' : function(fn, args, meta, e, scope, lazy) {
 			var fndef = e(fn, scope);
+			console.log(fn, fndef, meta);
 			if (typeof fndef === 'object' && fndef.type === 'fn') {
 				var params = fndef.ast[0];
 				if (args.length > params.length)
@@ -113,7 +119,6 @@ var Expressions = function Expressions() {
 				var result = e(fndef.ast[2], fnscope, lazy);
 				return result;
 			} else {
-				console.log(typeof fndef, fndef);
 				throw new Error("Not sure what's going on, here.");
 			}
 		},
@@ -127,7 +132,7 @@ var Expressions = function Expressions() {
 			// 3. return the final 'tuple' from the frag function			
 		},
 		'lambda' : function(paramlist, meta, expr, e, scope) {
-			return { type : 'fn', ast : [paramlist, null, expr], val : null, lazy : true };
+			return { type : 'fn', ast : [paramlist, null, expr], val : null, lazy : true, scope : scope };
 		},
 		'test' : function(condList, meta, e, scope) {
 			for (var i=0, l=condList.length; i<l; i++) {

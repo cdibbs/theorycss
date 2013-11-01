@@ -39,7 +39,9 @@ var src =
 	+ "    fn unitsnvars(x) -> 12pt * x;\n"
 	+ "    rununitsfn = unitsnvars(5);\n"
 	+ "    fn mylazy(x) -> { bob : x * 12pt };\n"
-	+ "    unlazy = within mylazy(5): bob;"
+	+ "    unlazy = within mylazy(5): bob;\n"
+	+ "    simplelambda = \\x, y => x * y;\n"
+	+ "    evallambda = simplelambda(5,3);\n"
 	+ "\n\n";
 var ast = new Compiler().compile(parser.parse(src), true)
 	.resolve("Website").val
@@ -222,6 +224,13 @@ vows.describe("Expressions class").addBatch({
 			
 			'we get the expected, fully-computed value' : function(topic) {
 				assert.deepEqual(topic, { type : 'int_', val: 60, units: 'pt' });
+			}
+		},
+		'evaluate a lambda' : {
+			topic : function(expr) { return expr.evaluate(ast.resolve("evallambda").ast[0], ast); },
+			
+			"we get the result of calling the lambda" : function(topic) {
+				assert.equal(topic, 15);
 			}
 		}
 	}
