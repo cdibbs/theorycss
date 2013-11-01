@@ -8,8 +8,8 @@ var Expressions = function Expressions(stack) {
 	var stack = stack || [];
 	
 	self.evaluate = function(ast, scope, lazy) {
-		if (ast[0] === '()')
-			console.log(ast);
+		/*if (ast[0] === '()')
+			console.log(ast);*/
 			
 		if (ast instanceof Array && ast.length > 0) {
 			if (typeof self.ops[ast[0]] !== 'undefined') {
@@ -45,6 +45,13 @@ var Expressions = function Expressions(stack) {
 	
 	self.getString = function(p) {
 		return typeof p === 'string' ? p : (typeof p === 'number' ? p : p[1]);
+	};
+	
+	self.getName = function(p) {
+		if (p instanceof Array && p.length) {
+			if (p[0] === 'id') return p[1];
+			else return "NAME" + p[1];
+		} else return false;
 	};
 	
 	self.hasUnits = function hasUnits(a) {
@@ -107,15 +114,18 @@ var Expressions = function Expressions(stack) {
 		},
 		'()' : function(fn, args, meta, e, scope, lazy) {
 			var fndef = e(fn, scope);
-			console.log(fn, fndef, meta);
+			//console.log(fn, fndef, meta);
+			//console.log('calling function... ', fn, fndef);
 			if (typeof fndef === 'object' && fndef.type === 'fn') {
+				var scope = fndef.scope || scope;
 				var params = fndef.ast[0];
 				if (args.length > params.length)
 					throw new Error('Too many arguments');
-				var fnscope = scope.createScope('fn', 'function', [fn, args]);
+				var fnscope = scope.createScope('fn', self.getName(fn) || 'anonymous', [fn, args]);
 				for(var i=0, l=args.length; i<l; i++) {
 					fnscope.addSymbol(params[i], 'param', null, [args[i]], true, scope);
 				}
+				fnscope.dump();
 				var result = e(fndef.ast[2], fnscope, lazy);
 				return result;
 			} else {
@@ -131,7 +141,7 @@ var Expressions = function Expressions(stack) {
 			// 2. use the node referenced by 'this' to begin processing the treefrag
 			// 3. return the final 'tuple' from the frag function			
 		},
-		'lambda' : function(paramlist, meta, expr, e, scope) {
+		'lambda' : function(paramlist, expr, meta, e, scope) {
 			return { type : 'fn', ast : [paramlist, null, expr], val : null, lazy : true, scope : scope };
 		},
 		'test' : function(condList, meta, e, scope) {
@@ -142,7 +152,7 @@ var Expressions = function Expressions(stack) {
 			}
 		},
 		'within' : function(dictexpr, wexpr, meta, e, scope, lazy) {
-			var wscope = scope.createScope('within', 'within', [wexpr, dictexpr]);
+			var wscope = scope.createScope('within', 'within:' + self.getName(dictexpr), [wexpr, dictexpr]);
 			// TODO need to filter/modify keys that don't conform to variable name rules
 			var dict = e(dictexpr, scope, lazy);
 			if (dict[0] !== 'dict')
@@ -216,6 +226,18 @@ var Expressions = function Expressions(stack) {
 						}
 					}
 					return c;
+				} else if (a[0] === 'array' && b[0] === 'array') {
+					var tmp = {}, result = u.clone(a);
+					result[1] = [];
+					
+					// o(2n)
+					for(var i=0, l=b[1].length; i<l; i++) { tmp[b[1][i]] = true; }
+					for(var i=0, l=a[1].length; i<l; i++) {
+						if (! tmp[a[1][i]]) {
+							result[1].push(a[1][i]);
+						}
+					}
+					return result;
 				} else {
 					throw new Error("Operation not valid for data types " + a[0] + " and " + b[0]);
 				}
@@ -226,6 +248,12 @@ var Expressions = function Expressions(stack) {
 				obj[key] = e(obj[key], scope, lazy);
 			}
 			return ['dict', obj, meta];
+		},
+		'array' : function(arr, meta, e, scope, lazy) {
+			for(var i=0, l=arr.length; i<l; i++) {
+				arr[i] = e(arr[i], scope, lazy);
+			}
+			return ['array', arr, meta];
 		},
 		'/' : self.genericNumericOp,
 		'<<' : self.genericNumericOp,

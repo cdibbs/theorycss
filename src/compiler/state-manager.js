@@ -2,7 +2,7 @@
 
 function StateManager(type, name, _ast, parentScope) {
 	var self = this;
-	var stack = [];
+	var variables = [];
 	var entry = null;
 	var output = "";
 		
@@ -11,11 +11,11 @@ function StateManager(type, name, _ast, parentScope) {
 		return scope;
 	};
 	self.addSymbol = function(id, type, val, ast, lazy, scope) {
-		stack[id] = { id : id, val : val, ast : ast, lazy : lazy, type : type, scope : scope };
-		return stack[id];
+		variables[id] = { id : id, val : val, ast : ast, lazy : lazy, type : type, scope : scope };
+		return variables[id];
 	};
 	self.resolve = function(id) {
-		if (typeof stack[id] === 'undefined') {
+		if (typeof variables[id] === 'undefined') {
 			if (parentScope) {
 				return parentScope.resolve(id);
 			} else {
@@ -23,7 +23,7 @@ function StateManager(type, name, _ast, parentScope) {
 			}
 		}
 		
-		return stack[id];
+		return variables[id];
 	};
 	self.setEntry = function(scope) { self.entry = scope;	};
 	self.hasEntry = function() { return self.entry != null; };
@@ -32,12 +32,19 @@ function StateManager(type, name, _ast, parentScope) {
 	self.getName = function() { return name; };
 	self.getOutput = function() { return output; };		
 	self.getParentScope = function() {  return parentScope; };
+	self.getVariables = function() { return variables; };
 	self.dump = function() {
-		var keys = Object.keys(stack);
-		console.log("keys " + keys.length);
-		for (var i=0; i<keys.length; i++) {
-			console.log(keys[i]);
+		var scopeTree = {};
+		pointer = self;
+		while (pointer) {
+			for(var key in scopeTree) {
+				scopeTree[pointer.getName() + '/' + key] = scopeTree[key];
+				delete scopeTree[key];
+			} 
+			scopeTree[pointer.getName()] = Object.keys(pointer.getVariables());
+			var pointer = pointer.getParentScope();
 		}
+		console.log(scopeTree);
 	};
 }
 
