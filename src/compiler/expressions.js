@@ -44,7 +44,7 @@ var Expressions = function Expressions(stack) {
 	};
 	
 	self.getString = function(p) {
-		return typeof p === 'string' ? p : (typeof p === 'number' ? p : p[1]);
+		return typeof p === 'string' ? p : (typeof p === 'number' ? p : 'p[1]');
 	};
 	
 	self.getName = function(p) {
@@ -80,28 +80,29 @@ var Expressions = function Expressions(stack) {
 			}
 			if (self.hasUnits(a) || self.hasUnits(b)) {
 				if ((self.hasUnits(a) && self.hasUnits(b)) && a.units !== b.units)
-					warn.IncompatibleUnits('Arithmetic with unequal units', meta);
+					warn.IncompatibleUnits('Arithmetic with unequal units', meta, scope);
 				
 				return { type : a.type || b.type, val : answer, units : a.units || b.units };
 			} else {
 				return answer;
 			}
 		} else {
-			throw new err.NotANumber('Not a number', meta);
+			throw new err.NotANumber('Not a number', meta, scope);
 		}
 	};
 	
 	self.ops = {
 		'num' : function(p1, e) { return p1; },
 		'str' : function(p1, e) { return p1; },
-		'id' : function(id, e, scope, lazy) {
+		'id' : function(id, meta, e, scope, lazy) {
 			var val = scope.resolve(id);
 			//console.log(id, " resolved as ", val)
 			if (val.type === 'fn')
 				return val;
 			
-			if (val['undefined'] === 'undefined')
-				throw new Error('Variable ' + id + ' undefined');
+			if (val['undefined'] === 'undefined') {
+				throw new err.Undefined('Variable ' + id + ' undefined', meta, scope);
+			}
 				
 			if (val.val == null && val.ast) {
 				if (val.scope) { // if the variable has a scope assoc with it, use that
@@ -114,18 +115,15 @@ var Expressions = function Expressions(stack) {
 		},
 		'()' : function(fn, args, meta, e, scope, lazy) {
 			var fndef = e(fn, scope);
-			//console.log(fn, fndef, meta);
-			//console.log('calling function... ', fn, fndef);
 			if (typeof fndef === 'object' && fndef.type === 'fn') {
 				var scope = fndef.scope || scope;
 				var params = fndef.ast[0];
 				if (args.length > params.length)
 					throw new Error('Too many arguments');
-				var fnscope = scope.createScope('fn', self.getName(fn) || 'anonymous', [fn, args]);
+				var fnscope = scope.createScope('fn', self.getName(fn) || 'anonymous', [fn, args], meta);
 				for(var i=0, l=args.length; i<l; i++) {
 					fnscope.addSymbol(params[i], 'param', null, [args[i]], true, scope);
 				}
-				fnscope.dump();
 				var result = e(fndef.ast[2], fnscope, lazy);
 				return result;
 			} else {
@@ -133,7 +131,7 @@ var Expressions = function Expressions(stack) {
 			}
 		},
 		'ff' : function(id, paramlist, actionblock, meta, e, scope) {
-			throw new err.UsageError("Frag functions cannot be used within expressions.", meta);
+			throw new err.UsageError("Frag functions cannot be used within expressions.", meta, scope);
 			// TODO: actually, they can be. They can return a dictionary (tuple with named values)
 			// in their last yield. Those values could be meaningfully used within an outer expression.
 			
@@ -152,11 +150,11 @@ var Expressions = function Expressions(stack) {
 			}
 		},
 		'within' : function(dictexpr, wexpr, meta, e, scope, lazy) {
-			var wscope = scope.createScope('within', 'within:' + self.getName(dictexpr), [wexpr, dictexpr]);
+			var wscope = scope.createScope('within', 'within:' + self.getName(dictexpr), [wexpr, dictexpr], meta);
 			// TODO need to filter/modify keys that don't conform to variable name rules
 			var dict = e(dictexpr, scope, lazy);
 			if (dict[0] !== 'dict')
-				throw new err.UsageError('Not a dictionary.', meta);
+				throw new err.UsageError('Not a dictionary.', meta, scope);
 			
 			var vars = Object.keys(dict[1]);
 			for(var i=0, l=vars.length; i<l; i++) {
@@ -239,7 +237,7 @@ var Expressions = function Expressions(stack) {
 					}
 					return result;
 				} else {
-					throw new Error("Operation not valid for data types " + a[0] + " and " + b[0]);
+					throw new err.UsageError("Operation not valid for data types " + a[0] + " and " + b[0], meta, scope);
 				}
 			}
 		},

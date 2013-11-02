@@ -1,28 +1,74 @@
 "use strict";
 
 exports.Err = function Err() {
-	this.UsageError = function(msg, meta) {
-		this.level = Err;
-		this.toString = function() { return msg; };
-	};
-	this.Unsupported = function(msg, meta) {
-		this.level = Err;
-		this.toString = function() {
-			return msg + srcLocation(meta);
-		};
-	};
-	this.Unsupported.prototype = new Error();
+	var self = this;
 	
-	this.NotANumber = function(msg, meta) {
-		this.toString = function() {
-			return msg + srcLocation(meta);
+	function baseError(msg, meta, scope) {
+		var sample = "", line = "", errMeta = meta;
+		
+		this.isKnown = true;
+		this.setSrcSample = function(src) {
+			var lines = src.split('\n');
+			line = lines[errMeta.loc.first_line - 1];
+			sample = line.substr(errMeta.loc.first_column, errMeta.loc.last_column - errMeta.loc.first_column);
+			line = line.trim();
 		};
+		this.toString = function() {
+			var m = "Error: " + msg + "\n";
+			m = m + "Location: line " + errMeta.loc.first_line + ", column " + errMeta.loc.first_column + "\n";
+			try { // if we can
+				if (sample)
+					m = m + "Token: " + sample + "\n";
+				if (line)
+					m = m + "Line: " + line + "\n";
+					
+				m = m + "Stack trace:\n";
+				var p = scope, n;
+				while (p != null && (n = p.getName()) !== 'prog') {
+					var meta = p.getMeta();
+					m = m + "  at " + p.getType() + " " + n + " (line "
+						+ (meta && meta.loc ? meta.loc.first_line + ":" + meta.loc.first_column : "") + ")\n";
+					p = p.getParentScope();
+				}
+			} catch(ex) { throw ex; }
+			return m;
+		};
+		baseError.prototype = new Error(msg);
+	};	
+	
+	self.Error = function(msg, meta, scope) {
+		var base = new baseError(msg, meta, scope);
+		return base;
+	};
+		
+	self.UsageError = function(msg, meta, scope) {
+		var base = new baseError(msg, meta, scope);
+		return base;
+	};
+	
+	self.Unsupported = function(msg, meta, scope) {
+		var base = new baseError(msg, meta, scope);
+		return base;;
+	};
+	
+	self.Undefined = function Undefined(msg, meta, scope) {
+		var base = new baseError(msg, meta, scope);
+		return base;
+	};
+	
+	self.NotANumber = function(msg, meta, scope) {
+		var base = new baseError(msg, meta, scope);
+		return base;
+	};
+	self.InternalError = function(msg, meta, scope) {
+		var base = new baseError(msg, meta, scope);
+		return base;
 	};
 };
 exports.err = new exports.Err();
 
 exports.Warn = function Warn() {
-	this.IncompatibleUnits = function(msg, meta) {
+	this.IncompatibleUnits = function(msg, meta, scope) {
 		this.level = Warn;
 		this.toString = function() {
 			return msg + srcLocation(meta);

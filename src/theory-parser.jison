@@ -14,7 +14,7 @@ file
 	
 namespace
 	: PREFIX id INDENT namespace_def DEDENT
-	{ $$ = ['ns', $id, $namespace_def]; }
+	{ $$ = ['ns', $id, $namespace_def, { loc : @$ }]; }
 	;
 	
 namespace_def
@@ -327,7 +327,7 @@ atom
 	| THIS
 		{ $$ = ['this']; }
 	| id
-		{ $$ = ['id', $1]; }
+		{ $$ = ['id', $1, { loc : @$ } ]; }
 	;	
 
 complex_atom

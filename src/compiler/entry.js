@@ -3,6 +3,7 @@ var _ = require("underscore");
 var Expressions = require('./expressions').Expressions;
 var StateManager = require('./state-manager').StateManager;
 var TreeFrags = require('./tree-fragments').TreeFragments;
+var err = require('./errors').err;
 var debugMode = true;
 
 var defaultOptions = {
@@ -21,23 +22,34 @@ var Compiler = function(opts) {
  	 * @param {Array} ast - the abstract syntax tree to compile
 	 * @param {Boolean} pp - true = preprocess only; builds and returns root scope
 	 */
-	self.compile = function(ast, pp) {
+	self.compile = function(ast, compileOpts) {
 		rootScope = new StateManager('prog', 'prog');
 		
 		if (ast instanceof Array && ast.length > 0) {
-			if (ast[0] === 'program') {
-				var namespaces = ast[1];
-				namespaces.forEach(function(ns) {
-					rootScope.addSymbol(ns[1], 'ns', self.evalNamespace(ns.slice(1), rootScope));
-				});
-				
-				// if a main theory was found, go ahead and generate the CSS, else return the rootScope.
-				if (rootScope.hasEntry() && !pp) { 
-					return self.evalMain(rootScope);
-				} else {
-					return rootScope;
+			try {
+				if (ast[0] === 'program') {
+					var namespaces = ast[1];
+					namespaces.forEach(function(ns) {
+						rootScope.addSymbol(ns[1], 'ns', self.evalNamespace(ns.slice(1), rootScope));
+					});
+					
+					// if a main theory was found, go ahead and generate the CSS, else return the rootScope.
+					if (rootScope.hasEntry() && !compileOpts.pp) { 
+							return self.evalMain(rootScope);
+					} else {
+						return rootScope;
+					}
 				}
+			} catch(ex) {
+				if (! ex.isKnown) {
+					throw ex;
+				}
+				if (compileOpts.src) {
+					ex.setSrcSample(compileOpts.src);
+				}
+				throw ex;
 			}
+
 		}
 		
 		return rootScope;
@@ -56,12 +68,12 @@ var Compiler = function(opts) {
 	};
 	
 	self.evalNamespace = function evalNamespace(nsAST, scope) {
-		var nsscope = scope.createScope('ns', nsAST[0], nsAST[1]);
+		var nsscope = scope.createScope('ns', nsAST[0], nsAST[1], nsAST[2]);
 		
 		nsAST[1].forEach(function(symbol) {
 			if (symbol.length >= 3 && symbol[0] === 'theory') {
 				var theoryAST = symbol.slice(1);
-				var theory = self.evalTheory(theoryAST, nsscope)
+				var theory = self.evalTheory(theoryAST, nsscope);
 				var theoryScope = nsscope.addSymbol(symbol[1], 'theory', theory, theoryAST, true, nsscope);
 				if (symbol[1].toLowerCase() === 'main') {
 					if (! rootScope.hasEntry()) {
@@ -79,7 +91,7 @@ var Compiler = function(opts) {
 	};
 		
 	self.evalTheory = function evalTheory(theoryAST, nsscope) {
-		var theoryScope = nsscope.createScope('theory', theoryAST[0], theoryAST.slice(2));
+		var theoryScope = nsscope.createScope('theory', theoryAST[0], theoryAST.slice(2), theoryAST[4]);
 		if (theoryAST[1] != null)
 			throw new Error('Theory inheritance not implemented.');
 		
@@ -100,6 +112,8 @@ var Compiler = function(opts) {
 	
 	self.evaluateExpression = new Expressions().evaluate;
 };
+
+function err() { console.log.apply(this, arguments); };
 
 function debug() { if (debugMode) console.log.apply(this, arguments); }
 

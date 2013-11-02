@@ -1,13 +1,13 @@
 "use strict";
 
-function StateManager(type, name, _ast, parentScope) {
+function StateManager(type, name, _ast, parentScope, meta) {
 	var self = this;
 	var variables = [];
 	var entry = null;
 	var output = "";
 		
-	self.createScope = function(type, name, ast) {
-		var scope = new StateManager(type, name, ast, self);
+	self.createScope = function(type, name, ast, meta) {
+		var scope = new StateManager(type, name, ast, self, meta);
 		return scope;
 	};
 	self.addSymbol = function(id, type, val, ast, lazy, scope) {
@@ -30,8 +30,10 @@ function StateManager(type, name, _ast, parentScope) {
 	self.getEntry = function() { return self.entry; };
 	self.getAST = function() { return _ast; };
 	self.getName = function() { return name; };
+	self.getType = function() { return type; };
 	self.getOutput = function() { return output; };		
 	self.getParentScope = function() {  return parentScope; };
+	self.getMeta = function() { return meta; };
 	self.getVariables = function() { return variables; };
 	self.dump = function() {
 		var scopeTree = {};

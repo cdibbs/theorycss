@@ -45,14 +45,14 @@ var tests = [
 		function(topic) { assert.equal(topic, 48); }],
 	["withinlambda",
 		"\n    fn givewithin(dict) -> within dict: \\x,y => x * y * knownkey;\n    withinlambda = givewithin({knownkey:3})(2,4);\n",
-		function(topic) { assert.equal(topic, 749); }],
-	/*["",
+		function(topic) { assert.equal(topic, 24); }],
+	["final",
 		"\n    verbose_name = { my : 1, cool : 2, friends : '3' };\n"
 		+ "    verbose_name' = (within verbose_name:\n"
 		+ "      \\x, y => (x + my) * (y + cool) * friends);\n"
-		+ "    final = { 'background-color' : verbose_name'()(1,2) };\n",
-		function(topic) { assert.deepEqual(topic[1], { 'background-color' : 24 }); }
-	]*/
+		+ "    final = { 'background-color' : verbose_name'(1,2) };\n",
+		function(topic) { assert.deepEqual(topic[1], { 'background-color' : '33333333' }); }
+	]
 ];
 
 for (var i=0; i<tests.length; i++) {

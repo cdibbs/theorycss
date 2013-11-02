@@ -42,7 +42,7 @@ function LeafDict(nodeId, typeList, isList) {
 	
 	self.evalMediaQuery = function(mq, scope) {
 		return new Expressions()
-			.evaluate(['id', mq], scope, false);
+			.evaluate(['id', mq, scope.getMeta()], scope, false);
 	};
 	
 	/**

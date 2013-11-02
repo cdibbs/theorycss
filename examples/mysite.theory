@@ -66,6 +66,6 @@ namespace Website
 			sides[(sides.indexOf(side) + 2) % 4]
 			where sides = ['top', 'right', 'bottom', 'left'];
 
-	library Palette
-		Background = 3**(2*5+3);
+	/*library Palette
+		Background = 3**(2*5+3);*/
 		
