@@ -90,7 +90,7 @@ vows.describe("CSS Output Filter").addBatch({
 		'an input tree with media queries and pseudo-elements' : {
 			topic : function(css) {
 				var input = {
-						'media-queries' : { 'small' : 'width < 640px' },
+						//'media-queries' : { 'small' : 'width < 640px' },
 						root : {
 							expression : 'div',
 							contexts : [

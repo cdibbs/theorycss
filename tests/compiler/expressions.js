@@ -1,6 +1,6 @@
 var assert = require("assert"),
 	Expressions = require("../../src/compiler/expressions").Expressions,
-	Compiler = require("../../lib/theory-compiler").Compiler,
+	Compiler = require("../../src/compiler/entry").Compiler,
 	parser = require("../../lib/theory-parser").parser,
 	vows = require("vows");
 	
@@ -59,7 +59,7 @@ for (var i=0; i<tests.length; i++) {
 	batch["evaluating"][tests[i][1]] = {
 		topic : (function(i) { return function(expr) {
 			src = src + "    " + tests[i][1];
-			var ast = new Compiler().compile(parser.parse(src), true)
+			var ast = new Compiler().compile(parser.parse(src), { src : src, pp : true })
 				.resolve("Website").val
 				.resolve("Main").val;
 			return expr.evaluate(ast.resolve(tests[i][0]).ast[0], ast);
