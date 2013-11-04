@@ -564,12 +564,12 @@ dict_with
 	
 dict_keep
 	: LBRACE expr_keep expression RBRACE
-		{ $$ = ['{keep}', $1, $3, { loc : @$ }]; }
+		{ $$ = ['{keep}', $expr_keep, $expression, { loc : @$ }]; }
 	;
 	
-expr_but : FROM expression BUT { $$ = $1; };
-expr_with : FROM expression WITH { $$ = $1; };
-expr_keep : FROM expression KEEP { $$ = $1; };
+expr_but : FROM expression BUT { $$ = $2; };
+expr_with : FROM expression WITH { $$ = $2; };
+expr_keep : FROM expression KEEP { $$ = $2; };
 		
 dict
 	: dict_comprehension

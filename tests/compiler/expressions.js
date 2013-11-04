@@ -52,17 +52,34 @@ var tests = [
 		+ "      \\x, y => (x + my) * (y + cool) * friends);\n"
 		+ "    final = { 'background-color' : verbose_name'(1,2) };\n",
 		function(topic) { assert.deepEqual(topic[1], { 'background-color' : '33333333' }); }
-	]
+	],
+	["comp1",
+	 	"\n    dict = { a : 1, b : 2, c : 3 };\n    comp1 = { from dict but a = 3 };\n",
+	 	function(topic) { assert.deepEqual(topic[1], { a : 3, b : 2, c : 3}); }],
+	["comp2",
+	 	"\n    comp2 = { from dict with \\k, v => v * v };\n",
+	 	function(topic) { assert.deepEqual(topic[1], { a : 1, b : 4, c : 9}); }],
+ 	["comp3",
+	 	"\n    comp3 = { from dict keep ['b', 'c'] };\n",
+	 	function(topic) { assert.deepEqual(topic[1], { b : 2, c : 3}); }],	 	
+ 	["comp4",
+	 	"\n    comp4 = { set x : x * x for x in [1,2,3] };\n",
+	 	function(topic) { assert.deepEqual(topic[1], { '1' : 1, '2' : 4, '3' : 9}); }]
 ];
 
 for (var i=0; i<tests.length; i++) {
 	batch["evaluating"][tests[i][1]] = {
 		topic : (function(i) { return function(expr) {
-			src = src + "    " + tests[i][1];
-			var ast = new Compiler().compile(parser.parse(src), { src : src, pp : true })
-				.resolve("Website").val
-				.resolve("Main").val;
-			return expr.evaluate(ast.resolve(tests[i][0]).ast[0], ast);
+			try {
+				src = src + "    " + tests[i][1];
+				var ast = new Compiler().compile(parser.parse(src), { src : src, pp : true })
+					.resolve("Website").val
+					.resolve("Main").val;
+				return expr.evaluate(ast.resolve(tests[i][0]).ast[0], ast);
+			} catch(ex) {
+				console.log(ex);
+				return ex;
+			}
 		}; })(i),
 		'we get the correct result' : tests[i][2] 
 	};

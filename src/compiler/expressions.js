@@ -8,14 +8,15 @@ var Expressions = function Expressions(stack) {
 	var stack = stack || [];
 	
 	self.evaluate = function(ast, scope, lazy) {
-		/*if (ast[0] === '()')
-			console.log(ast);*/
+		//if (ast[0] === '=' && ast[2][0] == 'comp1')
+			//console.log(ast);
 			
 		if (ast instanceof Array && ast.length > 0) {
 			if (typeof self.ops[ast[0]] !== 'undefined') {
 				var params = u.ipush(ast.slice(1), self.evaluate, scope, ast[0], lazy);
 				return self.ops[ast[0]].apply(this, params); 
 			}
+			//console.log(ast);
 		}
 		return ast;
 	};
@@ -130,6 +131,64 @@ var Expressions = function Expressions(stack) {
 				throw new Error("Not sure what's going on, here.");
 			}
 		},
+		"{but}" : function(expr, butlist, meta, e, scope, lazy) {
+			var dict = e(expr, scope);
+			if (dict[0] !== 'dict')
+				throw new err.UsageError("Not a dictionary", meta, scope);
+			
+			var newdict = u.clone(dict);
+			for (var i=0, l=butlist.length; i<l; i++) {
+				var b = butlist[i];
+				if (b[0] !== '=')
+					throw new err.UsageError("Only simple assignments (=) are permitted, here.", meta, scope);
+				
+				var key = b[1][0], val = e(b[2], scope);
+				newdict[1][key] = val;
+			}
+			return newdict;
+		},
+		"{with}" : function(expr, lambda, meta, e, scope, lazy) {
+			var dict = e(expr, scope);
+			if (dict[0] !== 'dict')
+				throw new err.UsageError("Not a dictionary", meta, scope);
+			if (lambda[1].length != 2)
+				throw new err.UsageError("Lambda must have 2 parameters, as in \\key, val => expr", meta, scope);
+			try {
+			var newdict = ['dict', {}, meta];
+			var keys = Object.keys(dict[1]);
+			for (var i=0, l=keys.length; i<l; i++) {
+				var key = keys[i], val = dict[1][key]; 
+				var result = e(['()', lambda, [key, val], meta], scope);
+				if (result instanceof Array && result[0] === 'array') {
+					if (result[1].length === 1) {
+						newdict[1][key] = result[1][0];
+						continue;
+					} else if (result[1].length === 2) {
+						newdict[1][result[1][0]] = result[1][1];
+						continue;
+					}
+				}
+				newdict[1][key] = result;
+			}
+			} catch(ex) { console.log(ex); }
+			return newdict;
+		},
+		"{keep}" : function(expr, keeparr, meta, e, scope, lazy) {
+			var dict = e(expr, scope), arr = e(keeparr, scope);
+			if (dict[0] !== 'dict')
+				throw new err.UsageError("Not a dictionary", expr[expr.length-1], scope);
+			
+			if (arr[0] !== 'array')
+				throw new err.UsageError("Not an array", keeparr[keeparr.length-1], scope);
+			
+			var newdict = ['dict', {}, meta];
+			for (var i=0, l=arr[1].length; i<l; i++) {
+				var key = e(arr[1][i], scope);
+				if (dict[1][key])
+					newdict[1][key] = dict[1][key];
+			}
+			return newdict;
+		},
 		'ff' : function(id, paramlist, actionblock, meta, e, scope) {
 			throw new err.UsageError("Frag functions cannot be used within expressions.", meta, scope);
 			// TODO: actually, they can be. They can return a dictionary (tuple with named values)
@@ -165,7 +224,6 @@ var Expressions = function Expressions(stack) {
 			var result = e(wexpr, wscope, lazy);
 			return result;
 		},
-		
 		'=' : function(id, expr, meta, e, scope) {
 			scope.addSymbol(id, expr); // lazily eval?
 		},
@@ -242,10 +300,14 @@ var Expressions = function Expressions(stack) {
 			}
 		},
 		'dict' : function(obj, meta, e, scope, lazy) {
-			for(var key in obj) {
-				obj[key] = e(obj[key], scope, lazy);
+			if (obj instanceof Array) { // then it's a comprehension
+				return e(obj, scope);
+			} else {
+				for(var key in obj) {
+					obj[key] = e(obj[key], scope, lazy);
+				}
+				return ['dict', obj, meta];
 			}
-			return ['dict', obj, meta];
 		},
 		'array' : function(arr, meta, e, scope, lazy) {
 			for(var i=0, l=arr.length; i<l; i++) {

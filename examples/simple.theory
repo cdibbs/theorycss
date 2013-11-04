@@ -13,6 +13,7 @@ namespace Website
 
   theory nother
     [[notherDiv]]
-      is { 'line-height' : 9px };
+      [[withChild]]
+        is { 'line-height' : 9px };
 
 
