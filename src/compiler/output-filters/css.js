@@ -37,7 +37,7 @@ var Css = function Css(options) {
 	 * @returns {String}
 	 */
 	this.filter = function filter(tree) {
-		//console.log(tree);
+		//console.log(JSON.stringify(tree, null, 1));
 		if (!tree['root'])
 			return '';
 		
@@ -103,7 +103,7 @@ var Css = function Css(options) {
 		} else {
 			var id = expr;
 			for(var i=ancestors.length-1; i>=0; i--) {
-				id = id + ' ' + ancestors[i];
+				id = ancestors[i] + ' ' + id;
 				if (ancestors[i].substr(0, 1) === '#') {
 					break;
 				}

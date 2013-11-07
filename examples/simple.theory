@@ -5,6 +5,9 @@ namespace Website
       [[#ident]]
         is { color: 'blue' }, alex(5,7);
         @bob is { 'font-size' : 12pt };
+        [[chris]]
+          [[was]]
+            is { here: "!" };
       [[child :: nother]]
 
     bob = 'width > 800px';
@@ -15,5 +18,4 @@ namespace Website
     [[notherDiv]]
       [[withChild]]
         is { 'line-height' : 9px };
-
 

@@ -42,6 +42,7 @@ var Compiler = function(opts) {
 				}
 			} catch(ex) {
 				if (! ex.isKnown) {
+					console.log(ex.stack);
 					throw ex;
 				}
 				if (compileOpts.src) {

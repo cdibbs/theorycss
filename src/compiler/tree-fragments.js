@@ -16,8 +16,8 @@ var TreeFragments = function TreeFragments(rootScope) {
 		var stack = [root];
 		do {
 			var pointer = stack.pop();
-			var scope = rootScope.getEntry().val;
-			pointer.genCSSProperties(scope);
+			var scope = rootScope.getEntry();
+			pointer.genCSSProperties(scope ? scope.val : rootScope);
 			var children = pointer.getChildren();
 			for(var i=0, l=children.length; i<l; i++) {
 				var child = children[i];
@@ -42,15 +42,13 @@ var TreeFragments = function TreeFragments(rootScope) {
 				}
 			}
 			
-			var tresolve = rootScope.getEntry().val.resolve;
 			if (theories && theories.length) {
+				var tresolve = rootScope.getEntry().val.resolve;
 				for(var i=0, l=theories.length; i<l; i++) {
 					var theory = tresolve(theories[i]);
 					if (theory) {
-						console.log(theory);
-						var tf = new TreeFragments(tresolve);
-						var ld = tf.processTree(theory.val.getEntry());
-						console.log(ld);
+						var tf = new TreeFragments(theory.scope);
+						var ld = tf.processTree(theory.val.getEntry().ast);
 						leafDict.addChild(ld);
 					} else {
 						throw new Error("Very Bad Things");
