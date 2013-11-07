@@ -32,12 +32,29 @@ var TreeFragments = function TreeFragments(rootScope) {
 		if (ast[0] === 'tf') {
 			var children = ast[2] ? ast[2][1] : null;
 			var isList = ast[2] ? ast[2][0] : null;
+			var theories = ast[1][2];
 			var leafDict = (function(isList, children) {
-				return new LeafDict(ast[1][1], ast[1][2], isList, children);
+				return new LeafDict(ast[1][1], isList);
 			})(isList, children);
 			if (children && children.length) {
 				for(var i=0, l=children.length; i<l; i++) {
 					leafDict.addChild(self.buildTree(children[i]));
+				}
+			}
+			
+			var tresolve = rootScope.getEntry().val.resolve;
+			if (theories && theories.length) {
+				for(var i=0, l=theories.length; i<l; i++) {
+					var theory = tresolve(theories[i]);
+					if (theory) {
+						console.log(theory);
+						var tf = new TreeFragments(tresolve);
+						var ld = tf.processTree(theory.val.getEntry());
+						console.log(ld);
+						leafDict.addChild(ld);
+					} else {
+						throw new Error("Very Bad Things");
+					}
 				}
 			}
 			return leafDict;

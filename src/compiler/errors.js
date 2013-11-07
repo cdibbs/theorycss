@@ -8,6 +8,9 @@ exports.Err = function Err() {
 		
 		this.isKnown = true;
 		this.setSrcSample = function(src) {
+			if (!errMeta || !errMeta.loc)
+				return;
+			
 			var lines = src.split('\n');
 			line = lines[errMeta.loc.first_line - 1];
 			sample = line.substr(errMeta.loc.first_column, errMeta.loc.last_column - errMeta.loc.first_column);
@@ -15,7 +18,8 @@ exports.Err = function Err() {
 		};
 		this.toString = function() {
 			var m = "Error: " + msg + "\n";
-			m = m + "Location: line " + errMeta.loc.first_line + ", column " + errMeta.loc.first_column + "\n";
+			if (errMeta && errMeta.loc)
+				m = m + "Location: line " + errMeta.loc.first_line + ", column " + errMeta.loc.first_column + "\n";
 			try { // if we can
 				if (sample)
 					m = m + "Token: " + sample + "\n";
@@ -26,8 +30,10 @@ exports.Err = function Err() {
 				var p = scope, n;
 				while (p != null && (n = p.getName()) !== 'prog') {
 					var meta = p.getMeta();
-					m = m + "  at " + p.getType() + " " + n + " (line "
-						+ (meta && meta.loc ? meta.loc.first_line + ":" + meta.loc.first_column : "") + ")\n";
+					if (meta && meta.loc) {
+						m = m + "  at " + p.getType() + " " + n + " (line "
+							+ (meta && meta.loc ? meta.loc.first_line + ":" + meta.loc.first_column : "") + ")\n";
+					}
 					p = p.getParentScope();
 				}
 			} catch(ex) { throw ex; }

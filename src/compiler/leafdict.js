@@ -8,7 +8,7 @@ var u = require('../util').u,
  * @param {Array} isList - the list of 'is' clauses to be applied to this node
  * @param {Array} children - tree frags that have this node as their parent
  */
-function LeafDict(nodeId, typeList, isList) {
+function LeafDict(nodeId, isList, scope) {
 	var self = this;
 	var css = [];
 	var mq = {};
