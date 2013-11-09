@@ -1,21 +1,21 @@
-namespace Website
+Website
   theory main
-    [[div]]
-      is |{ display: 'block' };
-      [[#ident]]
+    div is a.block;
+      #ident
         is { color: 'blue' }, alex(5,7);
         @bob is { 'font-size' : 12pt };
-        [[chris]]
-          [[was]]
+        chris
+          was
             is { here: "!" };
-      [[child :: nother]]
+      child :: nother
 
     bob = 'width > 800px';
 
     fn alex(a,b) -> { 'background-color' : 'rgba(' + (a*b) + ',' + (b-a) + ',' + (b**a) + ')' };
 
   theory nother
-    [[notherDiv]]
-      [[withChild]]
+    notherDiv
+      withChild
         is { 'line-height' : 9px };
+    
 

@@ -13,6 +13,7 @@ frac                        (?:\.[0-9]+)
 float						(?:[0-9]|[1-9][0-9]+)("."[0-9]*)
 spc							[\t \u00a0\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u200b\u2028\u2029\u3000]
 str							\"[^\"]*\"|\'[^\']*\'
+xstr						"x"{str}
 imp							"->"
 revimp						"<-"
 units						(?:[a-zA-Z][a-zA-Z0-9]*|\%)
@@ -164,6 +165,7 @@ units						(?:[a-zA-Z][a-zA-Z0-9]*|\%)
 {id}			return 'ID';
 {dict_id}		return 'DICT_ID';
 {str}			yytext = yytext.substr(1,yyleng-2); return 'STRING_LIT';
+{xstr}			yytext = yytext.substr(2,yyleng-3); return 'XSTRING_LIT';
 "."				return 'DOT';
 \s*<<EOF>>		%{
 					// remaining DEDENTs implied by EOF, regardless of tabs/spaces

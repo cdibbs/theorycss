@@ -13,7 +13,7 @@ file
 	;
 	
 namespace
-	: PREFIX id INDENT namespace_def DEDENT
+	: id INDENT namespace_def DEDENT
 	{ $$ = ['ns', $id, $namespace_def, { loc : @$ }]; }
 	;
 	
@@ -42,10 +42,10 @@ libdef
 	: vdef { $$ = $1; } | fdef { $$ = $1; } | fragfunc { $$ = $1; };
 	
 theory
-	: THEORY id INDENT treefrag theorybody DEDENT
-		{ $$ = ['theory', $2, null, $treefrag, $theorybody, { loc : @$ }]; }
-	| THEORY id EXTENDS id INDENT treefrag theorybody DEDENT
-		{ $$ = ['theory', $2, $4, $treefrag, $theorybody, { loc : @$ }]; }	
+	: THEORY id INDENT treefrag_block theorybody DEDENT
+		{ $$ = ['theory', $2, null, $treefrag_block, $theorybody, { loc : @$ }]; }
+	| THEORY id EXTENDS id INDENT treefrag_block theorybody DEDENT
+		{ $$ = ['theory', $2, $4, $treefrag_block, $theorybody, { loc : @$ }]; }	
 	;
 	
 theorybody : (def | NEWLINE)*;
@@ -57,14 +57,35 @@ vdef
 		{ $$ = $1; }
 	;
 	
+treefrag_block
+	: treefrag
+	{ $$ = $treefrag; };
+	
 treefrag
-	: tf_node tf_defblock
-	{ $$ = ['tf', $tf_node, $tf_defblock, { loc : @$ }]; }
+	: tf_node tf_nodedef
+	{ $$ = ['tf', $tf_node, $tf_nodedef, { loc : @$ }]; }
 	;
 
 tf_node
-	: XPATHSTART leafid tf_typify XPATHEND
-	{ $$ = ['tfnode', $leafid.join(''), $tf_typify, { loc : @$ }]; }
+	: leafid tf_typify
+	{ $$ = ['tfnode', $leafid, $tf_typify, { loc : @$ }]; }
+	;
+	
+tf_nodedef
+	: tf_islist INDENT tf_ndblock DEDENT
+	{ $$ = $tf_ndblock; if ($$[0]) $$[0] = $tf_islist.concat($$[0]); }
+	| INDENT tf_ndblock DEDENT
+	{ $$ = $tf_ndblock; }
+	|
+	;
+	
+tf_ndblock
+	: tf_islist tf_list
+	{ $$ = [$1, $2]; }
+	| tf_list
+	{ $$ = [null, $1]; }
+	| tf_islist
+	{ $$ = [$1, null]; }
 	;
 	
 tf_typify
@@ -73,24 +94,29 @@ tf_typify
 	| { $$ = null; }
 	; 
 
-tf_defblock
-	: INDENT tf_islist tf_list DEDENT
-	{ $$ = [$tf_islist, $tf_list]; }
-	|
-	;
-	
 tf_list
 	: treefrag tf_list
 	{ $$ = $tf_list; $$.unshift($treefrag); }
-	| 
-	{ $$ = []; }
+	| treefrag
+	{ $$ = [$treefrag]; }
 	;
 	
-leafid : (id | DOT | POUND)+;
+leafid
+	: DOT id
+	{ $$ = '.' + yytext; }
+	| POUND id
+	{ $$ = '#' + yytext; }
+	| id
+	{ $$ = yytext; }
+	| xpath
+	{ $$ = { type : 'xpath', val : $1 }; };
+	
+xpath
+	: XSTRING_LIT;
 
 tf_islist
-	: 
-	{ $$ = []; }
+	: tf_is
+	{ $$ = [$tf_is]; }
 	| tf_islist tf_is
 	{ $$ = $tf_islist; $$.push($tf_is); }
 	;
