@@ -117,7 +117,7 @@ units						(?:[a-zA-Z][a-zA-Z0-9]*|\%)
 "||"|"\Wor\W"		return 'OR';
 "&&"|"\Wand\W"		return 'AND';
 "&"				return 'B_AND';
-"|"				return 'B_OR';
+"|"				return 'PIPE';
 "\Wxor\W"			return 'XOR';
 "\Wnot\W"|"!"		return 'NOT';
 "?!"			return 'EXCUSEME';

@@ -1,7 +1,7 @@
 namespace Website
   theory main
     [[div]]
-      is { display: 'block' };
+      is |{ display: 'block' };
       [[#ident]]
         is { color: 'blue' }, alex(5,7);
         @bob is { 'font-size' : 12pt };

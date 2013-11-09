@@ -13,7 +13,7 @@ ninclude 'complicated.js' as cool
        ::Footer
     ]]
     
-    fn sepia() -> as;fj;asfj
+    fn sepia() -> 1;
       
   theory MyContent : Content
     [[#content
@@ -50,11 +50,11 @@ ninclude 'complicated.js' as cool
 
     fn sepiafy(prop, val) -> if (prop is Image) then val.sepia(100) else if (prop is Color) then sepia(val) else val endif;
 
-(red << 16) | (green << 8) | blue
+/*(red << 16) | (green << 8) | blue
       where
         red = (c.red * .393) + (c.green *.769) + (c.blue * .189),
         green = (c.red * .349) + (c.green *.686) + (c.blue * .168),
-        blue = (c.red * .272) + (c.green *.534) + (c.blue * .131);
+        blue = (c.red * .272) + (c.green *.534) + (c.blue * .131);*/
 
   fragfn clean
     ((...

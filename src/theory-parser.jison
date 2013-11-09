@@ -96,14 +96,14 @@ tf_islist
 	;
 
 tf_is
-	: COLON id AT id IS arglist EOL
-	{ $$ = ['tfis', $4, $arglist, $2, { loc : @$ }]; }
-	| COLON id IS arglist EOL
-	{ $$ = ['tfis', null, $arglist, $2, { loc : @$ }]; }
-	| AT id IS arglist EOL
-	{ $$ = ['tfis', $id, $arglist, null, { loc : @$ }]; }
-	| IS arglist EOL
-	{ $$ = ['tfis', null, $arglist, null, { loc : @$ }]; }
+	: COLON id AT id IS PIPE? arglist EOL
+	{ $$ = ['tfis', $4, $arglist, $2, !!$6, { loc : @$ }]; }
+	| COLON id IS PIPE? arglist EOL
+	{ $$ = ['tfis', null, $arglist, $2, !!$4, { loc : @$ }]; }
+	| AT id IS PIPE? arglist EOL
+	{ $$ = ['tfis', $id, $arglist, null, !!$4, { loc : @$ }]; }
+	| IS PIPE? arglist EOL
+	{ $$ = ['tfis', null, $arglist, null, !!$2, { loc : @$ }]; }
 	;
 	
 fragfunc 
@@ -432,7 +432,7 @@ xor_expression
 ior_expression
 	: xor_expression
 		{ $$ = $1; }
-	| ior_expression B_OR xor_expression
+	| ior_expression PIPE xor_expression
 		{ $$ = [$2, $1, $3, { loc : @$ }]; };
 		
 logical_and_expression
