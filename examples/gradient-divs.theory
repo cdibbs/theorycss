@@ -1,13 +1,13 @@
-namespace Website
+Website
 	theory main
-		[[html]]
-			[[div]]
+		html
+			div
 				is gradientSet(0xff0000, 0x00ff00);
-				[[div]]
-				[[div]]
-				[[div]]
-				[[div]]
-				[[div]]
+				div
+				div
+				div
+				div
+				div
 
 		ff gradientSet(color1, color2) ->
 			where count = 0, index = 0

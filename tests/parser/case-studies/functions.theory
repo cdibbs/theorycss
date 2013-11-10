@@ -1,6 +1,6 @@
-namespace TheoryTests
+TheoryTests
 	theory Functions
-		[[muststartwithtf]]
+		muststartwithtf
 
 		basic_func_as_1st_class = \x, y => (x + y) * (x - y);
 

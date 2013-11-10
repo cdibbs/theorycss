@@ -1,11 +1,11 @@
-namespace Bob
+Bob
 	theory Main
-		[[html]]
+		html
 			is cornucopia();
-			[[body]]
-				[[header :: Header]]
-				[[main :: MainArea]]
-				[[footer :: Footer]]
+			body
+				header :: Header
+				main :: MainArea
+				footer :: Footer
 		
 		ff cornucopia() ->
 			where rgb = 0x000000
@@ -15,11 +15,11 @@ namespace Bob
 		
 		
 	theory Header
-		[[div#header]]
+		#header
 			is fixedbar(32px, 'top');
-			[[a]]
-				[[img#logo]]
-			[[.title]]
+			a
+				img#logo
+			.title
 			
 		boxSides = { top:0, right:0, bottom:0, left: 0 };
 			

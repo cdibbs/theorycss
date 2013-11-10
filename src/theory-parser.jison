@@ -169,6 +169,8 @@ ffcasetree
 ffcasetree_nodedefblock
 	: INDENT ffcasetree_nodedef DEDENT
 		{ $$ = $2; }
+//    | ffcasetree_nodedef
+//    { $$ = $2; }
 	;
 
 ffcasetree_nodedef

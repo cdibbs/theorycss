@@ -1,11 +1,11 @@
 /*
  *Some comments littering the file
  */
-namespace Website
+Website
 	// comments, comments
 	///// totally necessary
 	theory ffexplorations
-		[[muststartwithtf]]		
+		muststartwithtf		
 		
 		// this function does what you'd expect... precisely zilch //
 		ff basicNoOp() ->

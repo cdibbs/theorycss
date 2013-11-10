@@ -4,9 +4,9 @@ var assert = require("assert"),
 	parser = require("../../lib/theory-parser").parser,
 	vows = require("vows");
 	
-var src = "namespace Website\n"
+var src = "Website\n"
 	+ "  theory Main\n"
-	+ "    [[athingy]]\n";
+	+ "    athingy\n";
 
 var batch = { 'evaluating' : { topic : new Expressions() }};
 var tests = [

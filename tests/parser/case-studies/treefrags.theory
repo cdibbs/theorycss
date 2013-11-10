@@ -1,41 +1,41 @@
-namespace Website
+Website
 	theory Main
-		[[html]]
-			[[body]]
-				[[child]]
-				[[second.child]]
-			[[first.level]]
-				[[yet.another]]
-			[[lets]]
-				[[go]]
-					[[deeper]]
-					[[please]]
-				[[back.again]]
+		html
+			body
+				child
+				second.child
+			first.level
+				yet.another
+			lets
+				go
+					deeper
+					please
+				back.again
 				
-				[[a.little.break]]
+				a.little.break
 				
-			[[follow.by.dedent]]
+			follow.by.dedent
 			
 			
-			[[coolness]]
-				[[whats.up.now]]
-			[[huh]]
+			coolness
+				whats.up.now
+			huh
 			
 	theory ApplyingFragFunctions
-		[[html]]
+		html
 			is { inline : goodness };
 			is { even : on,
 				multiple : lines };
-			[[body]]
+			body
 				is functional(andwith, params, 25);
 				is using(), many(25, 26), funcs(a, b, c);
-				[[nav.bar]]
+				nav.bar
 					@mobile is hidden; // plain dictionary
 					@desktop is fixedbar(25);
-				[[main.area]]
+				main.area
 					is mixinmatch();
 					@mobile is right;
-				[[footer]]
+				footer
 					@thesefirst is somethingelse();
 					is thenthese;
 					

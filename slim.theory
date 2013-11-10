@@ -1,49 +1,56 @@
 Website
-include 'library' as bob
-include '/path/to/my.theory' as myns
-ninclude 'complicated.js' as cool
+//include 'library' as bob
+//include '/path/to/my.theory' as myns
+//ninclude 'complicated.js' as cool
 
   theory main
-    [[body is |sepia; @mobile is beige;
+    body is |sepia;
        ::Navigator
        ::Header
        #main
          ::Menu
          ::MyContent
        ::Footer
-    ]]
     
     fn sepia() -> 1;
+
+    ff fraggle() ->
+      div -> style me + bro;
       
   theory MyContent : Content
-    [[#content
+    #content
         #needs-override is |clean, is |sepia
-    ]]
 
   theory Content
-    [[#content
+    #content
       .some
       .other
          .things
       #needs-override is |blacknwhite;
-    ]]
 
     gobblyGook = 'see spot run';
 
   theory Navigator
-    [[#navbar is fixedBar('top', 24px); @mobile is gone;
-        a
-          img
-        ul is dropdown()
-          li x 6
-            a
-    ]]
+    #navbar is fixedBar('top', 24px);
+      @mobile is gone;
+      a
+        img
+      ul is dropdown()
+        li x 6
+          a
 
   fragfn sepia
-    ((...
+    block
+      -> style bob
+      where bob = 147
+      <- yield bob = bob * 2, janet = bob * 3;
+      ... ->
+
+  fragfn sepia
+    Colorable
       <- style { def prop: sepiafy(prop, val) for prop, val in colors }
 	where colors = {from this.props keep colorProperties};
-    ))
+    
     
     // complex properties should 'register' somehow with parent object, so 'font: 16pt/18pt bold Aria;' registers four properties
     colorProperties = ['background-color', 'color', 'border-color', 'font-color', 'background-image' ];

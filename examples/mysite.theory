@@ -1,16 +1,16 @@
-namespace Website
+Website
 	theory Main
-		[[html]]
-			[[body]]
-				[[div.navbar]]
+		html
+			body
+				div.navbar
 					:hover is { 'z-index' : "103" };
 					@tablet is fixedbar('top', '32px') + { 'happy' : 'joy' };
 					@mobile is gone;
-				[[div.main]] 
-					[[div.leftmenu :: LeftMenu]]
+				div.main 
+					div.leftmenu :: LeftMenu
 						is scaleSibs(14.0);
-					[[div.content :: Article]] //-> 3, x 3 
-				[[div.footer]]
+					div.content :: Article //-> 3, x 3 
+				div.footer
 				
 		ff curveddeck() ->
 			((any))

@@ -1,6 +1,6 @@
-namespace Website
+Website
 	theory Main
-		[[lets.begin.witha.tf]]
+		treefrag
 			is final;
 
 		start_here = { x: dostuff() };

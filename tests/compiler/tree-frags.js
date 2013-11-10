@@ -7,7 +7,7 @@ var assert = require("assert"),
 	vows = require("vows");
 
 function parseSnippet(srcFrag) {
-	src = "namespace Website\n"
+	src = "Website\n"
 		+ "  theory main\n";
 	src = src + srcFrag + "\n\n";
 	
@@ -23,13 +23,13 @@ vows.describe("TreeFrags").addBatch({
 		'basic AST' : {
 			topic : function() {
 				var snippet =
-					  '    [[div :: OtherTheory]]\n'
+					  '    div :: OtherTheory\n'
 					+ '      is someVar, { literal : "value" }, func(3);\n'
 					+ '      :pseudoel @somemedia is someOtherThings;\n'
-					+ '      [[andKids]]\n'
-					+ '        [[andgrandkids]]\n'
+					+ '      andKids\n'
+					+ '        andgrandkids\n'
 					+ '          is func(5);\n'
-					+ '      [[ohsomany]]\n\n'
+					+ '      ohsomany\n\n'
 					+ '    someVar = { "background-color" : "red" };\n'
 					+ '    fn func(x) -> { "font-size" : 12pt * x };\n'
 					+ '    somemedia = "width > 500px";\n'
