@@ -9,7 +9,7 @@ int                         (?:[1-9][0-9]+|[0-9])
 exp                         (?:[eE][-+]?[0-9]+)
 hex							[0-9A-Fa-f]+
 bin							[0-1]+
-frac                        (?:\.[0-9]+)
+/*frac                        (?:\.[0-9]+)*/
 float						(?:[0-9]|[1-9][0-9]+)("."[0-9]*)
 spc							[\t \u00a0\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u200b\u2028\u2029\u3000]
 str							\"[^\"]*\"|\'[^\']*\'
@@ -21,12 +21,7 @@ units						(?:[a-zA-Z][a-zA-Z0-9]*|\%)
 %s PAREN
 %s BRACE
 /* block inside of which whitespace is non-semantic */
-%s WSBLOCK
-%s FN
-%s FF
-%s FFBLOCK
-%s FFFUNC
-%s FFNODE
+%s FREEDOM
 
 %%
 "//".*					/* ignore comment */
@@ -37,45 +32,27 @@ units						(?:[a-zA-Z][a-zA-Z0-9]*|\%)
 "uses"			return 'USES';
 "true"			return 'TRUE';
 "false"			return 'FALSE';
-"namespace"		return 'PREFIX';
-"test"			return 'TEST';
-"image"			return 'IMAGE';
 "data"			return 'DATA';
-"needs"			return 'NEEDS';
-"fn"			%{ this.begin('FN'); return 'FUNCTION'; %};
-"ff"			%{
-					this.begin('FF');
-					return 'FRAGFUNC';
-				%};
-<FF>{imp}		%{
-					this.begin('FFBLOCK');
-					return 'IMPLICATION';
-				%};
-<FFBLOCK>{revimp} %{
-					this.begin('FFFUNC');
+"fn"			return 'FUNCTION';
+"ff"			return 'FRAGFUNC';
+{revimp} %{
+					this.begin('FREEDOM');
 					return 'REVIMPLICATION';
 				%};
-<FFBLOCK>{imp}	%{
-					this.begin('FFFUNC');
+{imp}	%{
+					this.begin('FREEDOM');
 					return 'IMPLICATION';
 				%};
-{imp}			return 'IMPLICATION';
-{revimp}		return 'REVIMPLICATION';
-<FFBLOCK>"^"	%{
-					this.begin('FFFUNC');
+<INITIAL>"^"	%{
+					this.begin('FREEDOM');
 					return 'UP';
 				%};
-<FFBLOCK>"v"|"V"	%{
-					this.begin('FFFUNC');
+<INITIAL>"v"|"V"	%{
+					this.begin('FREEDOM');
 					return 'DOWN';
 				%};
-<FFFUNC>";"		%{
-					while(this.topState() === 'FFFUNC') { this.popState(); };
-					return 'EOL';
-				%};
-<FFFUNC>\s+		/* ignore whitespace within frag functions */
 "+"				return 'PLUS';
-"-"				return 'MINUS';
+<FREEDOM>"-"	return 'MINUS'; // this is used in CSS Ids
 ({float})"_"?({units})		%{
 						yytext = { type: 'fl_', val: parseFloat(yy.lexer.matches[1]), units: yy.lexer.matches[4], toString : function() { return this.val + this.units; } };
 						return 'FLOAT_UNITS';
@@ -85,14 +62,8 @@ units						(?:[a-zA-Z][a-zA-Z0-9]*|\%)
 ({int})"_"?({units})	%{ yytext = { type: 'int_', val : parseInt(yy.lexer.matches[1]), units: yy.lexer.matches[4], toString : function() { return this.val + this.units; } }; return 'INT_UNITS'; %};
 {int}				%{ yytext = parseInt(yytext); return 'INTEGER'; %};
 ({bin})"b"			%{ yytext = parseInt(yy.lexer.matches[1], 2); return 'BINNATLITERAL'; %};
-"#"({hex})			%{ yytext = parseInt(yy.lexer.matches[1]); return 'HEXCOLOR'; %};
+<FREEDOM>"#"({hex})			%{ yytext = parseInt(yy.lexer.matches[1]); return 'HEXCOLOR'; %};
 "#"					return 'POUND';
-"[--"				return 'SETSTART';
-"--]"				return 'SETEND';
-"[["				return 'XPATHSTART';
-"]]"				return 'XPATHEND';
-<FFBLOCK>"(("			this.begin('FFNODE'); return 'LFFNODE';
-<FFNODE>"))"			this.popState(); return 'RFFNODE';
 "\\"			return 'LAMBDA';
 "..."			return 'ELLIPSIS';
 ".."			return 'RANGE';
@@ -107,9 +78,9 @@ units						(?:[a-zA-Z][a-zA-Z0-9]*|\%)
 "lt"|"<"		return 'LT';
 "::"			return 'TYPIFY';
 "="				return 'ASSIGN';
-"@="			%{ this.begin('WSBLOCK'); return 'CASEASSIGN'; %};
-<WSBLOCK>\s+	/* ignore whitespace in certain blocks of code to give the programmer more freedom */
-<WSBLOCK>";" %{ this.popState(); return 'EOL'; %};
+"@="			%{ this.begin('FREEDOM'); return 'CASEASSIGN'; %};
+<FREEDOM>\s+	/* ignore whitespace in certain blocks of code to give the programmer more freedom */
+<FREEDOM>";" %{ this.popState(); return 'EOL'; %};
 "@"				return 'AT';
 "**"			return 'POWER';
 "*"				return 'TIMES';
@@ -133,8 +104,8 @@ units						(?:[a-zA-Z][a-zA-Z0-9]*|\%)
 "["				return 'LBRACKET';
 "]"				return 'RBRACKET';
 ":"				return 'COLON';
-<FN>";"			%{ this.popState(); return 'EOL'; %};
-<FN>\s+			/* ignore whitespace within functions */
+<FREEDOM>";"			%{ this.popState(); return 'EOL'; %};
+<FREEDOM>\s+			/* ignore whitespace within functions */
 ";"				return 'EOL';
 ","				return 'COMMA';
 "this"			return 'THIS';
@@ -150,7 +121,7 @@ units						(?:[a-zA-Z][a-zA-Z0-9]*|\%)
 "reduce"		return 'REDUCE';
 "for"			return 'FOR';
 "from"			return 'FROM';
-"set"			return 'SET';
+"def"			return 'DEF';
 "if"			return 'IF';
 "then"			return 'THEN';
 "int"			return 'INT';

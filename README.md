@@ -10,11 +10,9 @@ expressive power in styling the web. Theory answers this need with three importa
 Akin to nested rules in LESS, these describe rough, in-tree relationships between elements, as well
 as high-level, declarative styling rules.
 
-	[[html]]
-		[[#navbar :: NavigationBar]]
-			is fixedBar('top', 32px);
-		[[#content]]
-			is article(100%);
+	html
+		NavigationBar is fixedBar('top', 32px);
+		#content is article(100%);
 
 ##Theories 
 Theories express the high-level architecture of your site. They contain one Tree Fragment, and collections of related Frag Functions,
@@ -22,19 +20,21 @@ and ordinary properties and methods.
 
 	namespace Website
 		theory Main
-			[[html]]
-				[[#navbar :: NavigationBar]]
+			html
+				NavigationBar
 					@mobile is gone;
-				[[#banner :: Banner]]
+				#banner :: Banner
 					...		
 	
 		theory NavigationBar
-			[[#navbar]]
-				[[.small-logo]]
-				[[#login-form]]
+			#navbar
+				.small-logo
+				    Image(src='img/our-logo.png')
+				#login-form
 				...
 				
 		theory Banner
+			div
 			...
 
 ##Frag Functions

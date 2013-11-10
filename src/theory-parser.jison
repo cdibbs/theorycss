@@ -72,13 +72,16 @@ tf_node
 	;
 	
 tf_nodedef
-	: tf_islist INDENT tf_ndblock DEDENT
+	: tf_islist
+	{ $$ = [$tf_islist, null]; }
+	| tf_islist INDENT tf_ndblock DEDENT
 	{ $$ = $tf_ndblock; if ($$[0]) $$[0] = $tf_islist.concat($$[0]); }
 	| INDENT tf_ndblock DEDENT
 	{ $$ = $tf_ndblock; }
 	|
+	{ $$ = null; }
 	;
-	
+		
 tf_ndblock
 	: tf_islist tf_list
 	{ $$ = [$1, $2]; }
@@ -102,11 +105,11 @@ tf_list
 	;
 	
 leafid
-	: DOT id
+	: DOT dict_id
 	{ $$ = '.' + yytext; }
-	| POUND id
+	| POUND dict_id
 	{ $$ = '#' + yytext; }
-	| id
+	| dict_id
 	{ $$ = yytext; }
 	| xpath
 	{ $$ = { type : 'xpath', val : $1 }; };
@@ -115,40 +118,40 @@ xpath
 	: XSTRING_LIT;
 
 tf_islist
-	: tf_is
+	: tf_is EOL
 	{ $$ = [$tf_is]; }
-	| tf_islist tf_is
+	| tf_is EOL tf_islist
 	{ $$ = $tf_islist; $$.push($tf_is); }
 	;
 
 tf_is
-	: COLON id AT id IS PIPE? arglist EOL
+	: COLON id AT id IS PIPE? arglist
 	{ $$ = ['tfis', $4, $arglist, $2, !!$6, { loc : @$ }]; }
-	| COLON id IS PIPE? arglist EOL
+	| COLON id IS PIPE? arglist
 	{ $$ = ['tfis', null, $arglist, $2, !!$4, { loc : @$ }]; }
-	| AT id IS PIPE? arglist EOL
+	| AT id IS PIPE? arglist
 	{ $$ = ['tfis', $id, $arglist, null, !!$4, { loc : @$ }]; }
-	| IS PIPE? arglist EOL
+	| IS PIPE? arglist
 	{ $$ = ['tfis', null, $arglist, null, !!$2, { loc : @$ }]; }
 	;
 	
 fragfunc 
-	: FRAGFUNC id LPAREN RPAREN IMPLICATION ffactionblock
+	: FRAGFUNC id LPAREN RPAREN ffactionblock
 		{ $$ = ['ff', $id, [], $ffactionblock, { loc : @$ }]; } 
-	| FRAGFUNC id LPAREN paramlist RPAREN IMPLICATION ffactionblock
+	| FRAGFUNC id LPAREN paramlist RPAREN ffactionblock
 		{ $$ = ['ff', $id, $paramlist, $ffactionblock, { loc : @$ }]; };
 		
 ffactionblock
 	: INDENT ffaction DEDENT
 		{ $$ = $ffaction; }
 	| ffaction
-		{ $$ = $faction; }
+		{ $$ = $ffaction; }
 	;
 		
 ffaction
-	: ffcasetreelist
+	: INDENT ffcasetreelist DEDENT
 		{ $$ = ['ffaction', $ffcasetreelist, null, { loc : @$ }]; }
-	| WHERE assignment_list ffcasetreelist
+	| INDENT WHERE assignment_list EOL ffcasetreelist DEDENT
 		{ $$ = ['ffaction', $ffcasetreelist, $assignment_list, { loc : @$ }]; }
 	;
 	
@@ -191,9 +194,9 @@ ffcasetree_nodedef
 	;
 	
 ffnode
-	: LFFNODE ffid RFFNODE
+	: ffid
 		{ $$ = $ffid; }
-	| LFFNODE ffid TYPIFY id RFFNODE
+	| ffid TYPIFY id
 		{ $$ = [$ffid, $id]; }
 	;
 
@@ -251,13 +254,6 @@ typedef
 		{ $$ = new yy.Type($id); }
 	| id LBRACK RBRACK
 		{ $$ = new yy.Type("Array", $id); }
-	;
-
-sdef
-	: SETSTART id TYPIFY id SETEND assignment_list
-		{ $$ = ['setdef', $2, $4, $assignment_list, { loc : @$ }]; }
-	| SETSTART id SETEND assignment_list
-		{ $$ = ['setdef', $id, $id, $assignment_list, { loc : @$ }]; }
 	;
 	
 fdef
@@ -445,10 +441,23 @@ equivalence_expression
 	| equivalence_expression equiv_op relational_expression
 		{ $$ = [$2, $1, $3, { loc : @$ }]; };
 		
-and_expression
+is_expression
 	: equivalence_expression
+	{ $$ = $1; }
+	| is_expression IS equivalence_expression
+	{ $$ = [$2, $1, $3, { loc : @$ }]; }
+	;
+
+in_expression
+	: is_expression
 		{ $$ = $1; }
-	| and_expression B_AND equivalence_expression
+	| in_expression IN is_expression
+		{ $$ = [$2, $1, $3, { loc : @$ }]; };
+		
+and_expression
+	: in_expression
+		{ $$ = $1; }
+	| and_expression B_AND in_expression
 		{ $$ = [$2, $1, $3, { loc : @$ }]; };
 
 xor_expression
@@ -474,17 +483,11 @@ logical_or_expression
 		{ $$ = $1; }
 	| logical_or_expression OR logical_and_expression
 		{ $$ = [$2, $1, $3, { loc : @$ }]; };
-
-in_expression
+		
+ifnull_expression
 	: logical_or_expression
 		{ $$ = $1; }
-	| in_expression IN logical_or_expression
-		{ $$ = [$2, $1, $3, { loc : @$ }]; };
-
-ifnull_expression
-	: in_expression
-		{ $$ = $1; }
-	| ifnull_expression IFNULL in_expression
+	| ifnull_expression IFNULL logical_or_expression
 		{ $$ = [$2, $1, $3, { loc : @$ }]; };
 	
 test_expression
@@ -611,7 +614,7 @@ dict
 	;
 	
 fordict_start
-	: LBRACE SET expression COLON expression
+	: LBRACE DEF expression COLON expression
 		{ $$ = [ $1, $3 ]; }
 	;
 
@@ -635,8 +638,12 @@ dictdef
 	;
 
 ddatom
-	: id
-	| DICT_ID
+	: dict_id
 	| number
 	| STRING_LIT
+	;
+
+dict_id
+	: id
+	| DICT_ID
 	;

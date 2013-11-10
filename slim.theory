@@ -1,25 +1,28 @@
 Website
-//include 'library' as bob
-//include '/path/to/my.theory' as myns
-//ninclude 'complicated.js' as cool
+/*  use
+    'library' as bob,
+    '/path/to/my.theory' as myns with MyClass as Class,
+    'complicated.js' as cool; */
 
   theory main
     body is |sepia;
-       ::Navigator
-       ::Header
+       Navigator
+       Header
        #main
-         ::Menu
-         ::MyContent
-       ::Footer
+         Menu
+         MyContent
+       Footer
     
     fn sepia() -> 1;
 
-    ff fraggle() ->
-      div -> style me + bro;
+    ff fraggle()
+      div
+        -> style me + bro;
       
-  theory MyContent : Content
+  theory MyContent extends Content
     #content
-        #needs-override is |clean, is |sepia
+      #needs-override is |clean; is |sepia;
+        div
 
   theory Content
     #content
@@ -31,42 +34,41 @@ Website
     gobblyGook = 'see spot run';
 
   theory Navigator
-    #navbar is fixedBar('top', 24px);
-      @mobile is gone;
+    #navbar is fixedBar('top', 24px); @mobile is gone;
       a
         img
-      ul is dropdown()
-        li x 6
+      ul is dropdown();
+        li
           a
 
-  fragfn sepia
-    block
-      -> style bob
-      where bob = 147
-      <- yield bob = bob * 2, janet = bob * 3;
-      ... ->
+    ff sepia()
+      block
+        -> style bob
+           where bob = 147;
+        <- yield bob = bob * 2, janet = bob * 3;
+      ...
+        -> style janet;
 
-  fragfn sepia
-    Colorable
-      <- style { def prop: sepiafy(prop, val) for prop, val in colors }
-	where colors = {from this.props keep colorProperties};
+    ff sepia2()
+      Colorable
+        <- style { def prop: sepiafy(prop, val) for prop, val in colors }
+	   where colors = {from this.props keep colorProperties};
     
     
     // complex properties should 'register' somehow with parent object, so 'font: 16pt/18pt bold Aria;' registers four properties
     colorProperties = ['background-color', 'color', 'border-color', 'font-color', 'background-image' ];
 
-    fn sepiafy(prop, val) -> if (prop is Image) then val.sepia(100) else if (prop is Color) then sepia(val) else val endif;
+    fn sepiafy(prop, val) -> if (prop is Image) then val.sepia(100) elif (prop is Color) then sepia(val) else val endif;
 
-/*(red << 16) | (green << 8) | blue
+    /*(red << 16) | (green << 8) | blue
       where
         red = (c.red * .393) + (c.green *.769) + (c.blue * .189),
         green = (c.red * .349) + (c.green *.686) + (c.blue * .168),
         blue = (c.red * .272) + (c.green *.534) + (c.blue * .131);*/
 
-  fragfn clean
-    ((...
-      <- style { def prop:null for prop in this.props.keys };
-    ))
+    ff clean()
+      ...
+        <- style { def prop:null for prop in this.props.keys };
 
   class Font : CssSerializable
     has family(String), size(UnitNum), style(String), variant(String), weight(FontWeight);
