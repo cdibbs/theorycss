@@ -3,21 +3,22 @@ Theory CSS Metalanguage
 An expressive, functional CSS metalanguage for maintainable ([and even testable](#testing)) styling. 
 
 # Objective
-The emergence of CSS superset languages such as LESS and SASS prove need for more
-expressive power in styling the web. Theory answers this need with three important concepts:
+The emergence of CSS superset languages such as LESS and SASS prove need for a more
+expressive language for styling the web. Theory answers this need by providing high-level,
+relational structure between styled elements in a maintainable way.
 
 ##Tree Fragments
 Akin to nested rules in LESS, these describe rough, in-tree relationships between elements, as well
 as high-level, declarative styling rules.
-
+```
 	html
 		NavigationBar is fixedBar('top', 32px);
 		#content is article(100%);
-
+```
 ##Theories 
 Theories express the high-level architecture of your site. They contain one Tree Fragment, and collections of related Frag Functions,
 and ordinary properties and methods.
-
+```
 	namespace Website
 		theory Main
 			html
@@ -36,7 +37,7 @@ and ordinary properties and methods.
 		theory Banner
 			div
 			...
-
+```
 ##Frag Functions
 These are declarative, inherently recursive functions for dealing with TreeFrags more concisely.
 
