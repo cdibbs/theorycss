@@ -13,9 +13,11 @@ Website
 
     fn alex(a,b) -> { 'background-color' : 'rgba(' + (a*b) + ',' + (b-a) + ',' + (b**a) + ')' };
 
-    ff alex2(a,b) ->
-      ((div)) -> style chris where chris = {};
-        ((block)) -> style chris;
+    ff alex2(a,b)
+      div
+        -> style chris where chris = {};
+        block
+          -> style chris;
 
   theory nother
     notherDiv

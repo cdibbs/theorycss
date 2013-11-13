@@ -128,7 +128,7 @@ var Expressions = function Expressions(stack) {
 				var result = e(fndef.ast[2], fnscope, lazy);
 				return result;
 			} else {
-				throw new Error("Not sure what's going on, here.");
+				throw new Error("Not sure what's going on, here: " + fndef);
 			}
 		},
 		"{but}" : function(expr, butlist, meta, e, scope, lazy) {

@@ -20,7 +20,7 @@ TheoryTests
 		comp1 = { from dict but a = 3 };
 		comp2 = { from dict with \k, v => v * v };
 		comp3 = { from dict keep ['a', 'b'] };
-		comp3 = { set x : y for k in range };
+		comp4 = { set x : y for k in range };
 		
 
 		complicated = (if within dict: a != c

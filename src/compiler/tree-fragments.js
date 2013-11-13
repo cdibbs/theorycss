@@ -48,8 +48,8 @@ var TreeFragments = function TreeFragments(rootScope) {
 					var theory = tresolve(theories[i]);
 					if (theory) {
 						var tf = new TreeFragments(theory.scope);
-						var ld = tf.processTree(theory.val.getEntry().ast);
-						leafDict.addChild(ld);
+						//var ld = tf.processTree(theory.val.getEntry().ast);
+						//leafDict.addChild(ld);
 					} else {
 						throw new Error("Very Bad Things");
 					}

@@ -18,8 +18,6 @@ imp							"->"
 revimp						"<-"
 units						(?:[a-zA-Z][a-zA-Z0-9]*|\%)
 
-%s PAREN
-%s BRACE
 /* block inside of which whitespace is non-semantic */
 %s FREEDOM
 
@@ -43,11 +41,11 @@ units						(?:[a-zA-Z][a-zA-Z0-9]*|\%)
 					this.begin('FREEDOM');
 					return 'IMPLICATION';
 				%};
-<INITIAL>"^"	%{
+<INITIAL>"|^"	%{
 					this.begin('FREEDOM');
 					return 'UP';
 				%};
-<INITIAL>"v"|"V"	%{
+<INITIAL>"|v"|"|V"	%{
 					this.begin('FREEDOM');
 					return 'DOWN';
 				%};
@@ -95,12 +93,10 @@ units						(?:[a-zA-Z][a-zA-Z0-9]*|\%)
 "?!"			return 'EXCUSEME';
 "??"			return 'IFNULL';
 "?"				return 'QUESTION';
-"{"				%{ this.begin('BRACE'); return 'LBRACE'; %};
+"{"				%{ this.begin('FREEDOM'); return 'LBRACE'; %};
 "}"				%{ this.popState(); return 'RBRACE'; %};
-<BRACE>\s+		/* ignore whitespace in dictionary definitions */
-"("				%{ this.begin('PAREN'); return 'LPAREN'; %};
+"("				%{ this.begin('FREEDOM'); return 'LPAREN'; %};
 ")"				%{ this.popState(); return 'RPAREN'; %};
-<PAREN>\s+		/* ignore whitespace in parenthetic expressions */
 "["				return 'LBRACKET';
 "]"				return 'RBRACKET';
 ":"				return 'COLON';

@@ -12,46 +12,46 @@ Website
 					div.content :: Article //-> 3, x 3 
 				div.footer
 				
-		ff curveddeck() ->
-			((any))
-				((...))
-					v style joe;
-					^ style bob;
+		ff curveddeck()
+			any
+				...
+					|v style joe;
+					|^ style bob;
 
-		ff scaleSibs(fsize) ->
-			where fsize = 14pt
-			((...))
-				v style { 'font-size' : fsize }
+		ff scaleSibs(fsize)
+			where fsize = 14pt;
+			...
+				|v style { 'font-size' : fsize }
 					yield fsize = fsize * 1.2;
 
-		fn fib(n) ->
-			if (n <= 2) then 1
-			else fib(n - 1) + fib(n - 2)
-			endif;
+		fn fib(n) -> 
+      if (n <= 2) then 1
+      else fib(n - 1) + fib(n - 2)
+      endif;
 			
-		ff gradientSibs(color1, color2) ->
-			where bg = 'background-color'
-			((block))
-				((one))
-					v style { bg : color1 }
+		ff gradientSibs(color1, color2)
+			where bg = 'background-color';
+			block
+				one
+					|v style { bg : color1 }
 						yield count = 2;
-				((...))
-					v yield count = count + 1;
-					^ style { bg : (color1 + color2) * index / count + color1 }
+				...
+					|v yield count = count + 1;
+					|^ style { bg : (color1 + color2) * index / count + color1 }
 						where index = index + 1;
-				((one))
-					^ style { bg : color2 }
+				one
+					|^ style { bg : color2 }
 						yield index = 1;
 				
-		ff fixedbar(side, thickness) -> 
-			((block :: innerHeight))
+		ff fixedbar(side, thickness) 
+			block :: innerHeight
 				-> style (fixed + (boxSides - oppositeSide(side)));
 				<- style if t?! then { 'axis' : t } else nothing endif
 					where axis = if (side in array('top', 'bottom')) then 'height' else 'width' endif
 					yield thickness = t;
-				((...)) // e.g., bootstrap-y .container, .row, .row-fluid, etc
-					((a))
-						((sizeable))
+				... // e.g., bootstrap-y .container, .row, .row-fluid, etc
+					a
+						sizeable
 							<- yield t = if (thickness!) then
 									thickness
 								else
@@ -62,7 +62,7 @@ Website
 									endif
 								endif;
 								
-		fn oppositeSide(side) -> 
+		fn oppositeSide(side) ->
 			sides[(sides.indexOf(side) + 2) % 4]
 			where sides = ['top', 'right', 'bottom', 'left'];
 
