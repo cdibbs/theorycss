@@ -117,7 +117,7 @@ units						(?:[a-zA-Z][a-zA-Z0-9]*|\%)
 "reduce"		return 'REDUCE';
 "for"			return 'FOR';
 "from"			return 'FROM';
-"def"			return 'DEF';
+"set"			return 'SET';
 "if"			return 'IF';
 "then"			return 'THEN';
 "int"			return 'INT';

@@ -614,7 +614,7 @@ dict
 	;
 	
 fordict_start
-	: LBRACE DEF expression COLON expression
+	: LBRACE SET expression COLON expression
 		{ $$ = [ $1, $3 ]; }
 	;
 
