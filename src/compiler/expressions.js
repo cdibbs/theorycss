@@ -3,9 +3,10 @@ var u = require('../util').u,
 	err = require('./errors').err,
 	warn = require('./errors').warn;
 	 	
-var Expressions = function Expressions(stack) {
+var Expressions = function Expressions(stack, node) {
 	var self = this;
 	var stack = stack || [];
+	var node = node || null;
 	
 	self.evaluate = function(ast, scope, lazy) {
 		//if (ast[0] === '=' && ast[2][0] == 'comp1')
@@ -97,8 +98,8 @@ var Expressions = function Expressions(stack) {
 		'str' : function(p1, e) { return p1; },
 		'id' : function(id, meta, e, scope, lazy) {
 			var val = scope.resolve(id);
-			//console.log(id, " resolved as ", val)
-			if (val.type === 'fn')
+			// console.log(id, " resolved as ", val)
+			if (val.type === 'fn' || val.type === 'ff')
 				return val;
 			
 			if (val['undefined'] === 'undefined') {
@@ -127,6 +128,9 @@ var Expressions = function Expressions(stack) {
 				}
 				var result = e(fndef.ast[2], fnscope, lazy);
 				return result;
+			} else if (typeof fndef === 'object' && fndef.type === 'ff') {
+				fndef.scope
+				console.log(fn, args, e(fn, scope));
 			} else {
 				throw new Error("Not sure what's going on, here: " + fndef);
 			}
@@ -190,13 +194,7 @@ var Expressions = function Expressions(stack) {
 			return newdict;
 		},
 		'ff' : function(id, paramlist, actionblock, meta, e, scope) {
-			throw new err.UsageError("Frag functions cannot be used within expressions.", meta, scope);
-			// TODO: actually, they can be. They can return a dictionary (tuple with named values)
-			// in their last yield. Those values could be meaningfully used within an outer expression.
-			
-			// 1. look up treefrag 'this' object which gets set during its evaluation
-			// 2. use the node referenced by 'this' to begin processing the treefrag
-			// 3. return the final 'tuple' from the frag function			
+			console.log(id, paramlist, actionblock);			
 		},
 		'lambda' : function(paramlist, expr, meta, e, scope) {
 			return { type : 'fn', ast : [paramlist, null, expr], val : null, lazy : true, scope : scope };
