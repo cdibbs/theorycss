@@ -28,26 +28,26 @@ units						(?:[a-zA-Z][a-zA-Z0-9]*|\%)
 "library"				return 'LIBRARY';
 "extends"				return 'EXTENDS';
 "uses"			return 'USES';
-"import"		%{ this.begin('FREEDOM'); return 'IMPORT'; %};
+"import"		%{ this.myBegin('FREEDOM'); return 'IMPORT'; %};
 "true"			return 'TRUE';
 "false"			return 'FALSE';
 "data"			return 'DATA';
 "fn"			return 'FUNCTION';
 "ff"			return 'FRAGFUNC';
 {revimp} %{
-					this.begin('FREEDOM');
+					this.myBegin('FREEDOM', '<-');
 					return 'REVIMPLICATION';
 				%};
 {imp}	%{
-					this.begin('FREEDOM');
+					this.myBegin('FREEDOM', '->');
 					return 'IMPLICATION';
 				%};
 <INITIAL>"|^"	%{
-					this.begin('FREEDOM');
+					this.myBegin('FREEDOM', '|^');
 					return 'UP';
 				%};
 <INITIAL>"|v"|"|V"	%{
-					this.begin('FREEDOM');
+					this.myBegin('FREEDOM', '|v');
 					return 'DOWN';
 				%};
 "+"				return 'PLUS';
@@ -76,10 +76,11 @@ units						(?:[a-zA-Z][a-zA-Z0-9]*|\%)
 "gt"|">"		return 'GT';
 "lt"|"<"		return 'LT';
 "::"			return 'TYPIFY';
-"="				%{ this.begin('FREEDOM'); return 'ASSIGN'; %};
-"@="			%{ this.begin('FREEDOM'); return 'CASEASSIGN'; %};
+<INITIAL>"="	%{ this.myBegin('FREEDOM', '='); return 'ASSIGN'; %};
+<FREEDOM>"="	%{ return 'ASSIGN'; %};
+"@="			%{ this.myBegin('FREEDOM', '@='); return 'CASEASSIGN'; %};
 <FREEDOM>\s+	/* ignore whitespace in certain blocks of code to give the programmer more freedom */
-<FREEDOM>";" %{ this.popState(); return 'EOL'; %};
+<FREEDOM>";" %{ this.myPopState(); return 'EOL'; %};
 "@"				return 'AT';
 "**"			return 'POWER';
 "*"				return 'TIMES';
@@ -94,14 +95,14 @@ units						(?:[a-zA-Z][a-zA-Z0-9]*|\%)
 "?!"			return 'EXCUSEME';
 "??"			return 'IFNULL';
 "?"				return 'QUESTION';
-"{"				%{ this.begin('FREEDOM'); return 'LBRACE'; %};
-"}"				%{ this.popState(); return 'RBRACE'; %};
-"("				%{ this.begin('FREEDOM'); return 'LPAREN'; %};
-")"				%{ this.popState(); return 'RPAREN'; %};
+"{"				%{ this.myBegin('FREEDOM', '{'); return 'LBRACE'; %};
+"}"				%{ this.myPopState(); return 'RBRACE'; %};
+"("				%{ this.myBegin('FREEDOM', '('); return 'LPAREN'; %};
+")"				%{ this.myPopState(); return 'RPAREN'; %};
 "["				return 'LBRACKET';
 "]"				return 'RBRACKET';
 ":"				return 'COLON';
-<FREEDOM>";"			%{ this.popState(); return 'EOL'; %};
+<FREEDOM>";"			%{ this.myPopState(); return 'EOL'; %};
 <FREEDOM>\s+			/* ignore whitespace within functions */
 ";"				return 'EOL';
 ","				return 'COMMA';
@@ -154,14 +155,14 @@ units						(?:[a-zA-Z][a-zA-Z0-9]*|\%)
 				    if (indentation > this._iemitstack[0]) {
 				        this._iemitstack.unshift(indentation);
 				        this._log(this.topState(), "INDENT", this.stateStackSize());
-				        this.begin(this.topState()); // deepen our current state
+				        this.myBegin(this.topState(), 'deepening, due to indent'); // deepen our current state
 				        return 'INDENT';
 				    }
 				
 				    var tokens = [];
 				
 				    while (indentation < this._iemitstack[0]) {
-				    	this.popState();
+				    	this.myPopState();
 				    	this._log(this.topState(), "DEDENT", this.stateStackSize());
 				        tokens.push("DEDENT");
 				        this._iemitstack.shift();
@@ -175,6 +176,8 @@ jisonLexerFn = lexer.setInput;
 lexer.setInput = function(input) {
 	var debug = false;
 	this._iemitstack = [0];
-	this._log = function() { if (debug) console.log.apply(arguments); };
+	this.myBegin = function(state, why) { this._log("Begin " + state + " because " + why); this.begin(state); };
+	this.myPopState = function() { this._log("Popping " + this.popState() + " to " + this.topState()); };
+	this._log = function() { if (debug) console.log.apply(this, arguments); };
 	return jisonLexerFn.call(this, input);
 };
