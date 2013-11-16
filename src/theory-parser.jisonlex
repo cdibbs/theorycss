@@ -28,6 +28,7 @@ units						(?:[a-zA-Z][a-zA-Z0-9]*|\%)
 "library"				return 'LIBRARY';
 "extends"				return 'EXTENDS';
 "uses"			return 'USES';
+"import"		%{ this.begin('FREEDOM'); return 'IMPORT'; %};
 "true"			return 'TRUE';
 "false"			return 'FALSE';
 "data"			return 'DATA';
@@ -75,7 +76,7 @@ units						(?:[a-zA-Z][a-zA-Z0-9]*|\%)
 "gt"|">"		return 'GT';
 "lt"|"<"		return 'LT';
 "::"			return 'TYPIFY';
-"="				return 'ASSIGN';
+"="				%{ this.begin('FREEDOM'); return 'ASSIGN'; %};
 "@="			%{ this.begin('FREEDOM'); return 'CASEASSIGN'; %};
 <FREEDOM>\s+	/* ignore whitespace in certain blocks of code to give the programmer more freedom */
 <FREEDOM>";" %{ this.popState(); return 'EOL'; %};
@@ -112,6 +113,7 @@ units						(?:[a-zA-Z][a-zA-Z0-9]*|\%)
 "style"			return 'STYLE';
 "where"			return 'WHERE';
 "yield"			return 'YIELD';
+"into"			return 'INTO';
 "in"			return 'IN';
 "map"			return 'MAP';
 "reduce"		return 'REDUCE';

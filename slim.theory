@@ -1,10 +1,10 @@
 Website
-/*  use
-    'library' as bob,
-    '/path/to/my.theory' as myns with MyClass as Class,
-    'complicated.js' as cool; */
+  import
+    'library' into bob,
+    '/path/to/my.theory' into myns,
+    'complicated.js' into cool;
 
-  theory main
+  theory main uses bob
     body is |sepia;
        Navigator
        Header
@@ -12,7 +12,7 @@ Website
          Menu
          MyContent
        Footer
-    
+
     fn sepia() -> 1;
 
     ff fraggle()
@@ -46,12 +46,12 @@ Website
         -> style bob
            where bob = 147;
         <- yield bob = bob * 2, janet = bob * 3;
-      ...
-        -> style janet;
+        ...
+          -> style janet;
 
     ff sepia2()
       Colorable
-        <- style { def prop: sepiafy(prop, val) for prop, val in colors }
+        <- style { set prop: sepiafy(prop, val) for prop, val in colors }
 	   where colors = {from this.props keep colorProperties};
     
     
@@ -68,7 +68,7 @@ Website
 
     ff clean()
       ...
-        <- style { def prop:null for prop in this.props.keys };
+        <- style { set prop:null for prop in this.props.keys };
 
   class Font : CssSerializable
     has family(String), size(UnitNum), style(String), variant(String), weight(FontWeight);

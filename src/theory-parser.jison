@@ -28,6 +28,24 @@ namespace_item
 	: theory
 	| data
 	| library
+	| import
+	;
+	
+import : IMPORT import_list EOL
+	{ $$ = ['import', $import_list]; };
+	
+import_list
+	: import_clause
+	{ $$ = [$import_clause]; }
+	| import_list COMMA import_clause
+	{ $$ = $import_list; $$.push($import_clause); }
+	;
+
+import_clause
+	: STRING_LIT
+	{ $$ = [$1, null]; } 
+	| STRING_LIT INTO id
+	{ $$ = [$1, $id]; }
 	;
 	
 library
@@ -44,8 +62,18 @@ libdef
 theory
 	: THEORY id INDENT treefrag_block theorybody DEDENT
 		{ $$ = ['theory', $2, null, $treefrag_block, $theorybody, { loc : @$ }]; }
-	| THEORY id EXTENDS id INDENT treefrag_block theorybody DEDENT
-		{ $$ = ['theory', $2, $4, $treefrag_block, $theorybody, { loc : @$ }]; }	
+	| THEORY id theory_ext INDENT treefrag_block theorybody DEDENT
+		{ $$ = ['theory', $2, $4, $treefrag_block, $theorybody, { loc : @$ }]; }
+	| THEORY id 	
+	;
+	
+theory_ext
+	: EXTENDS id
+	{ $$ = [$id, []]; }
+	| EXTENDS id USES paramlist
+	{ $$ = [$id, $paramlist]; }
+	| USES paramlist
+	{ $$ = [null, $paramlist]; }
 	;
 	
 theorybody : (def | NEWLINE)*;
@@ -67,8 +95,8 @@ treefrag
 	;
 
 tf_node
-	: leafid tf_typify
-	{ $$ = ['tfnode', $leafid, $tf_typify, { loc : @$ }]; }
+	: GT? leafid tf_typify
+	{ $$ = ['tfnode', $leafid, $tf_typify, !!$1 /* direct descendant */, { loc : @$ }]; }
 	;
 	
 tf_nodedef
@@ -644,6 +672,6 @@ ddatom
 	;
 
 dict_id
-	: id
-	| DICT_ID
+	: DICT_ID
+	| id
 	;
