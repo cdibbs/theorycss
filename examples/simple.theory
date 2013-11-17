@@ -19,6 +19,15 @@ Website
         block
           -> style chris;
 
+    ff makeColor(c)
+      any
+        -> style { 'background-color' : c };
+        #header
+        ...
+          ...
+        div 
+      bob
+
   theory nother
     notherDiv
       withChild

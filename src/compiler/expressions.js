@@ -129,7 +129,7 @@ var Expressions = function Expressions(stack, node) {
 				var result = e(fndef.ast[2], fnscope, lazy);
 				return result;
 			} else if (typeof fndef === 'object' && fndef.type === 'ff') {
-				fndef.scope
+				//fndef.scope
 				console.log(fn, args, e(fn, scope));
 			} else {
 				throw new Error("Not sure what's going on, here: " + fndef);
