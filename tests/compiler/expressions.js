@@ -27,6 +27,10 @@ var tests = [
 	["g", "\n    g = basicFn() * recursiveFn(5);\n    fn recursiveFn(i) -> if i == 0 then 0 else i + recursiveFn(i-1) endif;\n", function(topic) { assert.equal(topic, 26565); }],
 	["pow", "pow = (2 ** 8 << 4 * 3) >> 5;\n", function(topic) { assert.equal(topic, 32768); }],
 	["bitwise", "bitwise = (0x123 & 255) | 256;\n", function(topic) { assert.equal(topic, 291); }],
+	["inkeyword", "inkeyword = 6 in [1,2,3];", function(topic) { assert.equal(topic, false); }],
+	["inkeyword1", "inkeyword1 = 6 in [1,2,6];", function(topic) { assert.equal(topic, true); }],
+	["indict", "indict = 'background-color' in { 'abc' : 'def', 'background-color' : 'red' };", function(topic) { assert.equal(topic, true); }],
+	["indict1", "indict1 = 'background-color' in { 'abc' : 'def', 'ghi' : 'jkl' };", function(topic) { assert.equal(topic, false); }],
 	["dictadd", "dictadd = { abc : '123', cde : '456', 'key' : 'value' } + { fgh : '789', 'abc' : 999 };\n",
 		function(topic) { assert.deepEqual(topic[1], { key: 'value' , cde: '456', abc: 999, fgh: '789' }); }],
 	["dictsubarr", "dictsubarr = { abc : '123', cde : '456', efg : 789 } - ['cde', 'abc'];\n", function(topic) { assert.deepEqual(topic[1], { efg : 789 }); }],
@@ -64,7 +68,20 @@ var tests = [
 	 	function(topic) { assert.deepEqual(topic[1], { b : 2, c : 3}); }],	 	
  	["comp4",
 	 	"\n    comp4 = { set x : x * x for x in [1,2,3] };\n",
-	 	function(topic) { assert.deepEqual(topic[1], { '1' : 1, '2' : 4, '3' : 9}); }]
+	 	function(topic) { assert.deepEqual(topic[1], { '1' : 1, '2' : 4, '3' : 9}); }],
+	["comp5",
+	 	"\n    comp5 = { set x : x * y for x, y in { 1 : 2, 3 : 4, 5 : 6 } };\n",
+	 	function(topic) { assert.deepEqual(topic[1], { '1' : 2, '3' : 12, '5' : 30}); }],
+	["map1",
+	 	"\n    map1 = map(\\x => x * x, [1,2,3,4,5]);\n",
+	 	function(topic) { assert.deepEqual(topic[1], [1,4,9,16,25]); }],
+    ["reduce1",
+	 	"\n    reduce1 = reduce(\\x,y => x * y, [1,2,3,4,5], 1);\n",
+	 	function(topic) { assert.deepEqual(topic, 120); }],
+	["reducedict",
+	 	"\n    reducedict = reduce(\\k,v,r,w => r + k * v, { 1:2, 3:4, 5:6 }, 0);\n",
+	 	function(topic) { assert.deepEqual(topic, 44); }]
+
 ];
 
 for (var i=0; i<tests.length; i++) {
