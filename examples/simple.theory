@@ -13,6 +13,15 @@ Website
 
     fn alex(a,b) -> { 'background-color' : 'rgba(' + (a*b) + ',' + (b-a) + ',' + (b**a) + ')' };
 
+    fn redu(afn, arr, ini) ->
+			reduceRec(afn, arr, ini, 0)
+      where reduceRec = \ini, i =>
+        if (i < arr.length) then
+          reduceRec(afn(arr[i], ini, arr), i+1)
+        else
+          ini
+        endif;
+
     ff alex2(a,b)
       div
         -> style chris where chris = {};
