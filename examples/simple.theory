@@ -1,8 +1,10 @@
-Website
+website
+  import "test" into test;
+
   theory main
     div is a.block;
       #ident
-        is { color: 'blue' }, alex(5,7), { 'font-size' : redu(\x, a => x + a, [1,2,3,4],0) };
+        is { color: 'blue' }, alex(5,7), { 'font-size' : redu(\x, a => _log(x + a), [1,2,3,4],0) };
         @bob is { 'font-size' : 12pt };
         chris > was
           is { here: "!" };
@@ -13,14 +15,13 @@ Website
 
     fn alex(a,b) -> { 'background-color' : 'rgba(' + (a*b) + ',' + (b-a) + ',' + (b**a) + ')' };
 
-    fn redu(afn, arr, ini) ->
-			reduceRec(afn, arr, ini, 0);
+    fn redu(afn, arr, ini) -> reduceRec(afn, arr, ini, 4);
 
     fn reduceRec(afn, arr, ini, i) ->
-        if (i < arr.length) then
-          reduceRec(afn, arr, afn(arr[i], ini, arr), i+1)
-        else
+        if (_log(i) == 0) then
           0
+        else 
+          reduceRec(afn, arr, afn(arr[i], ini, arr), i-1)
         endif;
 
     ff alex2(a,b)

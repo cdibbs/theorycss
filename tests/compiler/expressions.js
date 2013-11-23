@@ -58,16 +58,16 @@ var tests = [
 		function(topic) { assert.deepEqual(topic[1], { 'background-color' : '33333333' }); }
 	],
 	["accessor1",
-	 	"\n    accessor1 = dict['a'];\n",
-	 	function(topic) { assert.equal(topic, '1'); }
+	 	"\n    accessor1 = dictadd['abc'];\n",
+	 	function(topic) { assert.equal(topic, '999'); }
 	],
 	["accessor2",
 	 	"\n    accessor2 = [1,2,3,4][2];\n",
 	 	function(topic) { assert.equal(topic, '3'); }
 	],
 	["accessor3",
-	 	"\n    accessor3 = dict.b;\n",
-	 	function(topic) { assert.equal(topic, '2'); }
+	 	"\n    accessor3 = dictadd.cde;\n",
+	 	function(topic) { assert.equal(topic, '456'); }
 	],
 	["comp1",
 	 	"\n    dict = { a : 1, b : 2, c : 3 };\n    comp1 = { from dict but a = 3 };\n",

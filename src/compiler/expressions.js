@@ -57,6 +57,21 @@ var Expressions = function Expressions(stack, node) {
 		return a !== null && (typeof a === 'object' && a.units);
 	};
 	
+	self.genericComparisonOp = function(a, b, meta, e, scope, op) {
+		var a = e(a, scope), b = e(b, scope);
+		var answer;
+		switch(op) {
+			case '==': 	answer = (a == b); break;
+			case '>=': 	answer = (a >= b); break;
+			case '<=': 	answer = (a <= b); break;
+			case '>': 	answer = (a > b); break;
+			case '<': 	answer = (a < b); break;
+			default:
+				throw new err.NotImplemented(op + " isn't implemented, yet.");
+		}
+		return answer;
+	};
+		
 	self.genericNumericOp = function(a, b, meta, e, scope, op) {
 		var a = e(a, scope), b = e(b, scope);
 		if (self.isNumber(a) && self.isNumber(b)) {
@@ -91,10 +106,11 @@ var Expressions = function Expressions(stack, node) {
 	};
 	
 	self.accessor = function(expr1, expr2, meta, e, scope, lazy) {
-		var a = e(expr1, e, scope, lazy), b = e(expr2, e, scope, lazy);
+		var a = e(expr1, scope), b = e(expr2, scope);
+		console.log('a and b ', a, b);
 		if (a instanceof Array) {
 			if (a[0] === 'dict' || a[0] === 'array') {
-				console.log("Accessing ", b);
+				console.log("Accessing ", a);
 				return a[1][b];
 			}
 		}
@@ -125,7 +141,12 @@ var Expressions = function Expressions(stack, node) {
 		},
 		'()' : function(fn, args, meta, e, scope, lazy) {
 			var fndef = e(fn, scope);
-			if (typeof fndef === 'object' && fndef.type === 'fn') {
+			if (typeof fndef === 'function') {
+				// "native" function call
+				var nargs = u.clone(args);
+				nargs.unshift({ e : e, scope : scope, node : node });
+				return fndef.apply(this, nargs);
+			} else if (typeof fndef === 'object' && fndef.type === 'fn') {
 				var scope = fndef.scope || scope;
 				var params = fndef.ast[0];
 				if (args.length > params.length)
@@ -209,7 +230,8 @@ var Expressions = function Expressions(stack, node) {
 		},
 		'test' : function(condList, meta, e, scope) {
 			for (var i=0, l=condList.length; i<l; i++) {
-				if (e(condList[i][0], scope)) {
+				var result = e(condList[i][0], scope);
+				if (result) {
 					return e(condList[i][1], scope);
 				}
 			}
@@ -243,9 +265,11 @@ var Expressions = function Expressions(stack, node) {
 		'=' : function(id, expr, meta, e, scope) {
 			scope.addSymbol(id, expr); // lazily eval?
 		},
-		'==' : function(a, b, meta, e, scope) {
-			return e(a, scope) == e(b, scope);
-		},
+		'==' : self.genericComparisonOp,
+		'>=' : self.genericComparisonOp,
+		'<=' : self.genericComparisonOp,
+		'>' : self.genericComparisonOp,
+		'<' : self.genericComparisonOp,		
 		'*' : function(p1, p2, meta, e, scope) {
 			var a = e(p1, scope), b = e(p2, scope);
 			if (self.isNumber(a) && self.isNumber(b)) {

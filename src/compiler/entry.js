@@ -3,6 +3,7 @@ var _ = require("underscore");
 var Expressions = require('./expressions').Expressions;
 var StateManager = require('./state-manager').StateManager;
 var TreeFrags = require('./tree-fragments').TreeFragments;
+var coreLib = require('./corelib/core.js');
 var err = require('./errors').err;
 var debugMode = true;
 
@@ -29,6 +30,7 @@ var Compiler = function(opts) {
 			try {
 				if (ast[0] === 'program') {
 					var namespaces = ast[1];
+					self.import(coreLib, rootScope);
 					namespaces.forEach(function(ns) {
 						rootScope.addSymbol(ns[1], 'ns', self.evalNamespace(ns.slice(1), rootScope));
 					});
@@ -83,12 +85,27 @@ var Compiler = function(opts) {
 						err('Multiple main theories found.');
 					}
 				}
+			} else if (symbol.length >= 3 && symbol[0] === 'import') {
+				symbol[1].forEach(function(impClause) {
+					self.import(impClause, nsscope);
+				});
 			} else {
-				err('Unsupported construct, ' + symbol[0] + ', found.');
+				throw new err.Unsupported('Unsupported construct, ' + symbol[0] + ', found.', nsAST[2], scope);
 			}
 		});
 		
 		return nsscope;	
+	};
+	
+	self.import = function(clause, scope) {
+		if (typeof clause === 'function') {
+			var imp = clause({});
+			var props = Object.keys(imp);
+			for(var i=0, l=props.length; i<l; i++) {
+				var type = typeof imp[props[i]] === 'function' ? 'nfn' : '';
+				scope.addSymbol(props[i], type, imp[props[i]], '["Native" JS Code]', false, scope);
+			}
+		}
 	};
 		
 	self.evalTheory = function evalTheory(theoryAST, nsscope) {

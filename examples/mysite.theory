@@ -1,12 +1,12 @@
 Website
 	theory Main
 		html
-			body
+			body is |sepia();
 				div.navbar
 					:hover is { 'z-index' : "103" };
 					@tablet is fixedbar('top', '32px') + { 'happy' : 'joy' };
 					@mobile is gone;
-				div.main 
+				div.main is |something();
 					div.leftmenu :: LeftMenu
 						is scaleSibs(14.0);
 					div.content :: Article //-> 3, x 3 
@@ -56,9 +56,9 @@ Website
 									thickness
 								else
 									if (align in array('top', 'bottom')) then
-										img.height
+										sizeable.height
 									else
-										img.width
+										sizeable.width
 									endif
 								endif;
 								

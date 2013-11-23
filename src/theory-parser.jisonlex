@@ -1,4 +1,4 @@
-id							[a-zA-Z][a-zA-Z0-9_']*
+id							[a-zA-Z_][a-zA-Z0-9_']*
 nonascii					[\240-\377]
 unicode						\\{h}{1,6}
 escape						{unicode}|\\[^\r\n\f0-9a-f]

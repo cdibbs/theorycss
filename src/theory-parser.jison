@@ -32,7 +32,7 @@ namespace_item
 	;
 	
 import : IMPORT import_list EOL
-	{ $$ = ['import', $import_list]; };
+	{ $$ = ['import', $import_list, { loc : @$ }]; };
 	
 import_list
 	: import_clause
@@ -43,14 +43,14 @@ import_list
 
 import_clause
 	: STRING_LIT
-	{ $$ = [$1, null]; } 
+	{ $$ = [$1, null, { loc : @$ }]; } 
 	| STRING_LIT INTO id
-	{ $$ = [$1, $id]; }
+	{ $$ = [$1, $id, { loc : @$ }]; }
 	;
 	
 library
 	: LIBRARY id INDENT libbody DEDENT
-	{ $$ = ['lib', $2, $libbody]; }
+	{ $$ = ['lib', $2, $libbody, { loc : @$ }]; }
 	;
 
 libbody
@@ -418,7 +418,7 @@ member_op
 	: postfix_expression LBRACKET expression RBRACKET
 		{ $$ = ['[]', $1, $3, { loc : @$ }]; }
 	| postfix_expression DOT id
-		{ $$ = ['.', $1, $3, { loc : @$ }]; }
+		{ $$ = ['.', $1, ['str', $3], { loc : @$ }]; }
 	;
 	
 postfix_expression
