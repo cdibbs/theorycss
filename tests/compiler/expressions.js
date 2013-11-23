@@ -27,10 +27,10 @@ var tests = [
 	["g", "\n    g = basicFn() * recursiveFn(5);\n    fn recursiveFn(i) -> if i == 0 then 0 else i + recursiveFn(i-1) endif;\n", function(topic) { assert.equal(topic, 26565); }],
 	["pow", "pow = (2 ** 8 << 4 * 3) >> 5;\n", function(topic) { assert.equal(topic, 32768); }],
 	["bitwise", "bitwise = (0x123 & 255) | 256;\n", function(topic) { assert.equal(topic, 291); }],
-	["inkeyword", "inkeyword = 6 in [1,2,3];", function(topic) { assert.equal(topic, false); }],
-	["inkeyword1", "inkeyword1 = 6 in [1,2,6];", function(topic) { assert.equal(topic, true); }],
-	["indict", "indict = 'background-color' in { 'abc' : 'def', 'background-color' : 'red' };", function(topic) { assert.equal(topic, true); }],
-	["indict1", "indict1 = 'background-color' in { 'abc' : 'def', 'ghi' : 'jkl' };", function(topic) { assert.equal(topic, false); }],
+	["inkeyword", "inkeyword = 6 in [1,2,3];", function(topic) { assert.isFalse(topic); }],
+	["inkeyword1", "inkeyword1 = 6 in [1,2,6];", function(topic) { assert.isTrue(topic); }],
+	["indict", "indict = 'background-color' in { 'abc' : 'def', 'background-color' : 'red' };", function(topic) { assert.isTrue(topic); }],
+	["indict1", "indict1 = 'background-color' in { 'abc' : 'def', 'ghi' : 'jkl' };", function(topic) { assert.isFalse(topic); }],
 	["dictadd", "dictadd = { abc : '123', cde : '456', 'key' : 'value' } + { fgh : '789', 'abc' : 999 };\n",
 		function(topic) { assert.deepEqual(topic[1], { key: 'value' , cde: '456', abc: 999, fgh: '789' }); }],
 	["dictsubarr", "dictsubarr = { abc : '123', cde : '456', efg : 789 } - ['cde', 'abc'];\n", function(topic) { assert.deepEqual(topic[1], { efg : 789 }); }],
@@ -57,6 +57,18 @@ var tests = [
 		+ "    final = { 'background-color' : verbose_name'(1,2) };\n",
 		function(topic) { assert.deepEqual(topic[1], { 'background-color' : '33333333' }); }
 	],
+	["accessor1",
+	 	"\n    accessor1 = dict['a'];\n",
+	 	function(topic) { assert.equal(topic, '1'); }
+	],
+	["accessor2",
+	 	"\n    accessor2 = [1,2,3,4][2];\n",
+	 	function(topic) { assert.equal(topic, '3'); }
+	],
+	["accessor3",
+	 	"\n    accessor3 = dict.b;\n",
+	 	function(topic) { assert.equal(topic, '2'); }
+	],
 	["comp1",
 	 	"\n    dict = { a : 1, b : 2, c : 3 };\n    comp1 = { from dict but a = 3 };\n",
 	 	function(topic) { assert.deepEqual(topic[1], { a : 3, b : 2, c : 3}); }],
@@ -76,12 +88,11 @@ var tests = [
 	 	"\n    map1 = map(\\x => x * x, [1,2,3,4,5]);\n",
 	 	function(topic) { assert.deepEqual(topic[1], [1,4,9,16,25]); }],
     ["reduce1",
-	 	"\n    reduce1 = reduce(\\x,y => x * y, [1,2,3,4,5], 1);\n",
+	 	"\n    reduce1 = reduce(\\x,y,w => x * y, [1,2,3,4,5], 1);\n",
 	 	function(topic) { assert.deepEqual(topic, 120); }],
 	["reducedict",
 	 	"\n    reducedict = reduce(\\k,v,r,w => r + k * v, { 1:2, 3:4, 5:6 }, 0);\n",
 	 	function(topic) { assert.deepEqual(topic, 44); }]
-
 ];
 
 for (var i=0; i<tests.length; i++) {

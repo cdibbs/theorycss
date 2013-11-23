@@ -9,9 +9,6 @@ var Expressions = function Expressions(stack, node) {
 	var node = node || null;
 	
 	self.evaluate = function(ast, scope, lazy) {
-		//if (ast[0] === '=' && ast[2][0] == 'comp1')
-			//console.log(ast);
-			
 		if (ast instanceof Array && ast.length > 0) {
 			if (typeof self.ops[ast[0]] !== 'undefined') {
 				var params = u.ipush(ast.slice(1), self.evaluate, scope, ast[0], lazy);
@@ -91,6 +88,17 @@ var Expressions = function Expressions(stack, node) {
 		} else {
 			throw new err.NotANumber('Not a number', meta, scope);
 		}
+	};
+	
+	self.accessor = function(expr1, expr2, meta, e, scope, lazy) {
+		var a = e(expr1, e, scope, lazy), b = e(expr2, e, scope, lazy);
+		if (a instanceof Array) {
+			if (a[0] === 'dict' || a[0] === 'array') {
+				console.log("Accessing ", b);
+				return a[1][b];
+			}
+		}
+		throw new err.UsageError('Accessors valid only on arrays and dicts.', meta, scope);
 	};
 	
 	self.ops = {
@@ -206,6 +214,16 @@ var Expressions = function Expressions(stack, node) {
 				}
 			}
 		},
+		'in' : function(expr1, expr2, meta, e, scope, lazy) {
+			var a = e(expr1, scope, lazy), b = e(expr2, scope, lazy);
+			if (b[0] === 'array') {
+				return b[1].indexOf(a) !== -1;
+			} else if (b[0] === 'dict') {
+				return Object.keys(b[1]).indexOf(a) !== -1;
+			} else {
+				throw new err.UsageError('Second parameter must be a dictionary or an array.', meta, scope);
+			}
+		},
 		'within' : function(dictexpr, wexpr, meta, e, scope, lazy) {
 			var wscope = scope.createScope('within', 'within:' + self.getName(dictexpr), [wexpr, dictexpr], meta);
 			// TODO need to filter/modify keys that don't conform to variable name rules
@@ -313,6 +331,8 @@ var Expressions = function Expressions(stack, node) {
 			}
 			return ['array', arr, meta];
 		},
+		'[]' : self.accessor,
+		'.' : self.accessor,
 		'/' : self.genericNumericOp,
 		'<<' : self.genericNumericOp,
 		'>>' : self.genericNumericOp,
