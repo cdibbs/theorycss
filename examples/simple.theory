@@ -4,7 +4,7 @@ website
   theory main
     div is a.block;
       #ident
-        is { color: 'blue' }, alex(5,7), { 'font-size' : redu(\x, a => _log(x + a), [1,2,3,4],0) };
+        is { color: 'blue' }, alex(5,7), { 'font-size' : redu(\x, a => x + a, [1,2,3,4], 0) };
         @bob is { 'font-size' : 12pt };
         chris > was
           is { here: "!" };
@@ -15,13 +15,13 @@ website
 
     fn alex(a,b) -> { 'background-color' : 'rgba(' + (a*b) + ',' + (b-a) + ',' + (b**a) + ')' };
 
-    fn redu(afn, arr, ini) -> reduceRec(afn, arr, ini, 4);
+    fn redu(afn, arr, ini) -> reduceRec(afn, arr, ini, 0);
 
     fn reduceRec(afn, arr, ini, i) ->
-        if (_log(i) == 0) then
-          0
+        if (i == 4) then
+          afn(arr[i], ini)
         else 
-          reduceRec(afn, arr, afn(arr[i], ini, arr), i-1)
+          reduceRec(afn, arr, afn(arr[i], ini), i+1)
         endif;
 
     ff alex2(a,b)

@@ -152,9 +152,16 @@ var Expressions = function Expressions(stack, node) {
 				if (args.length > params.length)
 					throw new Error('Too many arguments');
 				var fnscope = scope.createScope('fn', self.getName(fn) || 'anonymous', [fn, args], meta);
+				var b = false;
+				console.log('under ', self.getName(fn));
 				for(var i=0, l=args.length; i<l; i++) {
+					if (params[i] === 'arr') {
+						b = true;
+					}
+					console.log(' symbol ', params[i], args[i]);
 					fnscope.addSymbol(params[i], 'param', null, [args[i]], true, scope);
 				}
+				if (!b)console.log("FAIL");
 				var result = e(fndef.ast[2], fnscope, lazy);
 				return result;
 			} else if (typeof fndef === 'object' && fndef.type === 'ff') {
