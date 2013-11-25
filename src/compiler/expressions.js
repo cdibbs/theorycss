@@ -105,6 +105,18 @@ var Expressions = function Expressions(stack, node) {
 		}
 	};
 	
+	self.execFn = function(fndef, args, name, meta, e, scope) {
+		var basescope = fndef.scope || scope;
+		var params = fndef.ast[0];
+		var callscope = basescope.createScope('fn', name, null, meta);
+		var b = false;
+		for(var i=0, l=args.length; i<l; i++) {
+			callscope.addSymbol(params[i], 'param', null, [e(args[i], scope)], true, basescope);
+		}
+		var result = e(fndef.ast[2], callscope, false);
+		return result;
+	};	
+	
 	self.accessor = function(expr1, expr2, meta, e, scope, lazy) {
 		var a = e(expr1, scope), b = e(expr2, scope);
 		if (a instanceof Array) {
@@ -142,20 +154,12 @@ var Expressions = function Expressions(stack, node) {
 			if (typeof fndef === 'function') {
 				// "native" function call
 				var nargs = u.clone(args);
-				nargs.unshift({ e : e, scope : scope, node : node });
+				var name = 'native' + (self.getName(fn) || 'anonymous');
+				nargs.unshift({ meta : meta, name : name, e : e, expr : self, scope : scope, node : node });
 				return fndef.apply(this, nargs);
 			} else if (typeof fndef === 'object' && fndef.type === 'fn') {
-				var basescope = fndef.scope || scope;
-				var params = fndef.ast[0];
-				if (args.length > params.length)
-					throw new Error('Too many arguments');
-				var callscope = basescope.createScope('fn', self.getName(fn) || 'anonymous', [fn, args], meta);
-				var b = false;
-				for(var i=0, l=args.length; i<l; i++) {
-					callscope.addSymbol(params[i], 'param', null, [e(args[i], scope)], true, basescope);
-				}
-				var result = e(fndef.ast[2], callscope, lazy);
-				return result;
+				var name = self.getName(fn) || 'anonymous';
+				return self.execFn(fndef, args, name, meta, e, scope);
 			} else if (typeof fndef === 'object' && fndef.type === 'ff') {
 				//fndef.scope
 				console.log(fn, args, e(fn, scope));
