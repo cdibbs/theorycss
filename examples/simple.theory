@@ -18,7 +18,7 @@ website
     fn redu(afn, arr, ini) -> reduceRec(afn, arr, ini, 0);
 
     fn reduceRec(afn, arr, ini, i) ->
-        if (i == 4) then
+        if (i == 3) then
           afn(arr[i], ini)
         else 
           reduceRec(afn, arr, afn(arr[i], ini), i+1)

@@ -107,10 +107,8 @@ var Expressions = function Expressions(stack, node) {
 	
 	self.accessor = function(expr1, expr2, meta, e, scope, lazy) {
 		var a = e(expr1, scope), b = e(expr2, scope);
-		console.log('a and b ', a, b);
 		if (a instanceof Array) {
 			if (a[0] === 'dict' || a[0] === 'array') {
-				console.log("Accessing ", a);
 				return a[1][b];
 			}
 		}
@@ -147,22 +145,16 @@ var Expressions = function Expressions(stack, node) {
 				nargs.unshift({ e : e, scope : scope, node : node });
 				return fndef.apply(this, nargs);
 			} else if (typeof fndef === 'object' && fndef.type === 'fn') {
-				var scope = fndef.scope || scope;
+				var basescope = fndef.scope || scope;
 				var params = fndef.ast[0];
 				if (args.length > params.length)
 					throw new Error('Too many arguments');
-				var fnscope = scope.createScope('fn', self.getName(fn) || 'anonymous', [fn, args], meta);
+				var callscope = basescope.createScope('fn', self.getName(fn) || 'anonymous', [fn, args], meta);
 				var b = false;
-				console.log('under ', self.getName(fn));
 				for(var i=0, l=args.length; i<l; i++) {
-					if (params[i] === 'arr') {
-						b = true;
-					}
-					console.log(' symbol ', params[i], args[i]);
-					fnscope.addSymbol(params[i], 'param', null, [args[i]], true, scope);
+					callscope.addSymbol(params[i], 'param', null, [e(args[i], scope)], true, basescope);
 				}
-				if (!b)console.log("FAIL");
-				var result = e(fndef.ast[2], fnscope, lazy);
+				var result = e(fndef.ast[2], callscope, lazy);
 				return result;
 			} else if (typeof fndef === 'object' && fndef.type === 'ff') {
 				//fndef.scope
