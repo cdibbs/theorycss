@@ -2,7 +2,7 @@
 
 function StateManager(type, name, _ast, parentScope, meta) {
 	var self = this;
-	var variables = [];
+	var variables = {};
 	var entry = null;
 	var output = "";
 		

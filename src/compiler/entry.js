@@ -102,8 +102,11 @@ var Compiler = function(opts) {
 			var imp = clause({});
 			var props = Object.keys(imp);
 			for(var i=0, l=props.length; i<l; i++) {
-				var type = typeof imp[props[i]] === 'function' ? 'nfn' : '';
-				scope.addSymbol(props[i], type, imp[props[i]], '["Native" JS Code]', false, scope);
+				if (typeof imp[props[i]] === 'function') {
+					scope.addSymbol(props[i], 'nfn', imp[props[i]], '["Native" JS Code]', false, scope);
+				} else if (typeof imp[props[i]] === 'object') {
+					scope.addSymbol(props[i], imp[props[i]].type, imp[props[i]], '["Native" JS Code]', false, scope);
+				}
 			}
 		}
 	};

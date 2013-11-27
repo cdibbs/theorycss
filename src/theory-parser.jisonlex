@@ -116,8 +116,6 @@ units						(?:[a-zA-Z][a-zA-Z0-9]*|\%)
 "yield"			return 'YIELD';
 "into"			return 'INTO';
 "in"			return 'IN';
-"map"			return 'MAP';
-"reduce"		return 'REDUCE';
 "for"			return 'FOR';
 "from"			return 'FROM';
 "set"			return 'SET';

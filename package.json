@@ -7,6 +7,9 @@
   "description": "The Theory CSS metaprogramming language",
   "main": "lib/theory-compiler",
   "bin" : "lib/cli.js",
+  "dependencies" : {
+
+  },
   "devDependencies": {
 	  "jison": "0.4.x",
 	  "nomnom": "1.5.2",
