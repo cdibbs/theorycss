@@ -11,8 +11,7 @@ var Classes = function Classes() {
 			methods: methods || {}			
 		};
 		c.callMethod = function callMethod(name, instance, env, args) {
-			console.log(this.methods);
-			return this.methods[name](instance, env, args);
+			return c.methods[name](instance, env, args);
 		};
 		return c;
 	};

@@ -4,7 +4,7 @@ website
   theory main
     div is a.block;
       #ident
-        is { color: rgba(255, 0, 0, 50).toCSS() }, alex(5,7), { 'font-size' : reduce(\x, a => x + a, [1,2,3,4], 0) };
+        is { color: rgba(1, 0, 0, 0.5).blend(rgba(0,0,1), 0.5).toCSS() }, alex(5,7), { 'font-size' : reduce(\x, a => x + a, [1,2,3,4], 0) };
         @bob is { 'font-size' : 12pt };
         chris > was
           is { here: "!" };

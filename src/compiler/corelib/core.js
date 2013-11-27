@@ -1,5 +1,6 @@
 var err = require('../errors').err,
 	classes = require('../classes'),
+	u = require('../../util'),
 	ColorJS = require('./color-js/color').Color;
 
 
@@ -56,17 +57,16 @@ function addColorLib(native) {
 	
 	native.rgb = function(env, r, g, b) { return native.rgba(env, r, g, b, 100); };
 	native.rgba = function(env, r, g, b, a) {
-		var c = ColorJS({ red: r, green: g, blue: b, alpha: a }); 
+		var c = ColorJS({ red: env.e(r, env.scope), green: env.e(g, env.scope), blue: env.e(b, env.scope), alpha: env.e(a, env.scope) }); 
 		return classes.makeInstance(native.Color, { _colorjs: c });
 	};
 };
 
 function addColorClassMethods(native) {
-	var props = Object.keys(ColorJS);
-	for (var i=0,l=props.length; i<l; i++) {
-		var k = props[i];
+	for (var k in ColorJS()) {
+		(function(k) {
 		if (k.substr(0,3) === 'set') {
-			continue;
+			/* ignore setters */
 		} else if (k.substr(0,3) === 'get') {
 			var n = k.substr(3,k.length-3);
 			n = n.substr(0,1).toLowerCase() + n.substr(1);
@@ -80,11 +80,20 @@ function addColorClassMethods(native) {
 					throw new err.Unimplemented('Native support for return type not implemented: ' + result, env.meta, env.scope);
 				}
 			};
+		} else if (k === 'blend') {
+			native.Color.methods[k] = function(instance, env, args) {
+				args = args.map(function(el) { return env.e(el, env.scope); });
+				args[0] = args[0][2]['_colorjs'];
+				console.log(args);
+				result = instance[2]['_colorjs'][k].apply(instance[2]['_colorjs'], args);
+				return result;
+			};
 		} else {
 			native.Color.methods[k] = function(instance, env) {
 				var result;
 				try {
-					var args = arguments.slice(2);
+					var args = Array.prototype.slice.call(arguments, 2)
+						.map(function(el) { return env.e(el, env.scope); });
 					result = instance[2]['_colorjs'][k].apply(instance[2]['_colorjs'], args);
 					if (typeof result === 'array') {
 						return result.map(function(e) { classes.makeInstance(native.Color, { _colorjs: e } ); });
@@ -94,9 +103,11 @@ function addColorClassMethods(native) {
 						return classes.makeInstance(native.Color, { _colorjs: result });
 					}
 				} catch(ex) {
+					console.log(ex);
 					throw new err.UsageError("Native library error: ", env.meta, env.scope);
 				} 
 			};
 		}
+		})(k);
 	}
 };

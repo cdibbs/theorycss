@@ -168,7 +168,7 @@ var Expressions = function Expressions(stack, node) {
 			} else if (fndef instanceof Array) {
 				if (fndef[0] === 'inst_mem') {
 					var ofClass = scope.resolve(fndef[1][1].name);
-					return ofClass.val.callMethod(fndef[2], fndef[1][1], { meta: meta, scope: scope}, args);
+					return ofClass.val.callMethod(fndef[2], fndef[1], { meta: meta, scope: scope, e : e}, args);
 				}
 			} else {
 				throw new Error("Not sure what's going on, here: " + fndef + " " + self.getName(fn));
