@@ -115,9 +115,17 @@ var Css = function Css(options) {
 	function dict2css(dict, spc) {
 		var o = '';
 		for (var key in dict[1]) {
-			o += spc + key + ':' + space(1) + dict[1][key] + ";" + nl(1);
+			o += spc + key + ':' + space(1) + renderValue(dict[1][key]) + ";" + nl(1);
 		}
 		return o;
+	}
+	
+	function renderValue(v) {
+		if (v instanceof Array) {
+			return v.map(function(el) { return renderValue(el); }).join(',' + space(1));
+		} else {
+			return v;
+		}
 	}
 	
 	function indent(n, str) {

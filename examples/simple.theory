@@ -1,10 +1,10 @@
 website
   import "test" into test;
 
-  theory main
+  .: main
     div is a.block;
       #ident
-        is { color: rgba(1, 0, 0, 0.5).blend(rgba(0,0,1), 0.5).toCSS() }, alex(5,7), { 'font-size' : reduce(\x, a => x + a, [1,2,3,4], 0) };
+        is { color: rgba(0.5, 0.75, 0.8, 0.5).sixToneCWScheme() }, alex(5,7), { 'font-size' : reduce(\x, a => x + a, [1,2,3,4], 0) };
         @bob is { 'font-size' : 12pt };
         chris > was
           is { here: "!" };
@@ -30,7 +30,7 @@ website
         div 
       bob
 
-  theory nother
+  .: nother
     notherDiv
       withChild
         is { 'line-height' : 9px };

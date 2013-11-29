@@ -1,4 +1,6 @@
 var u = require('../util').u,
+	err = require('./errors').err,
+	classes = require('./classes'),
 	Expressions = require('./expressions').Expressions;
 
 /**
@@ -58,14 +60,39 @@ function LeafDict(nodeId, isList, scope) {
 			if (! result instanceof Object) {
 				throw new Exception("Not a dictionary.");
 			}
-			/*for (var key in result[1]) {
-				console.log(expr.evaluate(result[1][key], scope), result[1][key], false);
-				result[1][key] = expr.evaluate(result[1][key], scope, false);
-			}*/
+			result = self.finalizeDict(result, scope, expr.evaluate);
 			dicts.push(result);
 			return true;
 		});
 		return dicts;
+	};
+	
+	self.finalizeDict = function(dict, scope, e) {
+		for (var k in dict[1]) {
+			dict[1][k] = self.finalizeValue(dict[1][k], scope, e);
+		}
+		return dict;
+	};
+	
+	self.finalizeValue = function finalizeValue(v, scope, e) {
+		if (v instanceof Array) {
+			if (v[0] === 'array') {
+				return v[1].map(function(el) { return self.finalizeValue(el, scope, e); });
+			} else if (v[0] === 'instance') {
+				var method = classes.hasMethod(v, 'toCSS', { scope: scope, e:e}) ? 'toCSS' : 'toString';
+				if (!method && !classes.hasMethod(v, 'toString', { scope : scope, e:e }))
+					throw new err.Undefined('Neither a toCSS nor a toString method was defined on object ' + v[1].getName());
+				var result = classes.callMethod(v, method, { scope : scope, e:e });
+				
+				return result;
+			} else {
+				throw new Error('Unsure what to do with:' + JSON.stringify(v, null, 2));
+			}
+		} else if (typeof v === 'object') {
+			return v;
+		} else {
+			return v;
+		}
 	};
 	
 	self.getTree = function getTree() {

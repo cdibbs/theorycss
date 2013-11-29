@@ -1,6 +1,7 @@
 "use strict";
 var u = require('../util').u,
 	err = require('./errors').err,
+	classes = require('./classes'),
 	warn = require('./errors').warn;
 	 	
 var Expressions = function Expressions(stack, node) {
@@ -123,8 +124,8 @@ var Expressions = function Expressions(stack, node) {
 			if (a[0] === 'dict' || a[0] === 'array') {
 				return a[1][b];
 			} else if (a[0] === 'instance') {
-				return ['inst_mem', a, b];				
-			}
+				return ['inst_mem', a, b];
+			}				
 		}
 		throw new err.UsageError('Accessors valid only on arrays and dicts.', meta, scope);
 	};
@@ -167,8 +168,7 @@ var Expressions = function Expressions(stack, node) {
 				console.log(fn, args, e(fn, scope));
 			} else if (fndef instanceof Array) {
 				if (fndef[0] === 'inst_mem') {
-					var ofClass = scope.resolve(fndef[1][1].name);
-					return ofClass.val.callMethod(fndef[2], fndef[1], { meta: meta, scope: scope, e : e}, args);
+					return classes.callMethod(fndef[1], fndef[2], { scope : scope, e : e, meta : meta });
 				}
 			} else {
 				throw new Error("Not sure what's going on, here: " + fndef + " " + self.getName(fn));

@@ -84,9 +84,8 @@ function addColorClassMethods(native) {
 			native.Color.methods[k] = function(instance, env, args) {
 				args = args.map(function(el) { return env.e(el, env.scope); });
 				args[0] = args[0][2]['_colorjs'];
-				console.log(args);
 				result = instance[2]['_colorjs'][k].apply(instance[2]['_colorjs'], args);
-				return result;
+				return classes.makeInstance(native.Color, { _colorjs: result });
 			};
 		} else {
 			native.Color.methods[k] = function(instance, env) {
@@ -95,8 +94,8 @@ function addColorClassMethods(native) {
 					var args = Array.prototype.slice.call(arguments, 2)
 						.map(function(el) { return env.e(el, env.scope); });
 					result = instance[2]['_colorjs'][k].apply(instance[2]['_colorjs'], args);
-					if (typeof result === 'array') {
-						return result.map(function(e) { classes.makeInstance(native.Color, { _colorjs: e } ); });
+					if (result instanceof Array) {
+						return ['array', result.map(function(e) { return classes.makeInstance(native.Color, { _colorjs: e } ); })];
 					} else if (typeof result === 'string') {
 						return result;
 					} else {
