@@ -1,6 +1,7 @@
 var err = require('../errors').err,
 	classes = require('../classes'),
 	u = require('../../util'),
+	colorNames = require('./color-names'),
 	ColorJS = require('./color-js/color').Color;
 
 
@@ -45,8 +46,16 @@ module.exports = function(native) {
 	return native;
 };
 
+function addColorNames(native) {
+	for (var name in colorNames) {
+		var namedColor = ColorJS(colorNames[name]);
+		native[name] = classes.makeInstance(native.Color, { _colorjs: namedColor });
+	}
+}
+
 function addColorLib(native) {
 	native.Color = classes.makeClass('Color');
+	addColorNames(native);
 	addColorClassMethods(native);
 	
 	native.hsl = function(env, r, g, b) { return native.hsla(env, h, s, l, 100); };

@@ -1,19 +1,24 @@
 website
   import "test" into test;
 
-  .: main
+  theory main
     div is a.block;
       #ident
-        is { color: rgba(0.5, 0.75, 0.8, 0.5).sixToneCWScheme() }, alex(5,7), { 'font-size' : reduce(\x, a => x + a, [1,2,3,4], 0) };
+        is { color: red.sixToneCWScheme() }, alex(5,7), { 'font-size' : reduce(\x, a => x + a, [1,2,3,4], 0) };
         @bob is { 'font-size' : 12pt };
         chris > was
-          is { here: "!" };
+          is testing;
       child :: nother
       
 
     bob = 'width > 800px';
 
     fn alex(a,b) -> { 'background-color' : 'rgba(' + (a*b) + ',' + (b-a) + ',' + (b**a) + ')' };
+
+    testing
+      backgroundColor: red;
+      color: blue;
+      +border(1px, 'solid', red);
 
     ff alex2(a,b)
       div
@@ -30,7 +35,7 @@ website
         div 
       bob
 
-  .: nother
+  theory nother
     notherDiv
       withChild
         is { 'line-height' : 9px };

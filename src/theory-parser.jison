@@ -54,11 +54,8 @@ library
 	;
 
 libbody
-	: (libdef | NEWLINE)*;
+	: (def | NEWLINE)*;
 
-libdef
-	: vdef { $$ = $1; } | fdef { $$ = $1; } | fragfunc { $$ = $1; };
-	
 theory
 	: THEORY id INDENT treefrag_block theorybody DEDENT
 		{ $$ = ['theory', $2, null, $treefrag_block, $theorybody, { loc : @$ }]; }
@@ -78,8 +75,29 @@ theory_ext
 	
 theorybody : (def | NEWLINE)*;
 	
-def : vdef { $$ = $1; } | fdef { $$ = $1; } | fragfunc { $$ = $1; };
+def : vdef { $$ = $1; } | fdef { $$ = $1; } | fragfunc { $$ = $1; } | cssdef { $$ = $1; };
 
+cssdef
+	: id INDENT cssdef_body DEDENT
+	{ $$ = ['=', $id, $cssdef_body, { loc : @$ }]; }
+	| id LBRACE cssdef_body RBRACE
+	{ $$ = ['=', $id, $cssdef_body, { loc : @$ }]; }
+	;
+	
+cssdef_body
+	: cssdef_rule
+	{ $$ = ['dict', {}, { loc : @$ }]; if ($1.length > 1) { $$[1][$1[0]] = $1[1]; } }
+	| cssdef_rule cssdef_body
+	{ $$ = $cssdef_body; if ($1.length > 1) { $$[1][$1[0]] = $1[1]; } }
+	;
+	
+cssdef_rule
+	: dict_id COLON expression EOL
+	{ var id = $dict_id.replace(/[A-Z]/g, function(match) { return '-' + match.toLowerCase(); }); $$ = [id, $expression]; }
+	| PLUS expression EOL
+	{ $$ = [$expression]; }
+	;
+	
 vdef
 	: caseassignment EOL
 		{ $$ = $1; }
@@ -661,17 +679,13 @@ ddeflist
 	;
 
 dictdef
-	: ddatom COLON expression
+	: dict_id COLON expression
 		{ $$ = [ $1, $3 ]; }
-	;
-
-ddatom
-	: dict_id
-	| number
-	| STRING_LIT
 	;
 
 dict_id
 	: DICT_ID
+	| number
+	| STRING_LIT
 	| id
 	;
