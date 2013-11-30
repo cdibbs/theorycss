@@ -7,11 +7,14 @@ website
         is { color: red.sixToneCWScheme() }, alex(5,7), { 'font-size' : reduce(\x, a => x + a, [1,2,3,4], 0) };
         @bob is { 'font-size' : 12pt };
         chris > was
-          is testing;
+          is testing, { testing : shouldnthappen(5,3) };
       child :: nother
       
 
     bob = 'width > 800px';
+    
+    fn shouldnthappen(a,b) -> a * myscope(b);
+    fn myscope(c) -> c * a;
 
     fn alex(a,b) -> { 'background-color' : 'rgba(' + (a*b) + ',' + (b-a) + ',' + (b**a) + ')' };
 
