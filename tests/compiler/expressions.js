@@ -2,6 +2,7 @@ var assert = require("assert"),
 	Expressions = require("../../src/compiler/expressions").Expressions,
 	Compiler = require("../../src/compiler/entry").Compiler,
 	parser = require("../../lib/theory-parser").parser,
+	err = require("../../src/compiler/errors").err,
 	vows = require("vows");
 	
 var src = "Website\n"
@@ -82,17 +83,23 @@ var tests = [
 	 	"\n    comp4 = { set x : x * x for x in [1,2,3] };\n",
 	 	function(topic) { assert.deepEqual(topic[1], { '1' : 1, '2' : 4, '3' : 9}); }],
 	["comp5",
-	 	"\n    comp5 = { set x : x * y for x, y in { 1 : 2, 3 : 4, 5 : 6 } };\n",
+	 	"\n    comp5 = { set x : num(x) * y for x, y in { 1 : 2, 3 : 4, 5 : 6 } };\n",
 	 	function(topic) { assert.deepEqual(topic[1], { '1' : 2, '3' : 12, '5' : 30}); }],
 	["map1",
 	 	"\n    map1 = map(\\x => x * x, [1,2,3,4,5]);\n",
 	 	function(topic) { assert.deepEqual(topic[1], [1,4,9,16,25]); }],
     ["reduce1",
-	 	"\n    reduce1 = reduce(\\x,y,w => x * y, [1,2,3,4,5], 1);\n",
+	 	"\n    reduce1 = reduce(\\x,y,i,w => x * y, [1,2,3,4,5], 1);\n",
 	 	function(topic) { assert.deepEqual(topic, 120); }],
 	["reducedict",
-	 	"\n    reducedict = reduce(\\k,v,r,w => r + k * v, { 1:2, 3:4, 5:6 }, 0);\n",
-	 	function(topic) { assert.deepEqual(topic, 44); }]
+	 	"\n    reducedict = reduce(\\r,k1,v1,i,w => r + num(k1) * v1, { 1:2, 3:4, 5:6 }, 0);\n",
+	 	function(topic) { assert.deepEqual(topic, 44); }],
+	["closures1",
+		"\n    closures1 = shouldnthappen(3,5);\n"
+		+"    fn shouldnthappen(inaccessiblevar,b) -> inaccessiblevar * myscope(b);\n"
+    	+"    fn myscope(c) -> c * inaccessiblevar;\n",
+    	function(e, topic) { assert.isNull(e); assert.isTrue(err.isErr(topic)); }
+	]
 ];
 
 for (var i=0; i<tests.length; i++) {
@@ -105,7 +112,6 @@ for (var i=0; i<tests.length; i++) {
 					.resolve("Main").val;
 				return expr.evaluate(ast.resolve(tests[i][0]).ast[0], ast);
 			} catch(ex) {
-				console.log(ex);
 				return ex;
 			}
 		}; })(i),

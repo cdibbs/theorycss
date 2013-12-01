@@ -35,6 +35,12 @@ function StateManager(type, name, _ast, parentScope, meta) {
 	self.getParentScope = function() {  return parentScope; };
 	self.getMeta = function() { return meta; };
 	self.getVariables = function() { return variables; };
+	self.base = function() {
+		var pointer = this;
+		while (pointer && pointer.getType() !== 'theory')
+			pointer = pointer.getParentScope();
+		return pointer;
+	};
 	self.dump = function() {
 		var scopeTree = {};
 		pointer = self;

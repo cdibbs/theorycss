@@ -107,7 +107,7 @@ var Expressions = function Expressions(stack, node) {
 	};
 	
 	self.execFn = function(fndef, args, name, meta, e, scope) {
-		var basescope = fndef.scope || scope;
+		var basescope = fndef.scope /* if defined within a closure - e.g., a lambda */ || scope.base();
 		var params = fndef.ast[0];
 		var callscope = basescope.createScope('fn', name, null, meta);
 		var b = false;
@@ -231,6 +231,39 @@ var Expressions = function Expressions(stack, node) {
 					newdict[1][key] = dict[1][key];
 			}
 			return newdict;
+		},
+		'{set}' : function(kvpExprs, params, srcExpr, meta, e, scope, lazy) {
+			var src = e(srcExpr, scope);
+			console.log(src);
+			if (src instanceof Array) {
+				if (src[0] === 'array') {
+					var result = {};
+					for (var i=0, l=src[1].length; i<l; i++) {
+						var v = src[1][i];
+						var callscope = scope.createScope('fn', 'comprehension', null, meta);
+						callscope.addSymbol(params[0], 'param', null, [v], true, scope);
+						var key = e(kvpExprs[0], callscope, false),
+							val = e(kvpExprs[1], callscope, false);
+						result[key] = val;
+					}
+					return ['dict', result, meta];
+				} else if (src[0] === 'dict') {
+					var result = {};
+					var skeys = Object.keys(src[1]);
+					for (var i=0, l=skeys.length; i<l; i++) {
+						var k = skeys[i];
+						var v = src[1][k]; 
+						var callscope = scope.createScope('fn', 'comprehension', null, meta);
+						callscope.addSymbol(params[0], 'param', null, [k], true, scope);
+						callscope.addSymbol(params[1], 'param', null, [v], true, scope);
+						var key = e(kvpExprs[0], callscope, false),
+							val = e(kvpExprs[1], callscope, false);
+						result[key] = val;
+					}
+					return ['dict', result, meta];
+				}
+			}
+			throw new err.UsageError("Source expression must evaluate to a Dict or an Array.", meta, scope);
 		},
 		'ff' : function(id, paramlist, actionblock, meta, e, scope) {
 			console.log(id, paramlist, actionblock);			

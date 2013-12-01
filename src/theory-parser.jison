@@ -656,19 +656,19 @@ dict
 	| LBRACE ddeflist RBRACE
 	 	{ $$ = $ddeflist; }
 	| fordict_start dict_for IN expression RBRACE
-		{ $$ = ['{for}', $fordict_start, $dict_for, $expression, { loc : @$ }]; }
+		{ $$ = ['{set}', $fordict_start, $dict_for, $expression, { loc : @$ }]; }
 	;
 	
 fordict_start
 	: LBRACE SET expression COLON expression
-		{ $$ = [ $1, $3 ]; }
+		{ $$ = [ $3, $5 ]; }
 	;
 
 dict_for
 	: FOR id
-		{ $$ = [$1, null]; }
+		{ $$ = [$2, null]; }
 	| FOR id COMMA id
-		{ $$ = [$1, $4]; }
+		{ $$ = [$2, $4]; }
 	;
 				
 ddeflist
@@ -684,8 +684,8 @@ dictdef
 	;
 
 dict_id
-	: DICT_ID
-	| number
+	: number
+	| DICT_ID
 	| STRING_LIT
 	| id
 	;

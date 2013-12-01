@@ -6,6 +6,7 @@ exports.Err = function Err() {
 	function baseError(msg, meta, scope) {
 		var sample = "", line = "", errMeta = meta;
 		
+		this.isTheoryError = true;
 		this.isKnown = true;
 		this.setSrcSample = function(src) {
 			if (!errMeta || !errMeta.loc)
@@ -40,7 +41,11 @@ exports.Err = function Err() {
 			return m;
 		};
 		baseError.prototype = new Error(msg);
-	};	
+	};
+	
+	self.isErr = function(obj) {
+		return obj && obj.isTheoryError;
+	};
 	
 	self.Error = function(msg, meta, scope) {
 		var base = new baseError(msg, meta, scope);
