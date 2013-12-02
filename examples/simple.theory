@@ -10,8 +10,14 @@ website
           is testing, { testing : shouldnthappen(5,3) };
       child :: nother
       
-
+    /* this object should have to be passed into regular functions.
+       Only frag functions receive it, implicitly. Therefore, the
+       this keyword can be used both in classes and tree frags.
+       Exception: frag functions in classes? Need to solve this.
+       Should frag functions be permitted within classes?
+     */
     bob = 'width > 800px';
+    chris = John(1,2,3).toString();
     
     fn shouldnthappen(a,b) -> a * myscope(b);
     fn myscope(c) -> c * c;
