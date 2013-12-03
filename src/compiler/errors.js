@@ -1,14 +1,14 @@
-"use strict";
-
+//"use strict";
 exports.Err = function Err() {
 	var self = this;
 	
 	function baseError(msg, meta, scope) {
 		var sample = "", line = "", errMeta = meta;
+		var e = new Error(msg);
 		
-		this.isTheoryError = true;
-		this.isKnown = true;
-		this.setSrcSample = function(src) {
+		e.isTheoryError = true;
+		e.isKnown = true;
+		e.setSrcSample = function(src) {
 			if (!errMeta || !errMeta.loc)
 				return;
 			
@@ -17,16 +17,18 @@ exports.Err = function Err() {
 			sample = line.substr(errMeta.loc.first_column, errMeta.loc.last_column - errMeta.loc.first_column);
 			line = line.trim();
 		};
-		this.toString = function() {
+		e.toString = function() {
+			return e.message + e.stack;
+		};
+		e.__defineGetter__('message', function() {
 			var m = "Error: " + msg + "\n";
 			if (errMeta && errMeta.loc)
 				m = m + "Location: line " + errMeta.loc.first_line + ", column " + errMeta.loc.first_column + "\n";
-			try { // if we can
-				if (sample)
-					m = m + "Token: " + sample + "\n";
-				if (line)
-					m = m + "Line: " + line + "\n";
-					
+			return m;
+		});
+		e.__defineGetter__('stack', function() {
+			var m =  e.message;
+			try { // if we can					
 				m = m + "Stack trace:\n";
 				var p = scope, n;
 				while (p != null && (n = p.getName()) !== 'prog') {
@@ -39,8 +41,8 @@ exports.Err = function Err() {
 				}
 			} catch(ex) { throw ex; }
 			return m;
-		};
-		baseError.prototype = new Error(msg);
+		});
+		return e;
 	};
 	
 	self.isErr = function(obj) {

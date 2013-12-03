@@ -127,6 +127,7 @@ var Expressions = function Expressions(stack, node) {
 				return ['inst_mem', a, b];
 			}				
 		}
+		console.log(expr1, expr2);
 		throw new err.UsageError('Accessors valid only on arrays and dicts.', meta, scope);
 	};
 	

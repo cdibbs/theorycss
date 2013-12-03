@@ -43,6 +43,9 @@ var TreeFragments = function TreeFragments(rootScope) {
 			}
 			
 			if (theories && theories.length) {
+				var tentry = rootScope.getEntry().val;
+				if (!tentry)
+					throw new Error("Program does not contain an entry.");
 				var tresolve = rootScope.getEntry().val.resolve;
 				for(var i=0, l=theories.length; i<l; i++) {
 					var theory = tresolve(theories[i]);

@@ -7,12 +7,11 @@ var assert = require("assert"),
 	vows = require("vows");
 
 function parseSnippet(srcFrag) {
-	src = "Website\n"
+	src = "website\n"
 		+ "  theory main\n";
 	src = src + srcFrag + "\n\n";
-	
 	var ast = new Compiler().compile(parser.parse(src), { src : src, pp : true })
-		.resolve("Website").val
+		.resolve("website").val
 		.resolve("main").val;
 	
 	return ast;
@@ -46,18 +45,29 @@ vows.describe("TreeFrags").addBatch({
 			},
 			'processTree() produces valid LeafDict' : function(topic) {
 				var ast = topic.getEntry().ast;
-				var tf = new TreeFrags(topic);
+				var tf = new TreeFrags(topic.getParentScope().getParentScope());
 				var ld = tf.buildTree(ast);
 				assert.instanceOf(ld, LeafDict);
-			}/*,
-			'evaluating definition list produces correct styles' : function(topic) {
-				var ast = topic.getEntry().ast;
-				console.log(topic);
-				var tf = new TreeFrags(topic);
-				var ld = tf.processTree(ast);
-				ld.dumpTree();
-				assert.instanceOf(ld, LeafDict);				
-			}*/
+			}
+		}
+	},
+	'tree traversal (this keyword)' : {
+		topic : function() {
+			var snippet =
+				  '    div\n'
+				+ '      is { result : myFn() };\n'
+				+ '      span\n'
+				+ '        a\n'
+				+ '    fn myFn() -> recMyfn(0, this);\n'
+				+ '    fn recMyfn(i, node) -> if (node.children.count == 0) then i else recMyFn(i+1, children[0]) endif;';
+			return parseSnippet(snippet); 
+		},
+		'correctly counts the first descendents' : function(topic) {
+			var ast = topic.getEntry().ast;
+			var tf = new TreeFrags(topic.getParentScope().getParentScope());
+			var ld = tf.processTree(ast);
+			console.log(ld);
 		}
 	}
+	
 }).export(module);
