@@ -1,6 +1,7 @@
 "use static";
 var u = require('../util').u;	 	
 var LeafDict = require('./leafdict').LeafDict;
+var Expressions = require('./expressions').Expressions;
 var err = require('./errors').err;
 
 /**
@@ -28,17 +29,17 @@ var TreeFragments = function TreeFragments(rootScope) {
 		return root;
 	};
 	
-	self.buildTree = function buildTree(ast) {
+	self.buildTree = function buildTree(ast, parent) {
 		if (ast[0] === 'tf') {
 			var children = ast[2] ? ast[2][1] : null;
 			var isList = ast[2] ? ast[2][0] : null;
 			var theories = ast[1][2];
 			var leafDict = (function(isList, children) {
-				return new LeafDict(ast[1][1], isList);
+				return new LeafDict(ast[1][1], isList, parent, Expressions);
 			})(isList, children);
 			if (children && children.length) {
 				for(var i=0, l=children.length; i<l; i++) {
-					leafDict.addChild(self.buildTree(children[i]));
+					leafDict.addChild(self.buildTree(children[i], self));
 				}
 			}
 			

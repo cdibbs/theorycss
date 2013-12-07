@@ -59,7 +59,7 @@ vows.describe("TreeFrags").addBatch({
 				+ '      span\n'
 				+ '        a\n'
 				+ '    fn myFn() -> recMyfn(0, this);\n'
-				+ '    fn recMyfn(i, node) -> if (node.children.count == 0) then i else recMyFn(i+1, children[0]) endif;';
+				+ '    fn recMyfn(i, node) -> if (node.children().count == 0) then i else recMyFn(i+1, children[0]) endif;';
 			return parseSnippet(snippet); 
 		},
 		'correctly counts the first descendents' : function(topic) {

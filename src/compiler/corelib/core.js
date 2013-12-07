@@ -67,9 +67,32 @@ module.exports = function(native) {
 	};
 	
 	addColorLib(native);
+	addTreeLib(native);
 	
 	return native;
 };
+
+function addTreeLib(native) {
+	native.Node = classes.makeClass('Node');
+	native.Node.methods['parent'] = function (instance, env) {
+		var ld = instance[2]['_leafdict'];
+		var parent = ld.getParent();
+		if (parent)
+			classes.makeInstance("Node", { '_leafdict' :  parent });
+		else
+			return null;
+	};
+	native.Node.methods['children'] = function(instance, env) {
+		var ld = instance[2]['_leafdict'];
+		var children = ld.getChildren().map(function(c) { return classes.makeInstance("Node", { '_leafdict' : c }); });
+		return ['array', children, env.meta];		
+	};
+	native.Node.methods['css'] = function(instance, env) {
+		var ld = instance[2]['_leafdict'];
+		var css = ld.getStyleDict();
+		return ['dict', css, env.meta];
+	};
+}
 
 function addColorNames(native) {
 	for (var name in colorNames) {
@@ -86,13 +109,13 @@ function addColorLib(native) {
 	native.hsl = function(env, r, g, b) { return native.hsla(env, h, s, l, 100); };
 	native.hsla = function(env, h, s, l, a) {
 		var c = ColorJS({ hue: h, saturation: s, luminance: l, alpha: a }); 
-		return classes.makeInstance(native.Color, { _colorjs: c });
+		return classes.makeInstance("Color", { _colorjs: c });
 	};
 	
 	native.rgb = function(env, r, g, b) { return native.rgba(env, r, g, b, 100); };
 	native.rgba = function(env, r, g, b, a) {
 		var c = ColorJS({ red: env.e(r, env.scope), green: env.e(g, env.scope), blue: env.e(b, env.scope), alpha: env.e(a, env.scope) }); 
-		return classes.makeInstance(native.Color, { _colorjs: c });
+		return classes.makeInstance("Color", { _colorjs: c });
 	};
 };
 
@@ -109,7 +132,7 @@ function addColorClassMethods(native) {
 				if (typeof result === 'number') {
 					return result;
 				} else if (result instanceof Color) {
-					return classes.makeInstance(native.Color, { _colorjs: result });
+					return classes.makeInstance("Color", { _colorjs: result });
 				} else {
 					throw new err.Unimplemented('Native support for return type not implemented: ' + result, env.meta, env.scope);
 				}
@@ -119,7 +142,7 @@ function addColorClassMethods(native) {
 				args = args.map(function(el) { return env.e(el, env.scope); });
 				args[0] = args[0][2]['_colorjs'];
 				result = instance[2]['_colorjs'][k].apply(instance[2]['_colorjs'], args);
-				return classes.makeInstance(native.Color, { _colorjs: result });
+				return classes.makeInstance("Color", { _colorjs: result });
 			};
 		} else {
 			native.Color.methods[k] = function(instance, env) {
@@ -129,11 +152,11 @@ function addColorClassMethods(native) {
 						.map(function(el) { return env.e(el, env.scope); });
 					result = instance[2]['_colorjs'][k].apply(instance[2]['_colorjs'], args);
 					if (result instanceof Array) {
-						return ['array', result.map(function(e) { return classes.makeInstance(native.Color, { _colorjs: e } ); })];
+						return ['array', result.map(function(e) { return classes.makeInstance("Color", { _colorjs: e } ); })];
 					} else if (typeof result === 'string') {
 						return result;
 					} else {
-						return classes.makeInstance(native.Color, { _colorjs: result });
+						return classes.makeInstance("Color", { _colorjs: result });
 					}
 				} catch(ex) {
 					console.log(ex);

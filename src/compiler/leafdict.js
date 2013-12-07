@@ -1,7 +1,7 @@
 var u = require('../util').u,
 	err = require('./errors').err,
-	classes = require('./classes'),
-	Expressions = require('./expressions').Expressions;
+	Expressions = require('./expressions').Expressions,
+	classes = require('./classes');
 
 /**
  * Represents a single node in a tree fragment
@@ -10,7 +10,7 @@ var u = require('../util').u,
  * @param {Array} isList - the list of 'is' clauses to be applied to this node
  * @param {Array} children - tree frags that have this node as their parent
  */
-function LeafDict(nodeId, isList, scope) {
+function LeafDict(nodeId, isList, parent) {
 	var self = this;
 	var css = [];
 	var mq = {};
@@ -30,20 +30,20 @@ function LeafDict(nodeId, isList, scope) {
 		
 		return css;
 	};
-	
+
 	self.getNodeId = function getNodeId() { return nodeId; };
 	self.getMediaQueries = function getMediaQueries() { return mq; };
 	
 	self.addChild = function addChild(leafDict) {
 		children.push(leafDict);
 	};
-	
+	self.getParent = function getParent() { return parent; };	
 	self.getChildren = function getChildren() { return children; };
 	
 	self.getStyleDict = function() { return css; };
 	
 	self.evalMediaQuery = function(mq, scope) {
-		return new Expressions()
+		return new Expressions(self)
 			.evaluate(['id', mq, scope.getMeta()], scope, false);
 	};
 	
@@ -53,7 +53,7 @@ function LeafDict(nodeId, isList, scope) {
  	 * @throws Error if any expression does not return a property dictionary.
 	 */
 	self.evalDefList = function evalDefList(defList, scope) {
-		var expr = new Expressions();
+		var expr = new Expressions(self);
 		var dicts = [];
 		defList.every(function(def) {
 			var result = expr.evaluate(def, scope, false);

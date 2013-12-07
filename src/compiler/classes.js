@@ -26,7 +26,7 @@ var Classes = function Classes() {
 	};
 	
 	self.callMethod = function callMethod(instance, name, env, args) {
-		var ofClass = env.scope.resolve(instance[1].name);
+		var ofClass = env.scope.resolve(instance[1]);
 		if (!ofClass || ofClass === 'undefined' || !ofClass.val) {
 			throw new err.Undefined('Class ' + instance[1].name + ' is not defined.');
 		}

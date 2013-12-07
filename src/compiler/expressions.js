@@ -4,9 +4,8 @@ var u = require('../util').u,
 	classes = require('./classes'),
 	warn = require('./errors').warn;
 	 	
-var Expressions = function Expressions(stack, node) {
+var Expressions = function Expressions(node) {
 	var self = this;
-	var stack = stack || [];
 	var node = node || null;
 	
 	self.evaluate = function(ast, scope, lazy) {
@@ -127,8 +126,7 @@ var Expressions = function Expressions(stack, node) {
 				return ['inst_mem', a, b];
 			}				
 		}
-		console.log(expr1, expr2);
-		throw new err.UsageError('Accessors valid only on arrays and dicts.', meta, scope);
+		throw new err.UsageError('Accessors valid only on arrays and objects.', meta, scope);
 	};
 	
 	self.ops = {
@@ -151,6 +149,13 @@ var Expressions = function Expressions(stack, node) {
 				return e(val.ast[0], scope, lazy);
 			} else {
 				return val.val;
+			}
+		},
+		'this' : function(meta, e, scope, lazy) {
+			if (node) {
+				var wrapped = classes.makeInstance("Node", { '_leafdict' : node });
+				console.log(wrapped);
+				return wrapped;
 			}
 		},
 		'()' : function(fn, args, meta, e, scope, lazy) {
@@ -235,7 +240,6 @@ var Expressions = function Expressions(stack, node) {
 		},
 		'{set}' : function(kvpExprs, params, srcExpr, meta, e, scope, lazy) {
 			var src = e(srcExpr, scope);
-			console.log(src);
 			if (src instanceof Array) {
 				if (src[0] === 'array') {
 					var result = {};
