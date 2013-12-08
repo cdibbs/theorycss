@@ -6,7 +6,7 @@ var err = require('../errors').err,
 
 
 module.exports = function(native) {
-	native._log = function(env, o) {
+	native.log = function(env, o) {
 		var result = env.e(o, env.scope);
 		console.log(result);
 		return result;
@@ -97,7 +97,7 @@ function addTreeLib(native) {
 function addColorNames(native) {
 	for (var name in colorNames) {
 		var namedColor = ColorJS(colorNames[name]);
-		native[name] = classes.makeInstance(native.Color, { _colorjs: namedColor });
+		native[name] = classes.makeInstance("Color", { _colorjs: namedColor });
 	}
 }
 

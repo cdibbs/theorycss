@@ -55,11 +55,11 @@ vows.describe("TreeFrags").addBatch({
 		topic : function() {
 			var snippet =
 				  '    div\n'
-				+ '      is { result : myFn() };\n'
+				+ '      is { result : myFn(this) };\n'
 				+ '      span\n'
 				+ '        a\n'
-				+ '    fn myFn() -> recMyfn(0, this);\n'
-				+ '    fn recMyfn(i, node) -> if (node.children().count == 0) then i else recMyFn(i+1, children[0]) endif;';
+				+ '    fn myFn(node) -> recMyFn(0, node);\n'
+				+ '    fn recMyFn(i, node) -> if (node.children().length == 0) then i else recMyFn(i+1, node.children()[0]) endif;';
 			return parseSnippet(snippet); 
 		},
 		'correctly counts the first descendents' : function(topic) {

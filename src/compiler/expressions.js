@@ -154,7 +154,6 @@ var Expressions = function Expressions(node) {
 		'this' : function(meta, e, scope, lazy) {
 			if (node) {
 				var wrapped = classes.makeInstance("Node", { '_leafdict' : node });
-				console.log(wrapped);
 				return wrapped;
 			}
 		},
