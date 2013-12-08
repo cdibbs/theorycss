@@ -3,12 +3,12 @@ website
 
   theory main
     div is a.block;
-      #ident
+      #ident[christmas='tree']
         is { color: red.sixToneCWScheme() }, { 'font-size' : reduce(\a, x => x + a, [1,2,3,4], 0) };
         @bob is { 'font-size' : 12pt };
         chris > was
           is testing, { testing : shouldnthappen(5,3) };
-      child :: nother
+      div :: nother
       
     /* this object should have to be passed into regular functions.
        Only frag functions receive it, implicitly. Therefore, the
@@ -18,6 +18,8 @@ website
      */
     bob = 'width > 800px';
     chris = John(1,2,3).toString();
+    
+    fg,bg,txt,bord,bread,lnk = red.sixToneCWScheme();
     
     fn shouldnthappen(a,b) -> a * myscope(b);
     fn myscope(c) -> c * c;

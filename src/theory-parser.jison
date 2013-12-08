@@ -151,14 +151,28 @@ tf_list
 	;
 	
 leafid
-	: DOT dict_id
+	: DOT dict_id leaf_attrs
 	{ $$ = '.' + yytext; }
-	| POUND dict_id
+	| POUND dict_id leaf_attrs
 	{ $$ = '#' + yytext; }
-	| dict_id
+	| dict_id leaf_attrs
 	{ $$ = yytext; }
 	| xpath
 	{ $$ = { type : 'xpath', val : $1 }; };
+	
+leaf_attrs
+	: LBRACKET attr_list RBRACKET
+	|
+	;
+	
+attr_list
+	: attr_def
+	| attr_list COMMA attr_def
+	;
+
+attr_def
+	: assignment
+	;
 	
 xpath
 	: XSTRING_LIT;
@@ -311,17 +325,10 @@ where_expression
 	: WHERE assignment_list
 		{ $$ = $2; }
 	;
-	
-lside
-	: id
-		{ $$ = [ $id ]; }
-//	| LPAREN tuplevarlist RPAREN
-//		{ $$ = $tuplevarlist; }
-	;
-	
+		
 assignment
-	: lside ASSIGN expression
-		{  $$ = ['=', $lside, $3, { loc : @$ }]; }
+	: paramlist ASSIGN expression
+		{  $$ = ['=', $paramlist, $3, { loc : @$ }]; }
 	;
 	
 assignment_list
@@ -333,18 +340,10 @@ assignment_list
 	
 caseassignment
 	: assignment
-	| lside CASEASSIGN caselist
-		{ $$ = ['@=', $lside, $3, { loc : @$ }]; }
+	| paramlist CASEASSIGN caselist
+		{ $$ = ['@=', $paramlist, $3, { loc : @$ }]; }
 	;
 		
-caseassignment_list
-	: caseassignment
-		{ $$ = [ $caseassignment ]; }
-	| caseassignment COMMA caseassignment_list
-		{ $$ = $2; $$.unshift($caseassignment); }
-	;
-	
-
 caselist
 	: casedef
 		{ $$ = [$casedef]; }
@@ -366,7 +365,7 @@ arglist
 	
 argdef
 	: expression 
-//	| assignment 
+//	| id COLON expression 
 	;
 	
 paramlist

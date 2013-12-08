@@ -34,3 +34,8 @@ TheoryTests
 			pc -> { display : 'block' },
 			mobile -> { display : 'none' };
 
+
+
+		anothermguy @=
+			pc -> {}, mobile -> {};
+

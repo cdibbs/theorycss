@@ -46,7 +46,7 @@ var tests = [
 		"\n    fn returnsfn() -> \\x, y => x * y;\n    chainedcalls = returnsfn()(3,4);\n",
 		function(topic) { assert.equal(topic, 12); }],
 	["threecalls",
-		"\n    fn firstfn(a,b) -> \\c, d => c * d * d;\n    fn returnsfn() -> \\x, y => firstfn(x,y);\n    threecalls = returnsfn()(1,2)(3,4);\n",
+		"\n    fn firstfn(a,b) -> \\c, d => c * d * d;\n    fn returnsfn2() -> \\x, y => firstfn(x,y);\n    threecalls = returnsfn2()(1,2)(3,4);\n",
 		function(topic) { assert.equal(topic, 48); }],
 	["withinlambda",
 		"\n    fn givewithin(dict) -> within dict: \\x,y => x * y * knownkey;\n    withinlambda = givewithin({knownkey:3})(2,4);\n",
@@ -99,6 +99,10 @@ var tests = [
 		+"    fn shouldnthappen(inaccessiblevar,b) -> inaccessiblevar * myscope(b);\n"
     	+"    fn myscope(c) -> c * inaccessiblevar;\n",
     	function(e, topic) { assert.isNull(e); assert.isTrue(err.isErr(topic)); }
+	],
+	[["multi","variate","assignments"],
+		"\n    multi,variate,assignments = [1,2,3,4];",
+		function(e, topic) { assert.equal(topic[0], 1); assert.equal(topic[1], 2); assert.deepEqual(topic[2][1], [3,4]); }
 	]
 ];
 
@@ -110,7 +114,14 @@ for (var i=0; i<tests.length; i++) {
 				var ast = new Compiler().compile(parser.parse(src), { src : src, pp : true })
 					.resolve("Website").val
 					.resolve("Main").val;
-				return expr.evaluate(ast.resolve(tests[i][0]).ast[0], ast);
+				if (typeof tests[i][0] === 'string') {
+					return expr.evaluate(ast.resolve(tests[i][0]).ast[0], ast);
+				} else {
+					try {
+					var result = tests[i][0].map(function(el,index) { return expr.evaluate(['id', el, {}], ast); });
+					} catch(ex) { console.log(ex.stack); }
+					return result;
+				}
 			} catch(ex) {
 				return ex;
 			}

@@ -141,12 +141,19 @@ var Expressions = function Expressions(node) {
 			if (val['undefined'] === 'undefined') {
 				throw new err.Undefined('Variable ' + id + ' undefined', meta, scope);
 			}
-				
+			
 			if (val.val == null && val.ast) {
+				var result;
 				if (val.scope) { // if the variable has a scope assoc with it, use that
-					return e(val.ast[0], val.scope, lazy);
+					result = e(val.ast[0], val.scope, lazy);
 				}
-				return e(val.ast[0], scope, lazy);
+				result = e(val.ast[0], scope, lazy);
+				if (val.cluster) { // evaluate tuple, assign ALL vars in cluster, re-resolve variable that triggered this
+					scope.setCluster(val.cluster, result);
+					result = scope.resolve(id);
+					return result.val;
+				}
+				return result;
 			} else {
 				return val.val;
 			}
@@ -310,7 +317,25 @@ var Expressions = function Expressions(node) {
 			return result;
 		},
 		'=' : function(id, expr, meta, e, scope) {
-			scope.addSymbol(id, expr); // lazily eval?
+			console.log("HERE");
+			if (id.length === 1) {
+				scope.addSymbol(id[0], expr); // lazily eval?
+			} else {
+				var result = e(expr, scope);
+				if (result instanceof Array && result[0] === 'array') {
+					if (id.length <= result[1].length) {
+						for (var i=0, l=id.length; i<l-1; i++) {
+							scope.addSymbol(id[i], result[1][0]);
+							result[1].shift();
+						}
+						if (result[1].length === 1)
+							scope.addSymbol(id[id.length-1], result[1][0]);
+						else
+							scope.addSymbol(id[id.length-1], result); 
+					}
+				}
+				throw new err.UsageError('Multivariate assignment requires array length greater than the number of variables.', meta, scope);
+			}
 		},
 		'==' : self.genericComparisonOp,
 		'>=' : self.genericComparisonOp,

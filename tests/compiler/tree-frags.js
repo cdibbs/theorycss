@@ -58,7 +58,7 @@ vows.describe("TreeFrags").addBatch({
 				+ '      is { result : myFn(this) };\n'
 				+ '      span\n'
 				+ '        a\n'
-				+ '    fn myFn(node) -> recMyFn(0, node);\n'
+				+ '    fn myFn(node) -> recMyFn(1, node);\n'
 				+ '    fn recMyFn(i, node) -> if (node.children().length == 0) then i else recMyFn(i+1, node.children()[0]) endif;';
 			return parseSnippet(snippet); 
 		},
@@ -66,7 +66,8 @@ vows.describe("TreeFrags").addBatch({
 			var ast = topic.getEntry().ast;
 			var tf = new TreeFrags(topic.getParentScope().getParentScope());
 			var ld = tf.processTree(ast);
-			console.log(ld);
+			var out = ld.genCSSProperties(topic);
+			assert.equal(out[0].dictionaries[0][1]['result'], 3);
 		}
 	}
 	
