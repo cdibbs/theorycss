@@ -4,7 +4,7 @@ website
   theory main
     div is a.block;
       #ident[christmas='tree']
-        is { color: red.sixToneCWScheme() }, { 'font-size' : reduce(\a, x => x + a, [1,2,3,4], 0) };
+        is { color: fg, 'background-color' : bg }, { 'font-size' : reduce(\a, x => x + a, [1,2,3,4], 0) };
         @bob is { 'font-size' : 12pt };
         chris > was
           is testing, { testing : shouldnthappen(5,3) };

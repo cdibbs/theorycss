@@ -31,7 +31,7 @@ function StateManager(type, name, _ast, parentScope, meta) {
 			}
 		}
 		if (variables[id]) {
-			throw new err.AlreadyDefined("Variable " + id + " already defined within this scope.");
+			throw new err.AlreadyDefined("Variable " + id + " already defined within this scope.", {}, scope);
 		}
 		variables[id] = { id : id, val : val, ast : ast, lazy : lazy, type : type, scope : scope };
 		return variables[id];
@@ -48,7 +48,6 @@ function StateManager(type, name, _ast, parentScope, meta) {
 		for (var i=0; i<clustersByPos[key].length - 1; i++) {
 			var id = clustersByPos[key][i].id;
 			delete variables[id].evalCluster, variables[id].cluster;
-			console.log(variables[id])
 			variables[id].val = result[1][0];
 			result[1].shift();
 		}
