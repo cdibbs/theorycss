@@ -111,7 +111,8 @@ var Expressions = function Expressions(node) {
 		var callscope = basescope.createScope('fn', name, null, meta);
 		var b = false;
 		for(var i=0, l=args.length; i<l; i++) {
-			callscope.addSymbol(params[i], 'param', null, [e(args[i], scope)], true, basescope);
+			if (params[i])
+				callscope.addSymbol(params[i], 'param', null, [e(args[i], scope)], true, basescope);
 		}
 		var result = e(fndef.ast[2], callscope, false);
 		return result;

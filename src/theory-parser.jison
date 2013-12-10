@@ -113,8 +113,8 @@ treefrag
 	;
 
 tf_node
-	: GT? leafid tf_typify
-	{ $$ = ['tfnode', $leafid, $tf_typify, !!$1 /* direct descendant */, { loc : @$ }]; }
+	: GT? leafid leaf_attrs tf_typify
+	{ $$ = ['tfnode', $leafid, $leaf_attrs, $tf_typify, !!$1 /* direct descendant */, { loc : @$ }]; }
 	;
 	
 tf_nodedef
@@ -151,23 +151,26 @@ tf_list
 	;
 	
 leafid
-	: DOT dict_id leaf_attrs
+	: DOT dict_id
 	{ $$ = '.' + yytext; }
-	| POUND dict_id leaf_attrs
+	| POUND dict_id
 	{ $$ = '#' + yytext; }
-	| dict_id leaf_attrs
+	| dict_id
 	{ $$ = yytext; }
 	| xpath
 	{ $$ = { type : 'xpath', val : $1 }; };
 	
 leaf_attrs
 	: LBRACKET attr_list RBRACKET
+	{ $$ = $attr_list; }
 	|
 	;
 	
 attr_list
 	: attr_def
+	{ $$ = [ $attr_def ]; }
 	| attr_list COMMA attr_def
+	{ $$ = $attr_list; $$.push($attr_def); }
 	;
 
 attr_def

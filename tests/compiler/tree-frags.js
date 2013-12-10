@@ -40,7 +40,7 @@ vows.describe("TreeFrags").addBatch({
 				assert.equal(ast[0], "tf");
 				assert.equal(ast[1][0], "tfnode");
 				assert.equal(ast[1][1], "div");
-				assert.equal(ast[1][2], "OtherTheory");
+				assert.equal(ast[1][3], "OtherTheory");
 				assert.equal(ast[2][0][0][0], "tfis");
 			},
 			'processTree() produces valid LeafDict' : function(topic) {

@@ -97,7 +97,7 @@ var Css = function Css(options) {
 		if (media) output[1][media] = o; else output[0] = o;
 	};
 	
-	this.compactNodeId = function compactNodeId(ancestors, expr) {
+	this.compactNodeId = function compactNodeId(ancestors, expr, attrs) {
 		if (expr.substr(0, 1) === '#') {
 			return expr;
 		} else {

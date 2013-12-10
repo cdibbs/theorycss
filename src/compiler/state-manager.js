@@ -20,7 +20,7 @@ function StateManager(type, name, _ast, parentScope, meta) {
 				clustersById[clusterKey] = {};
 				for (var i=0; i<id.length; i++) {
 					if (variables[id[i]]) {
-						throw new err.AlreadyDefined("Variable " + id[i] + " already defined within this scope.");
+						throw new err.AlreadyDefined("Cluster variable " + id[i] + " already defined within this scope.");
 					}
 					variables[id[i]] = { id : id[i], val : val, ast : ast, lazy : lazy, scope : scope, cluster : clusterKey };
 					clustersByPos[clusterKey][i] = clustersById[clusterKey][id[i]] = { val : null, hasVal : false, id : id[i] };
@@ -31,6 +31,7 @@ function StateManager(type, name, _ast, parentScope, meta) {
 			}
 		}
 		if (variables[id]) {
+			throw new Error();
 			throw new err.AlreadyDefined("Variable " + id + " already defined within this scope.", {}, scope);
 		}
 		variables[id] = { id : id, val : val, ast : ast, lazy : lazy, type : type, scope : scope };
@@ -43,7 +44,6 @@ function StateManager(type, name, _ast, parentScope, meta) {
 			throw new err.UsageError('Multivariate assignment requires array length greater than the number of variables.', result[2], self);
 		}
 		
-		console.log("Setting ", key, result);
 		var len = result[1].length;
 		for (var i=0; i<clustersByPos[key].length - 1; i++) {
 			var id = clustersByPos[key][i].id;
