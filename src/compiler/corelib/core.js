@@ -92,6 +92,12 @@ function addTreeLib(native) {
 		var css = ld.getStyleDict();
 		return ['dict', css, env.meta];
 	};
+	native.Node.methods['attributes'] = function(instance, env) {
+		var ld = instance[2]['_leafdict'];
+		var attrs = ld.getAttributes();
+		var dict = attrs.reduce(function(prev, cur) { return prev[cur.name] = cur.value; }, {});
+		return ['dict', dict, env.meta];
+	};
 }
 
 function addColorNames(native) {

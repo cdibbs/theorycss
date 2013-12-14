@@ -10,11 +10,12 @@ var u = require('../util').u,
  * @param {Array} isList - the list of 'is' clauses to be applied to this node
  * @param {Array} children - tree frags that have this node as their parent
  */
-function LeafDict(nodeId, isList, parent) {
+function LeafDict(nodeId, attrs, isList, parent) {
 	var self = this;
 	var css = [];
 	var mq = {};
 	var children = [];
+	var attributes = null;
 	
 	self.genCSSProperties = function genCSSProperties(scope) {
 		if (!isList) return;
@@ -27,6 +28,7 @@ function LeafDict(nodeId, isList, parent) {
 					});
 			return true;
 		});
+		attributes = self.calculateAttributes(attrs, scope);
 		
 		return css;
 	};
@@ -41,6 +43,7 @@ function LeafDict(nodeId, isList, parent) {
 	self.getChildren = function getChildren() { return children; };
 	
 	self.getStyleDict = function() { return css; };
+	self.getAttributes = function() { return attributes; };
 	
 	self.evalMediaQuery = function(mq, scope) {
 		return new Expressions(self)
@@ -108,6 +111,7 @@ function LeafDict(nodeId, isList, parent) {
 			var pointer = pointers[0], node = pointers[1];
 			var children = pointer.getChildren();
 			node.expression = pointer.getNodeId();
+			node.attributes = pointer.getAttributes();
 			node.contexts = pointer.getStyleDict();
 			node.children = [];
 			for(var i=0, l=children.length; i<l; i++) {
@@ -119,6 +123,14 @@ function LeafDict(nodeId, isList, parent) {
 			
 		} while (stack.length);
 		return tree;
+	};
+	
+	self.calculateAttributes = function calculateAttributes(attrs, scope) {
+		if (!attrs) return [];
+		var e = new Expressions(self).evaluate;
+		return attrs.map(function(attr) {
+			return { 'name' : attr[1][0], 'value' : e(attr[2], scope, false)};
+		});
 	};
 };
 

@@ -2,13 +2,12 @@ website
   import "test" into test;
 
   theory main
-    div is a.block;
-      #ident[christmas='tree']
-        is { color: fg, 'background-color' : bg }, { 'font-size' : reduce(\a, x => x + a, [1,2,3,4], 0) };
-        @bob is { 'font-size' : 12pt };
-        chris > was
-          is testing, { testing : shouldnthappen(5,3) };
-      div :: nother
+    div[title='chris was here'] is testing;
+      #ident is testing;
+        ul
+          li x 8
+            a[href=linkNum(this)]
+          
       
     /* this object should have to be passed into regular functions.
        Only frag functions receive it, implicitly. Therefore, the
@@ -20,9 +19,6 @@ website
     chris = John(1,2,3).toString();
     
     fg,bg,txt,bord,bread,lnk = red.sixToneCWScheme();
-    
-    fn shouldnthappen(a,b) -> a * myscope(b);
-    fn myscope(c) -> c * c;
 
     testing
       backgroundColor: red;

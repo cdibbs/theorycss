@@ -19,6 +19,7 @@ var Css = function Css(options) {
 	 * {
 	 *   root: {   
 	 * 	   expression : 'div',
+	 *     attributes : [ { name : 'name', value : 'value' }, {}, .. ]
 	 *     contexts : [ {
 	 *       media: (key in media-queries),
 	 *       mediaString: "...",
@@ -37,7 +38,7 @@ var Css = function Css(options) {
 	 * @returns {String}
 	 */
 	this.filter = function filter(tree) {
-		//console.log(JSON.stringify(tree, null, 1));
+		console.log(JSON.stringify(tree, null, 1));
 		if (!tree['root'])
 			return '';
 		
@@ -64,8 +65,9 @@ var Css = function Css(options) {
 		var expr = branch.expression;
 		var contexts = branch.contexts;
 		var children = branch.children;
+		var attrs = branch.attributes;
 		for (var i=0, l=contexts.length; i<l; i++) {
-			self.renderContext(ancestors, output, expr, contexts[i]);
+			self.renderContext(ancestors, output, expr, contexts[i], attrs);
 		}
 
 		var ancest = u.ipush(ancestors, expr);
@@ -76,7 +78,7 @@ var Css = function Css(options) {
 		return output;
 	};	
 	
-	this.renderContext = function renderContext(ancestors, output, expr, context) {
+	this.renderContext = function renderContext(ancestors, output, expr, context, attrs) {
 		var media = context.mediaString;
 		var pseudoEl = context.pseudoEl;
 		var cssDicts = context.dictionaries;
@@ -88,7 +90,7 @@ var Css = function Css(options) {
 			n = n * 2;
 		}
 		
-		o += space(bn) + self.compactNodeId(ancestors, expr) + space(1) + '{' + nl(1);
+		o += space(bn) + self.compactNodeId(ancestors, expr, attrs) + space(1) + '{' + nl(1);
 		for(var i=0, l=cssDicts.length; i<l; i++) {
 			o += dict2css(cssDicts[i], space(n));
 		}
@@ -99,7 +101,7 @@ var Css = function Css(options) {
 	
 	this.compactNodeId = function compactNodeId(ancestors, expr, attrs) {
 		if (expr.substr(0, 1) === '#') {
-			return expr;
+			return expr + attrs2Str(attrs);
 		} else {
 			var id = expr;
 			for(var i=ancestors.length-1; i>=0; i--) {
@@ -108,9 +110,13 @@ var Css = function Css(options) {
 					break;
 				}
 			}
-			return id;
+			return id + attrs2Str(attrs);
 		}
 	};
+	
+	function attrs2Str(attrs) {
+		return attrs.reduce(function(prev, cur) { return prev + '[' + cur.name + '="' + cur.value + '"]'; }, '');
+	}
 	
 	function dict2css(dict, spc) {
 		var o = '';
