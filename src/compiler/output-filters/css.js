@@ -38,7 +38,7 @@ var Css = function Css(options) {
 	 * @returns {String}
 	 */
 	this.filter = function filter(tree) {
-		console.log(JSON.stringify(tree, null, 1));
+		//console.log(JSON.stringify(tree, null, 1));
 		if (!tree['root'])
 			return '';
 		

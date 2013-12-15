@@ -28,7 +28,7 @@ function LeafDict(nodeId, attrs, isList, parent) {
 					});
 			return true;
 		});
-		attributes = self.calculateAttributes(attrs, scope);
+		//attributes = self.calculateAttributes(attrs, scope);
 		
 		return css;
 	};
@@ -111,7 +111,7 @@ function LeafDict(nodeId, attrs, isList, parent) {
 			var pointer = pointers[0], node = pointers[1];
 			var children = pointer.getChildren();
 			node.expression = pointer.getNodeId();
-			node.attributes = pointer.getAttributes();
+			//node.attributes = pointer.getAttributes();
 			node.contexts = pointer.getStyleDict();
 			node.children = [];
 			for(var i=0, l=children.length; i<l; i++) {

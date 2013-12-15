@@ -2,11 +2,12 @@ website
   import "test" into test;
 
   theory main
-    div[title='chris was here'] is testing;
-      #ident is testing;
+    div
+      #ident is { background : 'red' };
         ul
-          li x 8
-            a[href=linkNum(this)]
+          li * 8
+            a[href=links[this.index()]]
+        div
           
       
     /* this object should have to be passed into regular functions.
@@ -14,7 +15,8 @@ website
        this keyword can be used both in classes and tree frags.
        Exception: frag functions in classes? Need to solve this.
        Should frag functions be permitted within classes?
-     */
+    */
+    
     bob = 'width > 800px';
     chris = John(1,2,3).toString();
     

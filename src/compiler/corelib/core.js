@@ -2,7 +2,8 @@ var err = require('../errors').err,
 	classes = require('../classes'),
 	u = require('../../util'),
 	colorNames = require('./color-names'),
-	ColorJS = require('./color-js/color').Color;
+	ColorJS = require('./color-js/color').Color,
+	Caman = require('caman').Caman;
 
 
 module.exports = function(native) {
@@ -68,7 +69,7 @@ module.exports = function(native) {
 	
 	addColorLib(native);
 	addTreeLib(native);
-	
+	addImageLib(native);
 	return native;
 };
 
@@ -97,6 +98,25 @@ function addTreeLib(native) {
 		var attrs = ld.getAttributes();
 		var dict = attrs.reduce(function(prev, cur) { return prev[cur.name] = cur.value; }, {});
 		return ['dict', dict, env.meta];
+	};
+	native.Node.methods['index'] = function(instance, env) {
+		var ld = instance[2]['_leafdict'];
+		var children = ld.getParent().getChildren();
+		return children.indexOf(ld);
+	};
+}
+
+function addImageLib(native) {
+	native.Image = classes.makeClass('Image');
+	native.Image.methods['colorize'] = function(instance, env) {
+		var img = instance[2]['_image'];
+		Caman("https://www.google.com/images/srpr/logo11w.png", function() {
+			this.colorize(255,0,0,100);
+			this.render(function() {
+				console.log(this.toBase64());
+			});
+		});
+		return 'TEXT';
 	};
 }
 

@@ -99,8 +99,8 @@ units						(?:[a-zA-Z][a-zA-Z0-9]*|\%)
 "}"				%{ this.myPopState(); return 'RBRACE'; %};
 "("				%{ this.myBegin('FREEDOM', '('); return 'LPAREN'; %};
 ")"				%{ this.myPopState(); return 'RPAREN'; %};
-"["				return 'LBRACKET';
-"]"				return 'RBRACKET';
+"["				%{ this.myBegin('FREEDOM', '['); return 'LBRACKET'; %};
+"]"				%{ this.myPopState(); return 'RBRACKET'; %};
 ":"				return 'COLON';
 <FREEDOM>";"			%{ this.myPopState(); return 'EOL'; %};
 <FREEDOM>\s+			/* ignore whitespace within functions */
@@ -130,7 +130,6 @@ units						(?:[a-zA-Z][a-zA-Z0-9]*|\%)
 "endif"			return 'ENDIF'; 
 "is"			return 'IS';
 "null"			return 'NULL';
-"x"				return 'REPEAT';
 {id}			return 'ID';
 {dict_id}		return 'DICT_ID';
 {str}			yytext = yytext.substr(1,yyleng-2); return 'STRING_LIT';

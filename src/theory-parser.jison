@@ -109,8 +109,8 @@ treefrag_block
 	
 treefrag
 	: tf_node tf_nodedef
-	{ $$ = ['tf', $tf_node, $tf_nodedef, { repeat: 1 }, { loc : @$ }]; }
-	| tf_node REPEAT INTEGER tf_nodedef
+	{ $$ = ['tf', $tf_node, $tf_nodedef, { repeat: $2 }, { loc : @$ }]; }
+	| tf_node TIMES INTEGER tf_nodedef
 	{ $$ = ['tf', $tf_node, $tf_nodedef, { repeat: $INTEGER }, { loc : @$ }]; }
 	;
 
