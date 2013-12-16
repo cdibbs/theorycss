@@ -123,7 +123,7 @@ tf_nodedef
 	: tf_islist
 	{ $$ = [$tf_islist, null]; }
 	| tf_islist INDENT tf_ndblock DEDENT
-	{ $$ = $tf_ndblock; if ($$[0]) $$[0] = $tf_islist.concat($$[0]); }
+	{ $$ = $tf_ndblock; if ($$[0]) $$[0] = $tf_islist.unshift($$[0]); else $$[0] = $tf_islist; }
 	| INDENT tf_ndblock DEDENT
 	{ $$ = $tf_ndblock; }
 	|

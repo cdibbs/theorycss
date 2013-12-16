@@ -48,7 +48,6 @@ var Css = function Css(options) {
 			mqstr[1][k] = '';
 		}
 		var output = self.renderBranch([], mqstr, tree['root'], mediaQueries);
-		
 		// concatenate the different media queries together
 		var outputstring = output[0] + opts.whitespace.newline + nl(1);
 		for(var mq in output[1]) {
@@ -115,6 +114,7 @@ var Css = function Css(options) {
 	};
 	
 	function attrs2Str(attrs) {
+		if (!attrs) return [];
 		return attrs.reduce(function(prev, cur) { return prev + '[' + cur.name + '="' + cur.value + '"]'; }, '');
 	}
 	

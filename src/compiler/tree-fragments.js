@@ -35,9 +35,8 @@ var TreeFragments = function TreeFragments(rootScope) {
 			var isList = ast[2] ? ast[2][0] : null;
 			var attrs = ast[1][2];
 			var theories = ast[1][3];
-			var leafDict = (function(isList, children) {
-				return new LeafDict(ast[1][1], attrs, isList, parent);
-			})(isList, children);
+			var leafDict = new LeafDict(ast[1][1], attrs, isList, parent);
+			
 			if (children && children.length) {
 				for(var i=0, l=children.length; i<l; i++) {
 					leafDict.addChild(self.buildTree(children[i], self));

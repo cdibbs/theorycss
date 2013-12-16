@@ -110,7 +110,7 @@ function addImageLib(native) {
 	native.Image = classes.makeClass('Image');
 	native.Image.methods['colorize'] = function(instance, env) {
 		var img = instance[2]['_image'];
-		Caman("https://www.google.com/images/srpr/logo11w.png", function() {
+		Caman("src/compiler/corelib/pixastic/sample-images/earth.png", function() {
 			this.colorize(255,0,0,100);
 			this.render(function() {
 				console.log(this.toBase64());
@@ -118,6 +118,7 @@ function addImageLib(native) {
 		});
 		return 'TEXT';
 	};
+	native.toy = classes.makeInstance("Image", {});
 }
 
 function addColorNames(native) {

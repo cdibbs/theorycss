@@ -3,7 +3,7 @@ website
 
   theory main
     div
-      #ident is { background : 'red' };
+      #ident is toy.colorize();
         ul
           li * 8
             a[href=links[this.index()]]
@@ -17,7 +17,7 @@ website
        Should frag functions be permitted within classes?
     */
     
-    bob = 'width > 800px';
+    mobile = 'width > 800px';
     chris = John(1,2,3).toString();
     
     fg,bg,txt,bord,bread,lnk = red.sixToneCWScheme();
