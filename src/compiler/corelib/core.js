@@ -3,6 +3,7 @@ var err = require('../errors').err,
 	u = require('../../util'),
 	colorNames = require('./color-names'),
 	ColorJS = require('./color-js/color').Color,
+	Q = require('q'),
 	Caman = require('caman').Caman;
 
 
@@ -109,14 +110,31 @@ function addTreeLib(native) {
 function addImageLib(native) {
 	native.Image = classes.makeClass('Image');
 	native.Image.methods['colorize'] = function(instance, env) {
+		var deferred = Q.defer();
 		var img = instance[2]['_image'];
-		Caman("src/compiler/corelib/pixastic/sample-images/earth.png", function() {
-			this.colorize(255,0,0,100);
-			this.render(function() {
-				console.log(this.toBase64());
+		try {
+			Caman("src/compiler/corelib/pixastic/sample-images/earth.png", function() {
+				this.colorize(255,0,0,100);
+				this.render(function() {
+					deferred.resolve(this);
+				});
 			});
+		} catch(ex) {
+			deferred.reject(ex);
+		}
+		return deferred.promise;
+	};
+	native.Image.methods['toBase64'] = function(instance, env) {
+		var deferred = Q.defer();
+		var img = instance[2]['_image'];
+		try {
+		Caman(img, function() {
+			deferred.resolve(this.toBase64());
 		});
-		return 'TEXT';
+		} catch(ex) {
+			deferred.reject(ex);
+		}
+		return deferred.promise;
 	};
 	native.toy = classes.makeInstance("Image", {});
 }

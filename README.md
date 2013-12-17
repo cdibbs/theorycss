@@ -7,6 +7,14 @@ The emergence of CSS superset languages such as LESS and SASS prove need for a m
 expressive language for styling the web. Theory answers this need by providing high-level,
 relational structure between styled elements in a maintainable way.
 
+##Installation
+Theory relies on Caman for image manipulation, so you will need to install:
+
+- Cairo (libcairo2-dev)
+- libjpeg (libjpeg-dev)
+- libgif (libgif-dev)
+- libpng (libpng-dev)
+
 ##Tree Fragments
 Akin to nested rules in LESS, these describe rough, in-tree relationships between elements, as well
 as high-level, declarative styling rules.
