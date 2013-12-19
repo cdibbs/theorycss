@@ -116,7 +116,7 @@ function addImageLib(native) {
 			Caman("src/compiler/corelib/pixastic/sample-images/earth.png", function() {
 				this.colorize(255,0,0,100);
 				this.render(function() {
-					deferred.resolve(this);
+					deferred.resolve(this.toBase64());
 				});
 			});
 		} catch(ex) {

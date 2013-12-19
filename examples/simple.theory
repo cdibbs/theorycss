@@ -3,7 +3,8 @@ website
 
   theory main
     div
-      #ident is toy.colorize();
+      #ident
+        is { 'background' : toy.colorize() };
         ul
           li * 8
             a[href=links[this.index()]]
