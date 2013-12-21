@@ -20,6 +20,7 @@ function LeafDict(nodeId, attrs, isList, parent) {
 	self.genCSSProperties = function genCSSProperties(scope) {
 		if (!isList) return;
 		isList.every(function(isdef) {
+			
 			css.push(
 					{ media : isdef[1],
 					  mediaString : isdef[1] ? self.evalMediaQuery(isdef[1], scope) : null,

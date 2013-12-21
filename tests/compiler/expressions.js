@@ -115,10 +115,10 @@ for (var i=0; i<tests.length; i++) {
 					.resolve("Website").val
 					.resolve("Main").val;
 				if (typeof tests[i][0] === 'string') {
-					return expr.evaluate(ast.resolve(tests[i][0]).ast[0], ast);
+					return expr.evaluate(ast.resolve(tests[i][0]).ast[0], ast, false, true);
 				} else {
 					try {
-					var result = tests[i][0].map(function(el,index) { return expr.evaluate(['id', el, {}], ast); });
+					var result = tests[i][0].map(function(el,index) { return expr.evaluate(['id', el, {}], ast, false, true); });
 					} catch(ex) { console.log(ex.stack); }
 					return result;
 				}
@@ -126,7 +126,10 @@ for (var i=0; i<tests.length; i++) {
 				return ex;
 			}
 		}; })(i),
-		'we get the correct result' : tests[i][2] 
+		'we get the correct result' : (function(i) { return function(result) { 
+			result.then(tests[i][2]); 
+			};
+			})(i) 
 	};
 }
 		

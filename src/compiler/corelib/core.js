@@ -9,50 +9,65 @@ var err = require('../errors').err,
 
 module.exports = function(native) {
 	native.log = function(env, o) {
-		var result = env.e(o, env.scope);
-		console.log(result);
-		return result;
+		return env.e(o, env.scope, null, true)
+		.then(function(result) {
+			console.log(result);
+			return result;
+		});
 	};
 	
 	native.num = function(env, s) {
-		var es = env.e(s, env.scope), num = parseFloat(es);
-		if (Number.isNaN(num)) {
-			throw new err.NotANumber("Not a Number", env.meta, env.scope);
-		} 
-		return num;
+		return env.e(s, env.scope, null, true)
+		.then(function(es) { 
+			var num = parseFloat(es);
+			if (Number.isNaN(num)) {
+				throw new err.NotANumber("Not a Number", env.meta, env.scope);
+			} 
+			return num;
+		});
 	};
 	
 	native.isNaN = function(env, v) {
-		var ev = env.e(v, env.scope);
-		return Number.isNaN(ev);
+		return env.e(v, env.scope, null, true)
+		.then(function(ev) {
+			return Number.isNaN(ev);
+		});
 	};
 	
 	native.map = function(env, fn, arr) {
-		var fndef = env.e(fn, env.scope);
-		var arr = arr[1].map(function(el) {
-			return env.expr.execFn(fndef, [el], env.name, env.meta, env.e, env.scope);
+		return env.e(fn, env.scope, null, true)
+		.then(function(fndef) {
+			if (!(arr instanceof Array && arr[0] === 'array'))
+				throw new err.UsageError("Must be an array.", env.meta, env.scope);
+			var arr = arr[1].map(function(el) {
+				return env.expr.execFn(fndef, [el], env.name, env.meta, env.e, env.scope);
+			});
+			return ['array', arr];
 		});
-		return ['array', arr];
 	};
 	
 	native.reduce = function(env, fn, arr, init) {
-		var fndef = env.e(fn, env.scope);
-		if (arr instanceof Array) {
-			if (arr[0] === 'array') {
-				var initial = init ? env.e(init, env.scope) : arr[1][0];
-				return arr[1].reduce(function(c, x, i, arr) {
-					return env.expr.execFn(fndef, [c, x, i, arr], env.name, env.meta, env.e, env.scope);
-				});
-			} else if (arr[0] === 'dict') {
-				var keys = Object.keys(arr[1]);
-				var initial = init ? env.e(init, env.scope) : 0;
-				return keys.reduce(function(c, x, i, orig) {
-					var stage = env.expr.execFn(fndef, [c, x, arr[1][x], i, arr], env.name, env.meta, env.e, env.scope);
-					return stage;
-				}, initial);
+		return Q.all([
+			env.e(fn, env.scope, null, true),
+			init ? env.e(init, env.scope, null, true) : arr[1][0]
+			])
+		.spread(function(fndef, initial) {
+			if (arr instanceof Array) {
+				if (arr[0] === 'array') {
+					return arr[1].reduce(function(c, x, i, arr) {
+						return env.expr.execFn(fndef, [c, x, i, arr], env.name, env.meta, env.e, env.scope);
+					});
+				} else if (arr[0] === 'dict') {
+					var keys = Object.keys(arr[1]);
+					var initial = init ? env.e(init, env.scope) : 0;
+					return keys.reduce(function(c, x, i, orig) {
+						var stage = env.expr.execFn(fndef, [c, x, arr[1][x], i, arr], env.name, env.meta, env.e, env.scope);
+						return stage;
+					}, initial);
+				}
 			}
-		}
-		throw new err.UsageError('Not an Array or Dict', env.meta, env.scope);
+			throw new err.UsageError('Not an Array or Dict', env.meta, env.scope);
+		});
 	};
 	
 	native.len = function(env, obj) {
