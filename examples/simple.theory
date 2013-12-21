@@ -3,7 +3,7 @@ website
 
   theory main
     div
-      #ident is toy.colorize();
+      #ident is toy.colorize().toBaseCSS();
         ul
           li * 8
             a[href=links[this.index()]]

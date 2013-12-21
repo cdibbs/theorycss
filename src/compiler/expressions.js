@@ -2,21 +2,28 @@
 var u = require('../util').u,
 	err = require('./errors').err,
 	classes = require('./classes'),
+	Q = require('q'),
 	warn = require('./errors').warn;
 	 	
 var Expressions = function Expressions(node) {
 	var self = this;
 	var node = node || null;
 	
-	self.evaluate = function(ast, scope, lazy) {
+	self.evaluate = function(ast, scope, lazy, callback) {
 		if (ast instanceof Array && ast.length > 0) {
 			if (typeof self.ops[ast[0]] !== 'undefined') {
 				var params = u.ipush(ast.slice(1), self.evaluate, scope, ast[0], lazy);
-				return self.ops[ast[0]].apply(this, params); 
+				var result = self.ops[ast[0]].apply(this, params);
+				if (callback)
+					Q(result).then(callback);
+				else
+					return result;
 			}
 			//console.log(ast);
 		}
-		return ast;
+		
+		if (callback)
+			Q(ast).then(callback);
 	};
 	
 	self.isLiteral = function isLiteral(p) {

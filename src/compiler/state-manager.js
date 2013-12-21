@@ -64,6 +64,7 @@ function StateManager(type, name, _ast, parentScope, meta) {
 		
 		delete clustersByPos[key], clustersById[key];
 	};
+	
 	self.resolve = function(id) {
 		if (typeof variables[id] === 'undefined') {
 			if (parentScope) {
@@ -81,6 +82,7 @@ function StateManager(type, name, _ast, parentScope, meta) {
 
 		return variables[id];
 	};
+	
 	self.setEntry = function(scope) { self.entry = scope;	};
 	self.hasEntry = function() { return self.entry != null; };
 	self.getEntry = function() { return self.entry; };
