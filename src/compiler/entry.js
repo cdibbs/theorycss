@@ -5,6 +5,7 @@ var StateManager = require('./state-manager').StateManager;
 var TreeFrags = require('./tree-fragments').TreeFragments;
 var coreLib = require('./corelib/core.js');
 var err = require('./errors').err;
+var Q = require('q');
 var debugMode = true;
 
 var defaultOptions = {
@@ -64,10 +65,63 @@ var Compiler = function(opts) {
 			var tf = new TreeFrags(scope);
 			var tfAST = main.val.getEntry().ast;
 			var leafDict = tf.processTree(tfAST);
-			return leafDict.getTree();
+			return waitForPromises(leafDict.getTree());
 		} else {
 			throw new Error('Unimplemented main entry type.');
 		}
+	};
+	
+	function waitForPromises(tree) {
+		var deferred = Q.defer();
+		
+		if (!tree['root'])
+			deferred.reject(new err.Unsupported('No root found.'));
+			
+		var values = [], total = 0, finished = 0;
+		function notify(i) {
+			values[i] = { completed : values[i] };
+			finished = finished + 1;
+			if (finished == total ) { deferred.resolve(tree); }
+			else { deferred.notify(finished / total); }
+		};
+		
+		function waitOn(d, k, v) {
+			if (v.then) { // FIXME: probably but not definitely Q
+				total = total + 1;
+				v.then((function(i) { return function(finalVal) {
+					d[k] = finalVal;
+					notify(i); 
+				}; })(values.length));
+				values.push(i);
+				return values.length;
+			}
+			return false;
+		}
+			
+		// now find all promises, and attach notify as their next event
+		var stack = [tree['root']];
+		while (stack.length) {
+			var current = stack.pop();
+			for(var i=0; i<current.children.length; i++) {
+				stack.push(current.children[i]);
+			}
+			for(var key in current.contexts) {
+				var context = current.contexts[key];
+				for(var index in context.dictionaries) {
+					var css = context.dictionaries[index][1];
+					for (var prop in css) {
+						if (css[prop] instanceof Array) {
+							for(var i=0; i<css[prop].length; i++) {
+								waitOn(css[prop], i, css[prop][i]);
+							}
+						} else {
+							waitOn(css, prop, css[prop]);
+						}
+					}
+				}
+			}
+		}
+		return deferred.promise;
 	};
 	
 	self.evalNamespace = function evalNamespace(nsAST, scope) {
