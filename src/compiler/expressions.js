@@ -119,11 +119,12 @@ var Expressions = function Expressions(node) {
 	};
 	
 	self.execFn = function(fndef, args, name, meta, e, scope) {
-		var basescope = fndef.scope /* if defined within a closure - e.g., a lambda */ || scope.base();
+		var basescope = fndef.scope /* if defined within a closure - e.g., a lambda */
+			|| scope.base();
 		var params = fndef.ast[0];
 		var callscope = basescope.createScope('fn', name, null, meta);
 		var b = false;
-		args = args.map(function(arg) { return Q(e(arg, scope, null, true)); });
+		args = args.map(function(arg) { return e(arg, scope, null, true); });
 		return Q.all(args).then(function(args) {
 			for(var i=0, l=args.length; i<l; i++) {
 				if (params[i])
@@ -188,7 +189,6 @@ var Expressions = function Expressions(node) {
 		'()' : function(fn, args, meta, e, scope, lazy) {
 			return Q(e(fn, scope, null, true))
 			.then(function(fndef) {
-				console.log(fndef);
 				if (typeof fndef === 'function') {
 					// "native" function call
 					var nargs = u.clone(args);
@@ -318,9 +318,10 @@ var Expressions = function Expressions(node) {
 			// Walk the condition list through recursive promises. If the promised condition results in true,
 			// return a promise for that condition's value (e.g. if (cond) then value), else a promise to check
 			// the next condition.
-			var promise = Q(e(condList[0][0], scope, null, true));
+			var promise = e(condList[0][0], scope, null, true);
 			var promiseFactory = function(i) {
 				return function(result) {
+					console.log(result);
 					if (result) {
 						return e(condList[i][1], scope, null, true);
 					} else if (i < condList.length) {

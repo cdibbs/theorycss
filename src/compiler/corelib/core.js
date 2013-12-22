@@ -9,10 +9,13 @@ var err = require('../errors').err,
 
 module.exports = function(native) {
 	native.log = function(env, o) {
-		return env.e(o, env.scope, null, true)
-		.then(function(result) {
-			console.log(result);
-			return result;
+		var args = Array.prototype.slice.call(arguments, 1);
+		args = args.map(function(arg) { return env.e(arg, env.scope, null, true); });
+		return Q.all(args).spread(
+			function() {
+				var results = Array.prototype.slice.call(arguments, 0);
+				results = results.map(function(i) { return i; });
+				console.log.apply(this, arguments);
 		});
 	};
 	
