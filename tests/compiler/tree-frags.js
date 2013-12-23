@@ -67,7 +67,9 @@ vows.describe("TreeFrags").addBatch({
 			var tf = new TreeFrags(topic.getParentScope().getParentScope());
 			var ld = tf.processTree(ast);
 			var out = ld.genCSSProperties(topic);
-			assert.equal(out[0].dictionaries[0][1]['result'], 3);
+			out[0].dictionaries[0].done(function(dict) {
+				assert.equal(dict[1]['result'], 3);
+			});
 		}
 	}
 	

@@ -2,6 +2,7 @@ chris
   theory main
     html
       div
-        is { background: 'red', color: myfn(5) };
+        is { background: 'red' + " vs. blue", color: myfn(5) };
 
-    fn myfn(i) -> 32;
+    fn myfn(i) -> 3 * recursiveFn(5);
+    fn recursiveFn(i) -> if i > 0 then i + recursiveFn(i-1) else 0 endif;

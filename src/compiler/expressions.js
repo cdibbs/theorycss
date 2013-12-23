@@ -9,17 +9,16 @@ var Expressions = function Expressions(node) {
 	var self = this;
 	var node = node || null;
 	
-	self.evaluate = function(ast, scope, lazy, asPromise) {
+	self.evaluate = function(ast, scope, asPromise) {
 		if (ast instanceof Array && ast.length > 0) {
 			if (typeof self.ops[ast[0]] !== 'undefined') {
-				var params = u.ipush(ast.slice(1), self.evaluate, scope, ast[0], lazy);
+				var params = u.ipush(ast.slice(1), self.evaluate, scope, ast[0]);
 				var result = self.ops[ast[0]].apply(this, params);
 				if (asPromise)
-					return Q(result).fail(function(e) { console.log(e.stack); });
+					return Q(result);
 				else
 					return result;
 			}
-			//console.log(ast);
 		}
 		
 		if (asPromise)
@@ -121,24 +120,23 @@ var Expressions = function Expressions(node) {
 	self.execFn = function(fndef, args, name, meta, e, scope) {
 		var basescope = fndef.scope /* if defined within a closure - e.g., a lambda */
 			|| scope.base();
-		var params = fndef.ast[0];
-		var callscope = basescope.createScope('fn', name, null, meta);
-		var b = false;
-		args = args.map(function(arg) { return e(arg, scope, null, true); });
-		return Q.all(args).then(function(args) {
-			for(var i=0, l=args.length; i<l; i++) {
-				if (params[i])
-					callscope.addSymbol(params[i], 'param', null, args[i], true, basescope);
+		var qargs = args.map(function(arg) { return e(arg, scope, null, true); });
+		return Q.all(qargs).then(function(eargs) {
+			var params = fndef.ast[0];
+			var callscope = basescope.createScope('fn', name, null, meta);
+			for(var i=0, l=eargs.length; i<l; i++) {
+				if (params[i]) {
+					callscope.addSymbol(params[i], 'param', eargs[i], null, false, basescope);
+				}
 			}
 			var result = e(fndef.ast[2], callscope, false, true);
 			return result;
 		});
 	};	
 	
-	self.accessor = function(expr1, expr2, meta, e, scope, lazy) {
+	self.accessor = function(expr1, expr2, meta, e, scope) {
 		return Q.all([e(expr1, scope, null, true), e(expr2, scope, null, true)])
 		.spread(function(a, b) {
-			console.log("Here: ", a, b);
 			if (a instanceof Array) {
 				if (a[0] === 'dict' || a[0] === 'array') {
 					return a[1][b];
@@ -153,22 +151,22 @@ var Expressions = function Expressions(node) {
 	self.ops = {
 		'num' : function(p1, e) { return p1; },
 		'str' : function(p1, e) { return p1; },
-		'id' : function(id, meta, e, scope, lazy) {
+		'id' : function(id, meta, e, scope) {
 			var val = scope.resolve(id);
-			// console.log(id, " resolved as ", val)
+			//console.log(id, " resolved as ", val)
 			if (val.type === 'fn' || val.type === 'ff')
 				return val;
 			
 			if (val['undefined'] === 'undefined') {
 				throw new err.Undefined('Variable ' + id + ' undefined', meta, scope);
 			}
-			if (val.val == null && val.ast) {
+			if (val.val === null && val.ast !== null) {
 				var result;
 				if (val.scope) { // if the variable has a scope assoc with it, use that
-					result = e(val.ast[0], val.scope, lazy, true);
+					result = e(val.ast[0], val.scope, true);
 				} else
-					result = e(val.ast[0], scope, lazy, true);
-					
+					result = e(val.ast[0], scope, true);
+
 				return result.then(function(result) {
 					if (val.cluster) { // evaluate tuple, assign ALL vars in cluster, re-resolve variable that triggered this
 						scope.setCluster(val.cluster, result);
@@ -180,13 +178,13 @@ var Expressions = function Expressions(node) {
 				return val.val;
 			}
 		},
-		'this' : function(meta, e, scope, lazy) {
+		'this' : function(meta, e, scope) {
 			if (node) {
 				var wrapped = classes.makeInstance("Node", { '_leafdict' : node });
 				return wrapped;
 			}
 		},
-		'()' : function(fn, args, meta, e, scope, lazy) {
+		'()' : function(fn, args, meta, e, scope) {
 			return Q(e(fn, scope, null, true))
 			.then(function(fndef) {
 				if (typeof fndef === 'function') {
@@ -200,7 +198,7 @@ var Expressions = function Expressions(node) {
 					return self.execFn(fndef, args, name, meta, e, scope);
 				} else if (typeof fndef === 'object' && fndef.type === 'ff') {
 					//fndef.scope
-					console.log(fn, args, e(fn, scope));
+					console.log("CANT YET DEAL WITH FRAG FUNCS", fn, args, e(fn, scope));
 				} else if (fndef instanceof Array) {
 					if (fndef[0] === 'inst_mem') {
 						return classes.callMethod(fndef[1], fndef[2], { scope : scope, e : e, meta : meta });
@@ -210,7 +208,7 @@ var Expressions = function Expressions(node) {
 				}
 			});
 		},
-		"{but}" : function(expr, butlist, meta, e, scope, lazy) {
+		"{but}" : function(expr, butlist, meta, e, scope) {
 			return Q(e(expr, scope, null, true))
 			.then(function(dict) {
 				if (dict[0] !== 'dict')
@@ -228,14 +226,13 @@ var Expressions = function Expressions(node) {
 				return newdict;
 			});
 		},
-		"{with}" : function(expr, lambda, meta, e, scope, lazy) {
+		"{with}" : function(expr, lambda, meta, e, scope) {
 			return Q(e(expr, scope, null, true))
 			.then(function(dict) {
 				if (dict[0] !== 'dict')
 					throw new err.UsageError("Not a dictionary", meta, scope);
 				if (lambda[1].length != 2)
 					throw new err.UsageError("Lambda must have 2 parameters, as in \\key, val => expr", meta, scope);
-				try {
 					var newdict = ['dict', {}, meta];
 					var keys = Object.keys(dict[1]);
 					for (var i=0, l=keys.length; i<l; i++) {
@@ -252,11 +249,10 @@ var Expressions = function Expressions(node) {
 						}
 						newdict[1][key] = result;
 					}
-				} catch(ex) { console.log(ex); }
 				return newdict;
 			});
 		},
-		"{keep}" : function(expr, keeparr, meta, e, scope, lazy) {
+		"{keep}" : function(expr, keeparr, meta, e, scope) {
 			return Q.all([e(expr, scope, null, true), e(keeparr, scope, null, true)])
 			.spread(function(dict, arr) {
 				if (dict[0] !== 'dict')
@@ -274,7 +270,7 @@ var Expressions = function Expressions(node) {
 				return newdict;
 			});
 		},
-		'{set}' : function(kvpExprs, params, srcExpr, meta, e, scope, lazy) {
+		'{set}' : function(kvpExprs, params, srcExpr, meta, e, scope) {
 			return Q(e(srcExpr, scope, null, true))
 			.then(function(src) {
 				if (src instanceof Array) {
@@ -309,7 +305,7 @@ var Expressions = function Expressions(node) {
 			});
 		},
 		'ff' : function(id, paramlist, actionblock, meta, e, scope) {
-			console.log(id, paramlist, actionblock);			
+			console.log("NO FRAGGIES", id, paramlist, actionblock);			
 		},
 		'lambda' : function(paramlist, expr, meta, e, scope) {
 			return { type : 'fn', ast : [paramlist, null, expr], val : null, lazy : true, scope : scope };
@@ -318,14 +314,13 @@ var Expressions = function Expressions(node) {
 			// Walk the condition list through recursive promises. If the promised condition results in true,
 			// return a promise for that condition's value (e.g. if (cond) then value), else a promise to check
 			// the next condition.
-			var promise = e(condList[0][0], scope, null, true);
+			var promise = e(condList[0][0], scope, true);
 			var promiseFactory = function(i) {
 				return function(result) {
-					console.log(result);
 					if (result) {
-						return e(condList[i][1], scope, null, true);
+						return e(condList[i][1], scope, true);
 					} else if (i < condList.length) {
-						return e(condList[i+1][0], scope, null, true)
+						return e(condList[i+1][0], scope, true)
 							.then(promiseFactory(i+1));
 					} else {
 						return null;
@@ -334,8 +329,8 @@ var Expressions = function Expressions(node) {
 			};
 			return promise.then(promiseFactory(0));
 		},
-		'in' : function(expr1, expr2, meta, e, scope, lazy) {
-			return Q.all([e(expr1, scope, lazy, true), e(expr2, scope, lazy, true)])
+		'in' : function(expr1, expr2, meta, e, scope) {
+			return Q.all([e(expr1, scope, true), e(expr2, scope, true)])
 			.spread(function(a, b) {
 				if (b[0] === 'array') {
 					return b[1].indexOf(a) !== -1;
@@ -346,8 +341,8 @@ var Expressions = function Expressions(node) {
 				}
 			});
 		},
-		'within' : function(dictexpr, wexpr, meta, e, scope, lazy) {
-			return Q(e(dictexpr, scope, lazy, true))
+		'within' : function(dictexpr, wexpr, meta, e, scope) {
+			return Q(e(dictexpr, scope, true))
 			.then(function(dict) {
 				var wscope = scope.createScope('within', 'within:' + self.getName(dictexpr), [wexpr, dictexpr], meta);
 				// TODO need to filter/modify keys that don't conform to variable name rules
@@ -360,7 +355,7 @@ var Expressions = function Expressions(node) {
 					wscope.addSymbol(vars[i], 'param', null, [dict[1][vars[i]]], true, dscope);
 				}
 				
-				var result = e(wexpr, wscope, lazy, true);
+				var result = e(wexpr, wscope, true);
 				return result;
 			});
 		},
@@ -368,7 +363,7 @@ var Expressions = function Expressions(node) {
 			if (id.length === 1) {
 				scope.addSymbol(id[0], expr); // lazily eval?
 			} else {
-				var result = e(expr, scope, null, true);
+				var result = e(expr, scope, true);
 				return result.then(function(result) {
 					if (result instanceof Array && result[0] === 'array') {
 						if (id.length <= result[1].length) {
@@ -392,7 +387,7 @@ var Expressions = function Expressions(node) {
 		'>' : self.genericComparisonOp,
 		'<' : self.genericComparisonOp,		
 		'*' : function(p1, p2, meta, e, scope) {
-			return Q.all([e(p1, scope, null, true), e(p2, scope, null, true)])
+			return Q.all([e(p1, scope, true), e(p2, scope, true)])
 			.spread(function(a, b) {
 				if (self.isNumber(a) && self.isNumber(b)) {
 					return self.genericNumericOp(a, b, meta, e, scope, '*');
@@ -404,8 +399,8 @@ var Expressions = function Expressions(node) {
 			});
 		},
 		'+' : function(p1, p2, meta, e, scope) {
-			return Q.all([e(p1, scope, null, true), e(p2, scope, null, true)])
-			.then(function(a, b) {
+			return Q.all([e(p1, scope, true), e(p2, scope, true)])
+			.spread(function(a, b) {
 				if (self.isNumber(a) && self.isNumber(b)) {
 					return self.genericNumericOp(a, b, meta, e, scope, '+');
 				} else if (a instanceof Array && b instanceof Array) {
@@ -418,17 +413,15 @@ var Expressions = function Expressions(node) {
 						return c;
 					} else if (a[0] === 'array') {
 						return ['array', u.ipush(a[1], b), meta];
-					} /*else if (a[0] === 'str' && b[0] === 'str') {
-						//return ['str', ]
-					}*/
+					}
 				} else if (self.isString(a) || self.isString(b)) {
 					return self.getString(a) + self.getString(b);
 				}
 			});
 		},
 		'-' : function(p1, p2, meta, e, scope) {
-			return Q.all([e(p1, scope, null, true), e(p2, scope, null, true)])
-			.then(function(a, b) {
+			return Q.all([e(p1, scope, true), e(p2, scope, true)])
+			.spread(function(a, b) {
 				if (self.isNumber(a) && self.isNumber(b)) {
 					return self.genericNumericOp(a, b, meta, e, scope, '-');
 				} else if (a instanceof Array && b instanceof Array) {
@@ -466,28 +459,28 @@ var Expressions = function Expressions(node) {
 				}
 			});
 		},
-		'dict' : function(obj, meta, e, scope, lazy) {
+		'dict' : function(obj, meta, e, scope) {
 			if (obj instanceof Array) { // then it's a comprehension
-				return e(obj, scope, null, true);
+				return e(obj, scope, true);
 			} else {
 				var keys = [], values = [];
 				for(var key in obj) {
-					keys.push(key); values.push(e(obj[key], scope, lazy, true));
+					keys.push(key); values.push(e(obj[key], scope, true));
 				}
-				return Q.allSettled(values).then(function(values) {
+				return Q.all(values).then(function(values) {
 					var newdict = keys.reduce(function(d, k) {
-						d[k] = values.pop().value;
+						d[k] = values.pop();
 						return d;
 					}, {});
 					return ['dict', newdict, meta];
 				});
 			}
 		},
-		'array' : function(arr, meta, e, scope, lazy) {
+		'array' : function(arr, meta, e, scope) {
 			for(var i=0, l=arr.length; i<l; i++) {
-				arr[i] = e(arr[i], scope, lazy, true);
+				arr[i] = e(arr[i], scope, true);
 			}
-			return Q.allSettled(arr).then(function(arr) { return ['array', arr.map(function(el) { return el.value; }), meta]; });
+			return Q.all(arr).then(function(arr) { return ['array', arr, meta]; });
 		},
 		'[]' : self.accessor,
 		'.' : self.accessor,

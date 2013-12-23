@@ -45,7 +45,7 @@ var Compiler = function(opts) {
 				}
 			} catch(ex) {
 				if (! ex.isKnown) {
-					console.log(ex.stack);
+					console.log("Uncaught error: ", ex.stack);
 					throw ex;
 				}
 				if (compileOpts.src) {
@@ -78,20 +78,19 @@ var Compiler = function(opts) {
 			deferred.reject(new err.Unsupported('No root found.'));
 			
 		var values = [], total = 0, finished = 0;
-		function notify(i) {
+		function notify(i, err) {
 			values[i] = { completed : values[i] };
 			finished = finished + 1;
 			if (finished == total ) { deferred.resolve(tree); }
 			else { deferred.notify(finished / total); }
-		};
-		
+		}
+				
 		function waitOn(d, k, v) {
 			if (v.then) { // FIXME: probably but not definitely Q
 				total = total + 1;
-				v.then((function(i) { return function(finalVal) {
-					d[k] = finalVal;
-					notify(i); 
-				}; })(values.length));
+				v.then(
+					(function(i) { return function(finalVal) { d[k] = finalVal;	notify(i); }; })(values.length)
+				).fail(function(err) { deferred.reject(err); }).done();
 				values.push(i);
 				return values.length;
 			}

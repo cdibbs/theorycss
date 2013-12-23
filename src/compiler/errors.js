@@ -61,7 +61,12 @@ exports.Err = function Err() {
 	
 	self.Unsupported = function(msg, meta, scope) {
 		var base = new baseError(msg, meta, scope);
-		return base;;
+		return base;
+	};
+	
+	self.NotImplemented = function(msg, meta, scope) {
+		var base = new baseError(msg, meta, scope);
+		return base;
 	};
 	
 	self.Undefined = function Undefined(msg, meta, scope) {
