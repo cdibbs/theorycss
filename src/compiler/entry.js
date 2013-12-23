@@ -95,7 +95,7 @@ var Compiler = function(opts) {
 				values.push(i);
 				return values.length;
 			}
-			return false;
+			throw Error("Not a promise!");
 		}
 			
 		// now find all promises, and attach notify as their next event
@@ -108,16 +108,8 @@ var Compiler = function(opts) {
 			for(var key in current.contexts) {
 				var context = current.contexts[key];
 				for(var index in context.dictionaries) {
-					var css = context.dictionaries[index][1];
-					for (var prop in css) {
-						if (css[prop] instanceof Array) {
-							for(var i=0; i<css[prop].length; i++) {
-								waitOn(css[prop], i, css[prop][i]);
-							}
-						} else {
-							waitOn(css, prop, css[prop]);
-						}
-					}
+					var css = context.dictionaries[index];
+					waitOn(context.dictionaries, index, css);
 				}
 			}
 		}

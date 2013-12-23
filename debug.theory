@@ -1,0 +1,7 @@
+chris
+  theory main
+    html
+      div
+        is { background: 'red', color: myfn(5) };
+
+    fn myfn(i) -> 32;
