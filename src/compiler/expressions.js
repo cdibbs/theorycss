@@ -199,11 +199,23 @@ var Expressions = function Expressions(node) {
 				} else if (typeof fndef === 'object' && fndef.type === 'ff') {
 					//fndef.scope
 					console.log("CANT YET DEAL WITH FRAG FUNCS", fn, args, e(fn, scope));
+				} else if (typeof fndef === 'object' && fndef.type === 'class') { // Class instantiation
+					var eArgProm = args.map(function(a) { return e(a, scope, true); });
+					return Q.all(eArgProm).then(function(eArgs) {
+						var cnstrArgs = {};
+						for (var i=0; i<fndef.parameters.length; i++) {
+							if (!eArgs.length) break;
+							var a = eArgs.pop();
+							cnstrArgs[fndef.parameters[i]] = a;
+						}
+						return classes.makeInstance(fndef.name, cnstrArgs);
+					});
 				} else if (fndef instanceof Array) {
 					if (fndef[0] === 'inst_mem') {
-						return classes.callMethod(fndef[1], fndef[2], { scope : scope, e : e, meta : meta });
+						return classes.callMethod(fndef[1], fndef[2], { scope : scope, e : e, meta : meta }, args);
 					}
 				} else {
+					console.log("here in there be dragons", fndef);
 					throw new Error("Not sure what's going on, here: " + fndef + " " + self.getName(fn));
 				}
 			});

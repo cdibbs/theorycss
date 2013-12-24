@@ -4,8 +4,15 @@ var err = require('../errors').err,
 	colorNames = require('./color-names'),
 	ColorJS = require('./color-js/color').Color,
 	Q = require('q'),
-	Caman = require('caman').Caman;
+	fabric = require('fabric').fabric;
 
+// native utilities TODO break out into library
+function theory2Native(obj) {
+	if (obj instanceof Array) {
+		if (obj[0] === 'dict' || obj[0] === 'array')
+			return obj[1];
+	}
+}
 
 module.exports = function(native) {
 	native.log = function(env, o) {
@@ -126,49 +133,66 @@ function addTreeLib(native) {
 }
 
 function addImageLib(native) {
-	native.Image = classes.makeClass('Image');
-	native.Image.methods['colorize'] = function(instance, env) {
+	native.Image = classes.makeClass('Image', null, ['_src']);
+	function getImage(src) {
 		var deferred = Q.defer();
-		var img = instance[2]['_image'];
-		try {
-			Caman("src/compiler/corelib/pixastic/sample-images/earth.png", function() {
-				this.colorize(255,0,0,100);
-				this.render(function() {
-					console.log(this);
-					var img = classes.makeInstance("Image", { '_image': this });
+		if (typeof src === 'object') {
+			return Q(src); // either promise or img.
+		} else if (src.substr(0,5) === 'data:') {
+			
+		} else { // assume path/url
+			try {
+				fabric.Image.fromURL(src, function(img) {
 					deferred.resolve(img);
 				});
+			} catch(ex) {
+				deferred.reject(ex);
+			}
+		}
+		return deferred.promise;
+	}
+	native.Image.methods['getWidth'] = function(instance, env) {
+		var imgPromise = getImage(instance[2]['_src']);
+		var wPromise = imgPromise.then(function(img) { return img.getWidth(); });
+		return wPromise;
+	};
+	native.Image.methods['getHeight'] = function(instance, env) {
+		var imgPromise = getImage(instance[2]['_src']);
+		var hPromise = imgPromise.then(function(img) { return img.getHeight(); });
+		return hPromise;		
+	};
+	function filter(instance, env, name, args) {
+		try {
+		var imgPromise = getImage(instance[2]['_src']);
+		var promArgs = args ? args.map(function(arg) { return env.e(arg, env.scope, true); }) : [];
+		return Q.all(promArgs).then(function(eArgs) {
+			eArgs = eArgs.map(function(arg) { return theory2Native(arg); });
+			var transformPromise = imgPromise.then(function(img) {
+				img.filters.push(new fabric.Image.filters[name](eArgs[0])); // TODO only needed one arg, for now
+				return classes.makeInstance('Image', { '_src': img });
 			});
-		} catch(ex) {
-			deferred.reject(ex);
-		}
-		return deferred.promise;
+			return transformPromise;
+		});	
+		} catch(ex) { console.log(ex); }
 	};
-	native.Image.methods['toBase64'] = function(instance, env) {
-		var deferred = Q.defer();
-		var img = instance[2]['_image'];
-		try {
-		Caman(img, function() {
-			deferred.resolve(this.toBase64());
-		});
-		} catch(ex) {
-			deferred.reject(ex);
-		}
-		return deferred.promise;
+	native.Image.methods['sepia'] = function(instance, env) { return filter(instance, env, 'Sepia'); };
+	native.Image.methods['tint'] = function(instance, env, args) { return filter(instance, env, 'Tint', args); };
+	native.Image.methods['grayscale'] = function(instance, env) { return filter(instance, env, 'Grayscale'); };
+	native.Image.methods['toDataURL'] = function(instance, env) {
+
 	};
+	function toDataURL(img) {
+		var canvas = fabric.createCanvasForNode(img.getWidth(), img.getHeight());
+		img.applyFilters(canvas.renderAll.bind(canvas));
+		return img.toDataURL();
+	}
 	native.Image.methods['toCSS'] = function(instance, env) {
-		var deferred = Q.defer();
-		var img = instance[2]['_image'];
-		try {
-			Caman(img, function() {
-				deferred.resolve('url(' + this.toBase64() + ')');
+		var imgPromise = getImage(instance[2]['_src']);
+		var cssPromise = imgPromise.then(function(img) {
+			return 'url(' + toDataURL(img) + ')';
 		});
-		} catch(ex) {
-			deferred.reject(ex);
-		}
-		return deferred.promise;
+		return cssPromise;
 	};
-	native.toy = classes.makeInstance("Image", {});
 }
 
 function addColorNames(native) {

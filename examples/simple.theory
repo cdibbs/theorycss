@@ -4,7 +4,7 @@ website
   theory main
     div
       #ident
-        is { 'background-image' : toy.colorize().toCSS(), width: 1024px, height: 1024px };
+        is { 'background-image' : toy.tint( { color : '#ff0000', opacity : 0.5 } ).toCSS(), width: toy.getWidth(), height: toy.getHeight() };
         ul
           li * 8
             a[href=links[this.index()]]
@@ -22,6 +22,7 @@ website
     chris = John(1,2,3).toString();
     
     fg,bg,txt,bord,bread,lnk = red.sixToneCWScheme();
+    toy = Image("src/compiler/corelib/pixastic/sample-images/earth.png");
 
     testing
       backgroundColor: red;
