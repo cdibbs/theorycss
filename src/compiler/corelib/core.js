@@ -134,7 +134,9 @@ function addImageLib(native) {
 			Caman("src/compiler/corelib/pixastic/sample-images/earth.png", function() {
 				this.colorize(255,0,0,100);
 				this.render(function() {
-					deferred.resolve(this.toBase64());
+					console.log(this);
+					var img = classes.makeInstance("Image", { '_image': this });
+					deferred.resolve(img);
 				});
 			});
 		} catch(ex) {
@@ -148,6 +150,18 @@ function addImageLib(native) {
 		try {
 		Caman(img, function() {
 			deferred.resolve(this.toBase64());
+		});
+		} catch(ex) {
+			deferred.reject(ex);
+		}
+		return deferred.promise;
+	};
+	native.Image.methods['toCSS'] = function(instance, env) {
+		var deferred = Q.defer();
+		var img = instance[2]['_image'];
+		try {
+			Caman(img, function() {
+				deferred.resolve('url(' + this.toBase64() + ')');
 		});
 		} catch(ex) {
 			deferred.reject(ex);

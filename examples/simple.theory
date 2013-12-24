@@ -4,7 +4,7 @@ website
   theory main
     div
       #ident
-        is { 'background' : toy.colorize() };
+        is { 'background-image' : toy.colorize().toCSS(), width: 1024px, height: 1024px };
         ul
           li * 8
             a[href=links[this.index()]]

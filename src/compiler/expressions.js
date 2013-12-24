@@ -463,15 +463,16 @@ var Expressions = function Expressions(node) {
 			if (obj instanceof Array) { // then it's a comprehension
 				return e(obj, scope, true);
 			} else {
-				var keys = [], values = [];
+				var newdict = {}, values = [];
 				for(var key in obj) {
-					keys.push(key); values.push(e(obj[key], scope, true));
+					var promise = e(obj[key], scope, true);
+					values.push(promise);
+					newdict[key] = promise;
 				}
-				return Q.all(values).then(function(values) {
-					var newdict = keys.reduce(function(d, k) {
-						d[k] = values.pop();
-						return d;
-					}, {});
+				return Q.allSettled(values).then(function(values) {
+					for (var key in newdict) {
+						newdict[key] = newdict[key].inspect().value;
+					}
 					return ['dict', newdict, meta];
 				});
 			}
