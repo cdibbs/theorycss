@@ -5,13 +5,15 @@ var Classes = function Classes() {
 	
 	self.BaseClass = function BaseClass(){};
 	
-	self.makeClass = function makeClass(name, base, parameters, methods) {
+	self.makeClass = function makeClass(name, base, parameters, methods, properties, baseArgs) {
 		var c = new self.BaseClass();
 		c.type = 'class';
 		c.name = name;
 		c.base = base;
 		c.parameters = parameters || [];
-		c.methods = methods || {};			
+		c.methods = methods || {};
+		c.properties = properties || {};
+		c.baseArgs = baseArgs || [];
 		c.callMethod = function callMethod(name, instance, env, args) {
 			return c.methods[name](instance, env, args);
 		};
@@ -35,6 +37,24 @@ var Classes = function Classes() {
 	
 	self.hasMethod = function hasMethod(instance, name, state) {
 		return state.scope.resolve(name) !== 'undefined';
+	};
+	
+	// Given an AST representation of a method, return a function which invokes the method
+	function makeMethod(ast) {
+		
+	};
+	
+	self.fromAST = function fromAST(ast) {
+		if (! ast instanceof Array || ast[0] !== 'class')
+			throw new Error("AST not a known representation of a class.");
+			
+		var name = ast[1];
+		var baseName = ast[3][0];
+		var params = ast[2];
+		var methods = {};
+		var properties = [];
+		var klass = self.makeClass(name, baseName, params, methods, properties);
+		return klass;
 	};
 };
 

@@ -6,6 +6,7 @@ var TreeFrags = require('./tree-fragments').TreeFragments;
 var coreLib = require('./corelib/core.js');
 var err = require('./errors').err;
 var Q = require('q');
+var classes = require('./classes');
 var debugMode = true;
 
 var defaultOptions = {
@@ -130,6 +131,9 @@ var Compiler = function(opts) {
 						err('Multiple main theories found.');
 					}
 				}
+			} else if (symbol.length >= 3 && symbol[0] === 'class') {
+				var klass = classes.fromAST(symbol);
+				nsscope.addSymbol(klass.name, 'class', klass, symbol, false, nsscope);
 			} else if (symbol.length >= 3 && symbol[0] === 'import') {
 				symbol[1].forEach(function(impClause) {
 					self.import(impClause, nsscope);

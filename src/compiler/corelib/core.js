@@ -161,14 +161,14 @@ function addImageLib(native) {
 		var hPromise = imgPromise.then(function(img) { return img.getHeight(); });
 		return hPromise;		
 	};
-	function filter(instance, env, name, args) {
+	function filter(instance, env, name, args, filter) {
 		try {
 		var imgPromise = getImage(instance[2]['_src']);
 		var promArgs = args ? args.map(function(arg) { return env.e(arg, env.scope, true); }) : [];
 		return Q.all(promArgs).then(function(eArgs) {
 			eArgs = eArgs.map(function(arg) { return theory2Native(arg); });
 			var transformPromise = imgPromise.then(function(img) {
-				img.filters.push(new fabric.Image.filters[name](eArgs[0])); // TODO only needed one arg, for now
+				img.filters.push(filter ? filter : new fabric.Image.filters[name](eArgs[0])); // TODO only needed one arg, for now
 				return classes.makeInstance('Image', { '_src': img });
 			});
 			return transformPromise;
@@ -178,7 +178,58 @@ function addImageLib(native) {
 	native.Image.methods['sepia'] = function(instance, env) { return filter(instance, env, 'Sepia'); };
 	native.Image.methods['tint'] = function(instance, env, args) { return filter(instance, env, 'Tint', args); };
 	native.Image.methods['grayscale'] = function(instance, env) { return filter(instance, env, 'Grayscale'); };
-	native.Image.methods['pixelate'] = function(instance, env, args) { return filter(instance, env, 'Pixelate', args)};
+	native.Image.methods['pixelate'] = function(instance, env, args) { return filter(instance, env, 'Pixelate', args); };
+	native.Image.methods['brighten'] = function(instance, env, args) { return filter(instance, env, 'Brightness', args); };
+	native.Image.methods['emboss'] = function(instance, env, args) {
+		var emboss = new fabric.Image.filters.Convolute({
+  			matrix: [ 1,   1,  1,
+            		1, 0.7, -1,
+           			-1,  -1, -1 ]
+			});
+		return filter(instance, env, null, args, emboss);
+	};
+	native.Image.methods['emboss2'] = function(instance, env, args) {
+		var emboss = new fabric.Image.filters.Convolute({
+  			matrix: [ -2,   -1,  0,
+            		-1, 1, 1,
+           			0,  1, 2 ]
+			});
+		return filter(instance, env, null, args, emboss);
+	};
+	native.Image.methods['blur'] = function(instance, env, args) {
+		var emboss = new fabric.Image.filters.Convolute({
+  			matrix: [ 1/9, 1/9, 1/9,
+            		1/9, 1/9, 1/9,
+           			1/9, 1/9, 1/9 ]
+			});
+		return filter(instance, env, null, args, emboss);
+	};
+	native.Image.methods['sharpen'] = function(instance, env, args) {
+		var emboss = new fabric.Image.filters.Convolute({
+  			matrix: [ 0, -1, 0,
+            		-1, 5, -1,
+           			0,  -1, 0 ]
+			});
+		return filter(instance, env, null, args, emboss);
+	};
+	native.Image.methods['edgeDetect'] = function(instance, env, args) {
+		var emboss = new fabric.Image.filters.Convolute({
+			opaque: true,
+  			matrix: [ 0, 1, 0,
+            		1, -4, 1,
+           			0,  1, 0 ]
+			});
+		return filter(instance, env, null, args, emboss);
+	};
+	native.Image.methods['edgeEnhance'] = function(instance, env, args) {
+		var emboss = new fabric.Image.filters.Convolute({
+			opaque: true,
+  			matrix: [ 0,   0,  0,
+            		-1, 1, 0,
+           			0,  0, 0 ]
+			});
+		return filter(instance, env, null, args, emboss);
+	};
 	native.Image.methods['toDataURL'] = function(instance, env) {
 
 	};

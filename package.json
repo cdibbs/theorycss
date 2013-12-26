@@ -18,7 +18,8 @@
 	  "vows" : "latest",
 	  "browserify" : "latest",
 	  "underscore" : "latest",
-	  "q" : "latest"
+	  "q" : "latest",
+	  "fabric" : "latest"
   },
   "scripts" : {
     "test" : "vows --spec tests/compiler/*.js tests/compiler/**/*.js"

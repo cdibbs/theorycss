@@ -87,9 +87,14 @@ ctor
 	;
 
 class_extends
-	: COLON id (LPAREN arglist RPAREN)?
+	: COLON id baseclass_arglist?
 	{ $$ = [$id, $3]; }
 	|
+	;
+	
+baseclass_arglist
+	: LPAREN arglist RPAREN
+	{ $$ = $arglist; }
 	;
 
 def : vdef { $$ = $1; } | fdef { $$ = $1; } | fragfunc { $$ = $1; } | cssdef { $$ = $1; };
