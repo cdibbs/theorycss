@@ -70,16 +70,6 @@ Website
       ...
         <- style { set prop:null for prop in this.props.keys };
 
-  class Font : CssSerializable
-    has family(String), size(UnitNum), style(String), variant(String), weight(FontWeight);
-    
-    fn asCss() -> ""
-
-  class Border : Colorable
-    has 
-
-  class Image : Colorable, CssSerializable, HtmlSerializable, FileSerializable
-    has src(String), alt(String), title(String), height(UnitNum), width(UnitNum), data(String);
-
-    fn asCss() -> "data:image/png;base64," + base64(data);
+  class Font : CssSerializable    
+    fn toCSS() -> "";
 

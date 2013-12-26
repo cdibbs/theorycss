@@ -106,6 +106,7 @@ units						(?:[a-zA-Z][a-zA-Z0-9]*|\%)
 <FREEDOM>\s+			/* ignore whitespace within functions */
 ";"				return 'EOL';
 ","				return 'COMMA';
+"class"			return 'CLASS';
 "this"			return 'THIS';
 "but"			return 'BUT';
 "within"		return 'WITHIN';

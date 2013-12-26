@@ -43,10 +43,3 @@ website
               -> style {} where a = 5*8 yield janet = 2;
         div 
       bob
-
-  theory nother
-    notherDiv
-      withChild
-        is { 'line-height' : 9px };
-    
-

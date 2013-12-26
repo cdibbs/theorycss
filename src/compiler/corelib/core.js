@@ -178,6 +178,7 @@ function addImageLib(native) {
 	native.Image.methods['sepia'] = function(instance, env) { return filter(instance, env, 'Sepia'); };
 	native.Image.methods['tint'] = function(instance, env, args) { return filter(instance, env, 'Tint', args); };
 	native.Image.methods['grayscale'] = function(instance, env) { return filter(instance, env, 'Grayscale'); };
+	native.Image.methods['pixelate'] = function(instance, env, args) { return filter(instance, env, 'Pixelate', args)};
 	native.Image.methods['toDataURL'] = function(instance, env) {
 
 	};

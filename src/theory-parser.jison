@@ -29,6 +29,7 @@ namespace_item
 	| data
 	| library
 	| import
+	| class
 	;
 	
 import : IMPORT import_list EOL
@@ -61,7 +62,6 @@ theory
 		{ $$ = ['theory', $2, null, $treefrag_block, $theorybody, { loc : @$ }]; }
 	| THEORY id theory_ext INDENT treefrag_block theorybody DEDENT
 		{ $$ = ['theory', $2, $4, $treefrag_block, $theorybody, { loc : @$ }]; }
-	| THEORY id 	
 	;
 	
 theory_ext
@@ -74,7 +74,24 @@ theory_ext
 	;
 	
 theorybody : (def | NEWLINE)*;
-	
+
+class
+	: CLASS id ctor class_extends INDENT theorybody DEDENT
+	{ $$ = ['class', $id, $ctor, $class_extends, $theorybody]; }
+	;
+		
+ctor
+	: LPAREN paramlist RPAREN
+	{ $$ = $paramlist; }
+	|
+	;
+
+class_extends
+	: COLON id (LPAREN arglist RPAREN)?
+	{ $$ = [$id, $3]; }
+	|
+	;
+
 def : vdef { $$ = $1; } | fdef { $$ = $1; } | fragfunc { $$ = $1; } | cssdef { $$ = $1; };
 
 cssdef
