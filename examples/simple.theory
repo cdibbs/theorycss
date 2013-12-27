@@ -4,7 +4,7 @@ website
   theory main
     div
       #ident
-        is { 'background-image' : toy.toCSS(), width: toy.getWidth(), height: toy.getHeight() };
+        is { 'background-image' : toy.toCSS() }, dim(toy);
         ul
           li * 8
             a[href=links[this.index()]]
@@ -31,6 +31,8 @@ website
       backgroundColor: red;
       color: blue;
       +border(1px, 'solid', red);
+      +dim(earth);
+      +bkgImg(earth);
 
     ff alex2(a,b)
       div

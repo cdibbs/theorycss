@@ -1,8 +1,12 @@
 chris
   theory main
-    html
+    html is myff(5);
       div
-        is { background: 'red' + " vs. blue", color: myfn(5) };
 
-    fn myfn(i) -> 3 * recursiveFn(5);
-    fn recursiveFn(i) -> if i > 0 then i + recursiveFn(i-1) else 0 endif;
+    ff myff(n)
+      where chris = n * 5;
+      any
+        -> style { chris: twoChris }
+           where twoChris = 2 * chris
+           yield threeChris = 3 * chris;
+        div

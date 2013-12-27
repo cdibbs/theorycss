@@ -14,8 +14,14 @@ function theory2Native(obj) {
 	}
 }
 
+function units(n, u) {
+	return { type : Math.floor(n) === n ? 'int_' : 'fl_', val : n, units : u,
+			toString : function() { return n + u; }
+			};
+}
+
 module.exports = function(native) {
-	native.log = function(env, o) {
+	native.debug = function(env, o) {
 		var args = Array.prototype.slice.call(arguments, 1);
 		args = args.map(function(arg) { return env.e(arg, env.scope, null, true); });
 		return Q.all(args).spread(
@@ -34,6 +40,17 @@ module.exports = function(native) {
 				throw new err.NotANumber("Not a Number", env.meta, env.scope);
 			} 
 			return num;
+		});
+	};
+	
+	native.dim = function(env, o) {
+		return env.e(o, env.scope, null, true)
+		.then(function(inst) {
+			var wh = [classes.callMethod(inst, 'height', env),
+			          classes.callMethod(inst, 'width', env)];
+			return Q(wh).spread(function(h,w) {
+				return ['dict', { width: units(w, 'px'), height: units(h, 'px') }];
+			});
 		});
 	};
 	
@@ -151,12 +168,12 @@ function addImageLib(native) {
 		}
 		return deferred.promise;
 	}
-	native.Image.methods['getWidth'] = function(instance, env) {
+	native.Image.methods['width'] = function(instance, env) {
 		var imgPromise = getImage(instance[2]['_src']);
 		var wPromise = imgPromise.then(function(img) { return img.getWidth(); });
 		return wPromise;
 	};
-	native.Image.methods['getHeight'] = function(instance, env) {
+	native.Image.methods['height'] = function(instance, env) {
 		var imgPromise = getImage(instance[2]['_src']);
 		var hPromise = imgPromise.then(function(img) { return img.getHeight(); });
 		return hPromise;		
