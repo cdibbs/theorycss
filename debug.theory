@@ -10,3 +10,11 @@ chris
            where twoChris = 2 * chris
            yield threeChris = 3 * chris;
         div
+
+        
+    ff myff(n)
+      where chris = n * 5;
+      any
+        -> style {} where a = 5 yield bob = 2;
+      div
+        -> style {};

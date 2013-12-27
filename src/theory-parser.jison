@@ -265,17 +265,17 @@ ffcasetree_nodedefblock
 
 ffcasetree_nodedef
 	: ffdtfdef ffbtfdef ffcasetreelist
-		{ $$ = ['ffnodedef', $1, $2, $3, 'depth-first', { loc : @$ }]; }
+		{ $$ = ['ffnodedef', $1, $2, $3, 'd', { loc : @$ }]; }
 	| ffbtfdef ffdtfdef ffcasetreelist
-		{ $$ = ['ffnodedef', $1, $2, $3, 'breadth-first', { loc : @$ }]; }
+		{ $$ = ['ffnodedef', $2, $1, $3, 'b', { loc : @$ }]; }
 	| ffdtfdef ffcasetreelist
-		{ $$ = ['ffnodedef', $1, null, $2, 'df', { loc : @$ }]; }
+		{ $$ = ['ffnodedef', $1, null, $2, 'd', { loc : @$ }]; }
 	| ffbtfdef ffcasetreelist
-		{ $$ = ['ffnodedef', null, $1, $2, 'bf', { loc : @$ }]; }
+		{ $$ = ['ffnodedef', null, $1, $2, 'b', { loc : @$ }]; }
 	| ffdtfdef
-		{ $$ = ['ffnodedef', $1, null, null, 'df', { loc : @$ }]; }
+		{ $$ = ['ffnodedef', $1, null, null, 'd', { loc : @$ }]; }
 	| ffbtfdef
-		{ $$ = ['ffnodedef', null, $1, null, 'bf', { loc : @$ }]; }
+		{ $$ = ['ffnodedef', null, $1, null, 'b', { loc : @$ }]; }
 	| ffcasetreelist
 		{ $$ = ['ffnodedef', null, $1, null, '', { loc : @$ }]; }
 	;

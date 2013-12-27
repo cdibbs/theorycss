@@ -3,6 +3,7 @@ var u = require('../util').u,
 	err = require('./errors').err,
 	classes = require('./classes'),
 	Q = require('q'),
+	fragFunctions = require('./frag-functions'),
 	warn = require('./errors').warn;
 	 	
 var Expressions = function Expressions(node) {
@@ -198,7 +199,9 @@ var Expressions = function Expressions(node) {
 					return self.execFn(fndef, args, name, meta, e, scope);
 				} else if (typeof fndef === 'object' && fndef.type === 'ff') {
 					//fndef.scope
-					console.log("CANT YET DEAL WITH FRAG FUNCS", fn, args, e(fn, scope));
+					//console.log("CANT YET DEAL WITH FRAG FUNCS", fn, args, e(fn, scope));
+					var cff = new fragFunctions.FFEngine(fndef.ast).compile();
+					return cff.evaluate(node, args, e, scope);
 				} else if (typeof fndef === 'object' && fndef.type === 'class') { // Class instantiation
 					var eArgProm = args.map(function(a) { return e(a, scope, true); });
 					return Q.all(eArgProm).then(function(eArgs) {
@@ -317,7 +320,7 @@ var Expressions = function Expressions(node) {
 			});
 		},
 		'ff' : function(id, paramlist, actionblock, meta, e, scope) {
-			console.log("NO FRAGGIES", id, paramlist, actionblock);			
+			console.log("NO FRAGGIES", id, paramlist, actionblock);
 		},
 		'lambda' : function(paramlist, expr, meta, e, scope) {
 			return { type : 'fn', ast : [paramlist, null, expr], val : null, lazy : true, scope : scope };
