@@ -10,7 +10,7 @@ Bob
 		ff cornucopia()
 			where rgb = 0x000000;
 			...
-				-> style { 'background-color' : rgb }
+				-> { 'background-color' : rgb }
 					yield rgb = rgb + (0xff / 4);
 		
 		
@@ -25,8 +25,8 @@ Bob
 			
 		ff fixedbar(side, thickness)
 			block
-				-> style (fixed + (boxSides - boxSides.opposite(side)));
-				<- style if t?! then { 'axis' : t } else nothing endif
+				-> (fixed + (boxSides - boxSides.opposite(side)));
+				<- if t?! then { 'axis' : t } else nothing endif
 					where axis = if (side in array('top', 'bottom')) then 'height' else 'width' endif
 					yield thickness = t;
 				... // e.g., bootstrap-y .container, .row, .row-fluid, etc

@@ -313,16 +313,18 @@ ffbtfdef
 fragexprblock
 	: fragexpr EOL
 		{ $$ = $fragexpr; }
+	| EOL
+		{ $$ = ['s-w-y', null, null, null, { loc : @$ }]; }
 	;
 		
 fragexpr
-	: STYLE expression
+	: expression
 		{ $$ = ['s-w-y', $expression, null, null, { loc : @$ }]; }
-	| STYLE expression YIELD assignment_list
+	| expression YIELD assignment_list
 		{ $$ = ['s-w-y', $expression, null, $assignment_list, { loc : @$ }]; }
-	| STYLE expression WHERE assignment_list
+	| expression WHERE assignment_list
 		{ $$ = ['s-w-y', $expression, $assignment_list, null, { loc : @$ }]; }
-	| STYLE expression WHERE assignment_list YIELD assignment_list
+	| expression WHERE assignment_list YIELD assignment_list
 		{ $$ = ['s-w-y', $expression, $assignment_list, $assignment_list1, { loc : @$ }]; }
 	| WHERE assignment_list YIELD assignment_list
 		{ $$ = ['s-w-y', null, $assignment_list, $assignment_list1, { loc : @$ }]; }

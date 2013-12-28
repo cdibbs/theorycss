@@ -36,16 +36,16 @@ website
 
     ff alex2(a,b)
       div
-        -> style chris where chris = {};
+        -> chris where chris = {};
         block
-          -> style chris;
+          -> chris;
 
     ff makeColor(c)
       any
-        -> style { 'background-color' : c };
+        -> { 'background-color' : c };
         #header
         	...
-              -> style {} where a = 5*8 yield janet = 2;
+              -> {} where a = 5*8 yield janet = 2;
         div 
       bob
       

@@ -119,10 +119,10 @@ var Expressions = function Expressions(node) {
 	};
 	
 	self.execFn = function(fndef, args, name, meta, e, scope) {
-		var basescope = fndef.scope /* if defined within a closure - e.g., a lambda */
-			|| scope.base();
 		var qargs = args.map(function(arg) { return e(arg, scope, null, true); });
 		return Q.all(qargs).then(function(eargs) {
+			var basescope = fndef.scope /* if defined within a closure - e.g., a lambda */
+				|| scope.base();
 			var params = fndef.ast[0];
 			var callscope = basescope.createScope('fn', name, null, meta);
 			for(var i=0, l=eargs.length; i<l; i++) {

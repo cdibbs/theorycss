@@ -9,15 +9,24 @@ var ff = function FFEngine(name, ast) {
 	var root, args, initialWhere;
 	
 	self.compile = function() {
-		var initial = ast[1];
-		
+		var initial = ast[1];		
 		var instructions = [];
 		if (initial[2] !== null)
-			instructions.push(declareInitialValues(initial[2])); 
+			instructions.push(
+				declareInitialValues(initial[2], initial[3])
+			); 
 		
 		
-		var stack = [initial];
-		var current = 
+		var stack = [].concat(initial[1]); // shallow copy
+		var current;
+		while ((current = stack.pop()) !== null) {
+			if (current[2] && current[2][4]) {
+				var children = current[2][4];
+				for(var i=0,l=children.length; i<l; i++) {
+					addInstructions(current);			
+				}
+			}
+		}
 	};
 		
 	self.evaluate = function(node, args, e, scope) {
@@ -25,9 +34,15 @@ var ff = function FFEngine(name, ast) {
 	};
 };
 
-function declareInitialValues(ast) {
+function declareInitialValues(ast, meta) {
 	return function(node, args, e, scope) {
-		
+		var ffscope = scope.base().createScope('ff.where', name, null, meta);
+		var qargs = args.map(function(arg) { return e(arg, ffscope, null, true); });
+		return Q.all(qargs).then(function(ffargs) {
+			for(var i=0, l=eargs.length; i<l; i++) {
+				callscope.addSymbol(params[i], 'param', eargs[i], null, false, basescope);
+			}			
+		});
 	};
 };
 

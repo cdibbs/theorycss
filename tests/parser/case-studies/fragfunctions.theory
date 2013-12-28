@@ -17,23 +17,23 @@ Website
 		/* and this one only has Depth-First traversal logic */
 		ff DFTrav()
 			hereare
-				-> style { some : things }
+				-> { some : things }
 					where y'all = cool
 					yield nothing = null;
-				<- style { on : the }
+				<- { on : the }
 					where way = back(), up = the * tree;
 				...
-					-> style { ellipsis : 'represent the general case' }
+					-> { ellipsis : 'represent the general case' }
 						where indented_ellipses = 'represent N descendents';
 				misc
 				...
-					<- style only + on'the'way'back;
+					<- only + on'the'way'back;
 					
 					
 		// While this one uses the bread-first syntax //
 		ff BFTrav()
 			block
-				|v style prior'to'iteration;
+				|v prior'to'iteration;
 			...
 				|^ yield on = the, way = back, up = doStuff();
 			endingblock

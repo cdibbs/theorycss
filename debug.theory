@@ -6,15 +6,18 @@ chris
     ff myff(n)
       where chris = n * 5;
       any
-        -> style { chris: twoChris }
+        -> { chris: twoChris }
            where twoChris = 2 * chris
            yield threeChris = 3 * chris;
         div
+        john
+          -> {};
 
+    fn john(a, node) -> if (node.name == 'chris') then node.apply(dict, ret) else {} endif;
         
     ff myff(n)
       where chris = n * 5;
       any
-        -> style {} where a = 5 yield bob = 2;
+        -> {} where a = 5 yield a = 4;
       div
-        -> style {};
+        -> {};

@@ -112,7 +112,6 @@ units						(?:[a-zA-Z][a-zA-Z0-9]*|\%)
 "within"		return 'WITHIN';
 "with"			return 'WITH';
 "keep"			return 'KEEP';
-"style"			return 'STYLE';
 "where"			return 'WHERE';
 "yield"			return 'YIELD';
 "into"			return 'INTO';

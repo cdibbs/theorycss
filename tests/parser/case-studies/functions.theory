@@ -13,29 +13,29 @@ TheoryTests
 		ff fragMeBro(a, b, c)
 			where we = initialize, some = things;
 			...
-				-> style before_we_recurse(chris)
+				-> before_we_recurse(chris)
 					where chris = me
 					yield me = me;
-				<- style after_we_recurse()
+				<- after_we_recurse()
 					where we = have, some = new, things = 4*u;
 				div
-					-> style { having : "a lonely little div somewhere" };
+					-> { having : "a lonely little div somewhere" };
 		
 		ff noWhere(a, b)
 			something
 				beautiful
-					|v style "before breadth first recursive call";
-					|^ style "after that call, and we have more info";
+					|v "before breadth first recursive call";
+					|^ "after that call, and we have more info";
 
 		ff swyTests()
 			one
-				-> style bob where bob = bob yield bob = bob;
+				-> bob where bob = bob yield bob = bob;
 			two
-				-> style bob yield bob = bob;
+				-> bob yield bob = bob;
 			three
-				-> style bob where bob = bob;
+				-> bob where bob = bob;
 			four
-				-> style bob;
+				-> bob;
 			five
 				-> where bob = bob yield bob = bob;
 			six

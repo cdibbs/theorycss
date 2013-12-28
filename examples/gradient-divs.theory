@@ -14,5 +14,5 @@ Website
 			any
 					-> yield count = this.children.count;
 				...
-					|v style if (this.name == 'div') then { 'background-color' : (color1 + color2) * index / count + color1 } else {} endif
+					|v if (this.name == 'div') then { 'background-color' : (color1 + color2) * index / count + color1 } else {} endif
 						yield index = index + 1;

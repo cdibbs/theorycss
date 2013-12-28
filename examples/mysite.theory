@@ -15,13 +15,13 @@ Website
 		ff curveddeck()
 			any
 				...
-					|v style joe;
-					|^ style bob;
+					|v joe;
+					|^ bob;
 
 		ff scaleSibs(fsize)
 			where fsize = 14pt;
 			...
-				|v style { 'font-size' : fsize }
+				|v { 'font-size' : fsize }
 				   yield fsize = fsize * 1.2;
 
 		fn fib(n) -> 
@@ -33,20 +33,20 @@ Website
 			where bg = 'background-color';
 			block
 				one
-					|v style { bg : color1 }
+					|v { bg : color1 }
 						yield count = 2;
 				...
 					|v yield count = count + 1;
-					|^ style { bg : (color1 + color2) * index / count + color1 }
+					|^ { bg : (color1 + color2) * index / count + color1 }
 						where index = index + 1;
 				one
-					|^ style { bg : color2 }
+					|^ { bg : color2 }
 						yield index = 1;
 				
 		ff fixedbar(side, thickness) 
 			block :: innerHeight
-				-> style (fixed + (boxSides - oppositeSide(side)));
-				<- style if t?! then { 'axis' : t } else nothing endif
+				-> (fixed + (boxSides - oppositeSide(side)));
+				<- if t?! then { 'axis' : t } else nothing endif
 					where axis = if (side in array('top', 'bottom')) then 'height' else 'width' endif
 					yield thickness = t;
 				... // e.g., bootstrap-y .container, .row, .row-fluid, etc
