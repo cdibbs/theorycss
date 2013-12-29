@@ -14,10 +14,3 @@ chris
           -> {};
 
     fn john(a, node) -> if (node.name == 'chris') then node.apply(dict, ret) else {} endif;
-        
-    ff myff(n)
-      where chris = n * 5;
-      any
-        -> {} where a = 5 yield a = 4;
-      div
-        -> {};

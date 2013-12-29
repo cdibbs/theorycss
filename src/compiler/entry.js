@@ -166,7 +166,7 @@ var Compiler = function(opts) {
 			throw new Error('Theory inheritance not implemented.');
 		
 		theoryAST[3].forEach(function(tdef) {
-			if (tdef[0] === 'ff') console.log(JSON.stringify(tdef.slice(2), null, 2));
+			//if (tdef[0] === 'ff') console.log(JSON.stringify(tdef.slice(2), null, 2));
 			if (tdef[0] === '=' || tdef[0] === 'ff' || tdef[0] === 'fn' || tdef[0] === '@=') {
 				// for now, lazily evaluate everything. 
 				theoryScope.addSymbol(tdef[1], tdef[0], null, tdef.slice(2), true);
