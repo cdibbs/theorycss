@@ -69,6 +69,11 @@ exports.Err = function Err() {
 		return base;
 	};
 	
+	self.IllegalOperation = function(msg, meta, scope) {
+		var base = new baseError(msg, meta, scope);
+		return base;
+	};
+	
 	self.Undefined = function Undefined(msg, meta, scope) {
 		var base = new baseError(msg, meta, scope);
 		return base;

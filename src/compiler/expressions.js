@@ -378,7 +378,10 @@ var Expressions = function Expressions(node) {
 		},
 		'=' : function(id, expr, meta, e, scope) {
 			if (id.length === 1) {
-				scope.addSymbol(id[0], expr); // lazily eval?
+				var result = e(expr, scope, true);
+				result.then(function(result) {
+					scope.addSymbol(id[0], result); // lazily eval?
+				});
 			} else {
 				var result = e(expr, scope, true);
 				return result.then(function(result) {
