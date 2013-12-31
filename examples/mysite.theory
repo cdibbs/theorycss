@@ -44,14 +44,14 @@ Website
 						yield index = 1;
 				
 		ff fixedbar(side, thickness) 
-			block :: innerHeight
+			block
 				-> (fixed + (boxSides - oppositeSide(side)));
-				<- if t?! then { 'axis' : t } else nothing endif
+				<- if t?! then { axis : t } else nothing endif
 					where axis = if (side in array('top', 'bottom')) then 'height' else 'width' endif
 					yield thickness = t;
 				... // e.g., bootstrap-y .container, .row, .row-fluid, etc
 					a
-						sizeable
+						any
 							<- yield t = if (thickness!) then
 									thickness
 								else

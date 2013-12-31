@@ -9,6 +9,11 @@ chris
         -> { chris: twoChris }
            where twoChris = 2 * chris
            yield threeChris = 3 * chris;
+        ...
+          -> 'this is next';
+          div
+            a
+              span
         div
         john
           -> {};
