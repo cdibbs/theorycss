@@ -39,7 +39,7 @@ var TreeFragments = function TreeFragments(rootScope) {
 			
 			if (children && children.length) {
 				for(var i=0, l=children.length; i<l; i++) {
-					leafDict.addChild(self.buildTree(children[i], self));
+					leafDict.addChild(self.buildTree(children[i], leafDict));
 				}
 			}
 			

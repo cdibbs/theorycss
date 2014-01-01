@@ -15,6 +15,7 @@ var ff = function FFEngine(name, ast) {
 	self.compile = function() {
 		rootFFNode = nodify(actionAST[1][0]);
 		instructions = go(rootFFNode, 'd', instructions);
+		return self;
 	};
 	
 	/** Assumes instructions contain a list of functions with the following signature:
@@ -23,32 +24,44 @@ var ff = function FFEngine(name, ast) {
 	 * }
 	 */
 	self.evaluate = function(treeNode, args, e, scope) {
+		var node = instructions.root();
+		do {
+			console.log(node.instruction[0], node.instruction[2]);	
+		} while (node = node.Next);
+		//return;
 		var done = false;
 		var instruction = instructions.root();
 		var ffscope = scope.base().createScope('ff.where', name, null, meta);
 		
 		function instructionComplete(nextTreeNode, nextInstruction, yields, style) {
-			if (style)
+			if (style) {
 				nextTreeNode.apply(style);
+			}
 			
 			var actionScope = ffscope.createScope('ff.yield', name, null, meta);
 			for(var i=0, l=yields.length; i<l; i++) {
 				actionScope.addSymbol(yields[i][0], 'ff.where', yields[i][1], null, false, ffscope);
 			}
 			
-			if (instruction == null)
+			if (nextInstruction == null) {
+				console.log("Done!", JSON.stringify(yields, null, 2), JSON.stringify(style, null, 2));
 				return yields;
+			}
 				
-			nextInstruction.execute(nextTreeNode, nextInstruction, yields, e, actionScope);
+			try {
+				nextInstruction.execute(nextTreeNode, nextInstruction, yields, e, actionScope)
+					.spread(instructionComplete);
+				console.log(nextInstruction.instruction[0]);
+			} catch(ex) {
+				console.log(ex.stack);
+			}
 		};
 		
-		var qargs = args.map(function(arg) { return Q([arg[1], e(arg[2], ffscope, null, true)]); });
-			 
-		var initScope = qargs.then(function(eargs) {
+		var qargs = args.map(function(arg) { return e(arg, ffscope, null, true); });
+		var initScope = Q.all(qargs).then(function(eargs) {
 			for(var i=0, l=eargs.length; i<l; i++) {
-				ffscope.addSymbol(params[i], 'param', eargs[i], null, false, basescope);
+				ffscope.addSymbol(params[i], 'param', eargs[i], null, false, ffscope);
 			}
-						
 			if (ast[1][2] !== null)
 				return Q.all(ast[1][2].map(function(def) { return Q([def[1], e(def[2], ffscope, null, true)]); }));
 			else
@@ -59,6 +72,7 @@ var ff = function FFEngine(name, ast) {
 			}
 			
 			// and kick off tree evaluation... :-)
+			console.log(instruction.instruction[0]);
 			instruction.execute(treeNode, instruction, [], e, ffscope).spread(instructionComplete);
 		});
 	};
@@ -80,17 +94,27 @@ function LinkedList(LT) {
 	self.root = function() { return root; };
 }
 
-function InstrLink(method, list, prev) {
+function InstrLink(instr, list, prev) {
 	this.parentList = list;
-	this.execute = method;
+	this.instruction = instr;
+	this.execute = function() {
+		return instr[1].apply(this, arguments);
+	};
+	this.prev = function(label) {
+		console.log("here");
+		var node = this;
+		while (node.instruction[2] !== label && node.Prev != null) { node = node.Prev; }
+		return node.instruction[2] !== label ? null : node;
+	};
 	this.Prev = prev;
 	this.Next = null;
 }
 
 // discover how to traverse this thing, and record it
 function go(ffNode, prevDir, instructions) {
-	instructions.push(testMatch(node));
+	instructions.push(testMatch(ffNode));
 	var dirNotChanged = !(ffNode.bf() || ffNode.df());
+	instructions.push(reference("marker"));
 	if (ffNode.df() || (dirNotChanged && prevDir === 'd')) {
 		DFCall(ffNode, prevDir, instructions);
 		BFCall(ffNode, prevDir, instructions);
@@ -98,103 +122,143 @@ function go(ffNode, prevDir, instructions) {
 		BFCall(ffNode, prevDir, instructions);
 		DFCall(ffNode, prevDir, instructions);
 	}
+	return instructions;
 }
 
 function BFCall(ffNode, prevDir, instructions) {
 	var next = ffNode.nextSibling();
-	instructions.push(execute_SWY(ffNode, ffNode.bfPreAST()));
-	if (next) {
+	if (ffNode.bfPreAST())
+		instructions.push(execute_SWY(ffNode, ffNode.bfPreAST()));
+	if (next || ffNode.couldRepeat()) {
 		// Note: next sibling might be self, in FF, due to repeating nodes like '...'
-		instructions.push(new InstrLink(goto_NextSibling(ffNode)));
-		go(next, 'b', instructions);
-		instructions.push(goto_PrevSibling(next));
+		instructions.push(goto_NextSibling(ffNode));
+		if (next)
+			go(next, 'b', instructions);
+		else
+			instructions.push(reference("marker"));
+			
+		instructions.push(goto_PrevSibling(ffNode));
 	}
-	instructions.push(execute_SWY(ffNode, ffNode.bfPostAST()));
+	if (ffNode.bfPostAST())
+		instructions.push(execute_SWY(ffNode, ffNode.bfPostAST()));
 }
 
 function DFCall(ffNode, prevDir, instructions) {
 	var firstChild = ffNode.children().length > 0 ? ffNode.children()[0] : null;
-	instructions.push(execute_SWY(ffNode, ffNode.dfPreAST()));
-	if (firstChild) {
+	if (ffNode.dfPreAST())
+		instructions.push(execute_SWY(ffNode, ffNode.dfPreAST()));
+	if (firstChild || ffNode.couldRepeat()) {
 		instructions.push(goto_FirstChild(ffNode));
-		go(firstChild, 'd', instructions);
-		instructions.push(goto_Parent(firstChild));
+		if (firstChild)
+			go(firstChild, 'd', instructions);
+		else
+			instructions.push(reference("marker"));
+			
+		instructions.push(goto_Parent(ffNode));
 	}
-	instructions.push(execute_SWY(ffNode, ffNode.dfPostAST()));
+	if (ffNode.dfPostAST())
+		instructions.push(execute_SWY(ffNode, ffNode.dfPostAST()));
 }
 
 function testMatch(ffNode) {
-	return function(treeNode, instruction, args, e, scope) {
+	return ['testMatch', function testMatch(treeNode, instruction, args, e, scope) {
 		if (! ffNode.match(treeNode))
 			throw new err.IllegalOperation("Frag function node does not match corresponding tree node ("
 				+ treeNode.name() + " != " + ffNode.name() + ").", ffNode.meta(), scope);
-				
 		return Q([treeNode, instruction.Next, Q.all(args), null]);
-	};
+	}];
+}
+
+function reference(label) {
+	// basically just a NoOp that gives us an easy return point
+	return ['reference', function reference(treeNode, instruction, args, e, scope) {
+		return Q([treeNode, instruction.Next, Q.all(args), null]);
+	}, label];
 }
 
 function goto_NextSibling(ffNode) {
-	return function(treeNode, instruction, args, e, scope) {
-		if (! ffNode.repeat(treeNode.nextSibling())) {
-			return Q([treeNode.nextSibling(), instruction.Next, Q.all(args), null]);
+	return ['goto_NextSibling', function goto_NextSibling(treeNode, instruction, args, e, scope) {
+		var ohSibling = treeNode.nextSibling();
+		if (!ohSibling)
+			if (!ffNode.couldRepeat())
+				throw new err.IllegalOperation("Frag function does not match tree at node " + ffNode.name() + ".", ffNode.meta(), scope);
+			else
+				return Q([treeNode, instruction.Next, Q.all(args), null]);
+				
+		if (! ffNode.repeat(ohSibling)) {
+			return Q([ohSibling, instruction.Next, Q.all(args), null]);
 		} else {
-			return Q([treeNode.nextSibling(), instruction.Prev, Q.all(args), null]);
+			return Q([ohSibling, instruction.prev('marker'), Q.all(args), null]);
 		}
-	};
+	}];
 }
 
 function goto_PrevSibling(ffNode) {
-	return function(treeNode, instruction, args, e, scope) {
+	return ['goto_PrevSibling', function goto_PrevSibling(treeNode, instruction, args, e, scope) {
 		if (! ffNode.repeat(treeNode.prevSibling())) {
 			return Q([treeNode.prevSibling(), instruction.Next, Q.all(args), null]);
 		} else {
-			return Q([treeNode.prevSibling(), instruction.Prev, Q.all(args), null]);
+			return Q([treeNode.prevSibling(), instruction.prev('marker'), Q.all(args), null]);
 		}
-	};
+	}];
 }
 
 function goto_FirstChild(ffNode) {
-	return function(treeNode, instruction, args, e, scope) {
-		if (treeNode.children() === null || treeNode.children().length === 0)
-			throw new err.IllegalOperation("Frag function does not match tree at node " + ffNode.name() + ".", ffNode.meta(), scope);
-			
-		if (! ffNode.repeat(treeNode.children[0]())) {
-			return Q([treeNode.children()[0], instruction.Next, Q.all(args), null]);
+	return ['goto_FirstChild', function goto_FirstChild(treeNode, instruction, args, e, scope) {
+		var ohChild = treeNode.getChildren() ? treeNode.getChildren()[0] : 0;
+		if (!ohChild)
+			if (!ffNode.couldRepeat())
+				throw new err.IllegalOperation("Frag function does not match tree at node " + ffNode.name() + ".", ffNode.meta(), scope);
+			else
+				return Q([treeNode, instruction.Next, Q.all(args), null]);
+				
+		if (! ffNode.repeat(ohChild)) {
+			return Q([ohChild, instruction.Next, Q.all(args), null]);
 		} else {
-			return Q([treeNode.children()[0], instruction.Prev, Q.all(args), null]);
+			return Q([ohChild, instruction.prev('marker'), Q.all(args), null]);
 		}
-	};
+	}];
 }
 
 function goto_Parent(ffNode) {
-	return function(treeNode, instruction, args, e, scope) {
-		if (! ffNode.repeat(treeNode.parent())) {
-			return Q([treeNode.parent(), instruction.Next, Q.all(args), null]);
+	return ['goto_Parent', function goto_Parent(treeNode, instruction, args, e, scope) {
+		var parent = treeNode.getParent();
+		if (!parent)
+			if (!ffNode.couldRepeat())
+				throw new err.IllegalOperation("Frag function does not match tree at node " + ffNode.name() + ".", ffNode.meta(), scope);
+			else
+				return Q([treeNode, instruction.Next, Q.all(args), null]);
+		
+		if (! ffNode.repeat(treeNode.getParent())) {
+			return Q([parent, instruction.Next, Q.all(args), null]);
 		} else {
-			return Q([treeNode.parent(), instruction.Prev, Q.all(args), null]);
+			return Q([parent, instruction.prev('marker'), Q.all(args), null]);
 		}
-	};
+	}];
 }
 
-function execute_SWY(ffNode, ast) {
+function execute_SWY(ffNode, ast, label) {
 	if (ast && ast[0] === 's-w-y') {
 		var style = ast[1], whereAST = ast[2], yieldASTs = ast[3], meta = ast[4];
 		return ['execute_SWY', function(treeNode, instruction, args, e, scope) {
 			var swyscope = scope.createScope('s-w-y.where', ffNode.name(), null, meta);
-			var qwheres = whereAST.map(function(decl) { return e(decl, swyscope, null, true); });
-			return Q.all(qwheres).then(function(/* where - already added to scope by e */) {
-				var style = e(style, swyscope, true);
+			var qwheres = whereAST.map(function(decl) { return e(decl, swyscope, true); });
+			return Q.all(qwheres).then(function(ewheres) {
+				var stylePromise = e(style, swyscope, true);
 				var yieldPromises = yieldASTs.map(function(yieldAST) {
 					// be careful not to add yields to current scope with ['=', id, expr, meta];
-					return [yieldAST[1], e(yieldAST[2], swyscope, true)];
+					return Q.all([yieldAST[1], e(yieldAST[2], swyscope, true)]);
 				});
-				return Q([node, instruction.Next, Q.all(yieldPromises), style]); 
+				
+				return Q.all([Q.all(yieldPromises), stylePromise]).spread(function(eyields, estyle) {
+					return Q.all([treeNode, instruction.Next, eyields, estyle]);
+				});
 			});
-		}];
+		}, label];
 	} else {
-		return ['execute_SWY', function(node, args, e, scope) {
-			return Q([node, instruction.Next, Q.all(args), null]);
-		}];
+		return ['execute_SWY_NOP', function(treeNode, instruction, args, e, scope) {
+			return Q([treeNode, instruction.Next, Q.all(args), null]);
+		}, label];
 	}
 };
 
@@ -228,14 +292,17 @@ function NodeIterator(name, dOrB, d, b, parent, meta) {
 	
 	self.reset = function() { current = 0; return coll[current]; };
 	self.match = function(treeNode) {
+		if (!treeNode) return false;
+		console.log("checking name ", name, treeNode.getNodeId());
 		switch(name.toLowerCase()) {
 			case "...":
 			case "any": return true;
-			case "block": return blocks.reduce(function(el) { el === treeNode.name.toLowerCase(); });
+			case "block": return blocks.reduce(function(el) { el === treeNode.getNodeId().toLowerCase(); });
 			default:
-				return name.toLowerCase() === treeNode.name.toLowerCase();
+				return name.toLowerCase() === treeNode.getNodeId().toLowerCase();
 		}
 	};
+	self.couldRepeat = function couldRepeat() { return name === '...'; };
 	self.repeat = function(treeNode) {
 		return name === '...' && self.match(treeNode);
 	};

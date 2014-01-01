@@ -98,16 +98,19 @@ module.exports = function(native) {
 	};
 	
 	native.len = function(env, obj) {
-		if (obj instanceof Array) {
-			if (obj[0] === 'array') {
-				return obj[1].length;
-			} else if (obj[0] === 'dict') {
-				return Object.keys(arr[1]).length;
-			}		
-		} else if (typeof obj === "string") {
-			return obj.length;
-		}
-		throw new err.UsageError('Not an Array, String, or Dict', env.meta, env.scope);
+		env.e(obj, env.scope, null, true).then(function(eobj) {
+			console.log(obj, eobj);
+			if (eobj instanceof Array) {
+				if (eobj[0] === 'array') {
+					return eobj[1].length;
+				} else if (eobj[0] === 'dict') {
+					return Object.keys(eobj[1]).length;
+				}		
+			} else if (typeof eobj === "string") {
+				return eobj.length;
+			}
+			throw new err.UsageError('Not an Array, String, or Dict', env.meta, env.scope);
+		});
 	};
 	
 	addColorLib(native);
@@ -146,6 +149,11 @@ function addTreeLib(native) {
 		var ld = instance[2]['_leafdict'];
 		var children = ld.getParent().getChildren();
 		return children.indexOf(ld);
+	};
+	native.Node.methods['apply'] = function(instance, env, dict, retval) {
+		var ld = instance[2]['_leafdict'];
+		ld.apply(dict);
+		return retval; 
 	};
 }
 

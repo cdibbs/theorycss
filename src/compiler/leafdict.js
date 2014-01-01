@@ -15,7 +15,7 @@ function LeafDict(nodeId, attrs, isList, parent) {
 	var css = [];
 	var mq = {};
 	var children = [];
-	var attributes = null;
+	var attributes = null; 
 	
 	self.genCSSProperties = function genCSSProperties(scope) {
 		if (!isList) return;
@@ -34,6 +34,7 @@ function LeafDict(nodeId, attrs, isList, parent) {
 		return css;
 	};
 
+	self.apply = function apply(styleDict) { css.push(styleDict); };
 	self.getNodeId = function getNodeId() { return nodeId; };
 	self.getMediaQueries = function getMediaQueries() { return mq; };
 	
@@ -42,6 +43,23 @@ function LeafDict(nodeId, attrs, isList, parent) {
 	};
 	self.getParent = function getParent() { return parent; };	
 	self.getChildren = function getChildren() { return children; };
+	
+	self.nextSibling = function nextSibling() {
+		console.log("looking for siblings");
+		if (!parent || !parent.getChildren().length) return null;
+		var pc = parent.getChildren();
+		var i = children.indexOf(self);
+		console.log("uhh ohhhhh", i);
+		return i > -1 && i < pc.length - 1 ? pc[i+1] : null; 
+	};
+	
+	self.prevSibling = function prevSibling() {
+		if (!parent || !parent.getChildren().length) return null;
+		var pc = parent.getChildren();
+		var i = pc.indexOf(self);
+		console.log("uhh ohhhhh", i);
+		return i > 0 ? pc[i-1] : null; 
+	};
 	
 	self.getStyleDict = function() { return css; };
 	self.getAttributes = function() { return attributes; };

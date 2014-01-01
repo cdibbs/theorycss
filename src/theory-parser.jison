@@ -319,17 +319,17 @@ fragexprblock
 		
 fragexpr
 	: expression
-		{ $$ = ['s-w-y', $expression, null, null, { loc : @$ }]; }
+		{ $$ = ['s-w-y', $expression, [], [], { loc : @$ }]; }
 	| expression YIELD assignment_list
-		{ $$ = ['s-w-y', $expression, null, $assignment_list, { loc : @$ }]; }
+		{ $$ = ['s-w-y', $expression, [], $3, { loc : @$ }]; }
 	| expression WHERE assignment_list
-		{ $$ = ['s-w-y', $expression, $assignment_list, null, { loc : @$ }]; }
+		{ $$ = ['s-w-y', $expression, $3, [], { loc : @$ }]; }
 	| expression WHERE assignment_list YIELD assignment_list
-		{ $$ = ['s-w-y', $expression, $assignment_list, $assignment_list1, { loc : @$ }]; }
+		{ $$ = ['s-w-y', $expression, $3, $5, { loc : @$ }]; }
 	| WHERE assignment_list YIELD assignment_list
-		{ $$ = ['s-w-y', null, $assignment_list, $assignment_list1, { loc : @$ }]; }
+		{ $$ = ['s-w-y', null, $2, $4, { loc : @$ }]; }
 	| YIELD assignment_list
-		{ $$ = ['s-w-y', null, null, $assignment_list, { loc : @$ }]; };
+		{ $$ = ['s-w-y', null, [], $2, { loc : @$ }]; };
 		
 tuplevarlist
 	: id COMMA tuplevarlist

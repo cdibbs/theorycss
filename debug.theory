@@ -1,21 +1,20 @@
 chris
   theory main
-    html is myff(5);
+    html is john(5, this);
       div
+        a
+          span
+        b
 
     ff myff(n)
-      where chris = n * 5;
-      any
+      where start = n;
+      ...
         -> { chris: twoChris }
-           where twoChris = 2 * chris
-           yield threeChris = 3 * chris;
-        ...
-          -> 'this is next';
-          div
-            a
-              span
-        div
-        john
-          -> {};
+           where twoChris = 2 * start
+           yield start = 3 * twoChris;
 
-    fn john(a, node) -> if (node.name == 'chris') then node.apply(dict, ret) else {} endif;
+    fn john(a, node) ->
+      if (debug(len(node.children())) > 0) then
+        john(a, node.apply({chris: 'was here'}, node.children()[0]))
+      else {}
+      endif;
