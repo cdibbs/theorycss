@@ -20,7 +20,6 @@ function LeafDict(nodeId, attrs, isList, parent) {
 	self.genCSSProperties = function genCSSProperties(scope) {
 		if (!isList) return;
 		isList.every(function(isdef) {
-			
 			css.push(
 					{ media : isdef[1],
 					  mediaString : isdef[1] ? self.evalMediaQuery(isdef[1], scope) : null,
@@ -45,11 +44,9 @@ function LeafDict(nodeId, attrs, isList, parent) {
 	self.getChildren = function getChildren() { return children; };
 	
 	self.nextSibling = function nextSibling() {
-		console.log("looking for siblings");
 		if (!parent || !parent.getChildren().length) return null;
 		var pc = parent.getChildren();
 		var i = children.indexOf(self);
-		console.log("uhh ohhhhh", i);
 		return i > -1 && i < pc.length - 1 ? pc[i+1] : null; 
 	};
 	
@@ -57,7 +54,6 @@ function LeafDict(nodeId, attrs, isList, parent) {
 		if (!parent || !parent.getChildren().length) return null;
 		var pc = parent.getChildren();
 		var i = pc.indexOf(self);
-		console.log("uhh ohhhhh", i);
 		return i > 0 ? pc[i-1] : null; 
 	};
 	

@@ -119,6 +119,7 @@ var Css = function Css(options) {
 	}
 	
 	function dict2css(dict, spc) {
+		console.log("HEREEREEREREREERR",JSON.stringify(dict, null, 2));
 		var o = '';
 		for (var key in dict[1]) {
 			o += spc + key + ':' + space(1) + renderValue(dict[1][key]) + ";" + nl(1);

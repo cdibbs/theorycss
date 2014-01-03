@@ -33,6 +33,7 @@ var ff = function FFEngine(name, ast) {
 		var instruction = instructions.root();
 		var ffscope = scope.base().createScope('ff.where', name, null, meta);
 		
+		
 		function instructionComplete(nextTreeNode, nextInstruction, yields, style) {
 			if (style) {
 				nextTreeNode.apply(style);

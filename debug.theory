@@ -1,6 +1,6 @@
 chris
   theory main
-    html is john(5, this);
+    html is myff(5, this);
       div
         a
           span

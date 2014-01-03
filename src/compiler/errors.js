@@ -50,45 +50,45 @@ exports.Err = function Err() {
 	};
 	
 	self.Error = function(msg, meta, scope) {
-		var base = new baseError(msg, meta, scope);
+		var base = baseError(msg, meta, scope);
 		return base;
 	};
 		
 	self.UsageError = function(msg, meta, scope) {
-		var base = new baseError(msg, meta, scope);
+		var base = baseError(msg, meta, scope);
 		return base;
 	};
 	
 	self.Unsupported = function(msg, meta, scope) {
-		var base = new baseError(msg, meta, scope);
+		var base = baseError(msg, meta, scope);
 		return base;
 	};
 	
 	self.NotImplemented = function(msg, meta, scope) {
-		var base = new baseError(msg, meta, scope);
+		var base = baseError(msg, meta, scope);
 		return base;
 	};
 	
 	self.IllegalOperation = function(msg, meta, scope) {
-		var base = new baseError(msg, meta, scope);
+		var base = baseError(msg, meta, scope);
 		return base;
 	};
 	
 	self.Undefined = function Undefined(msg, meta, scope) {
-		var base = new baseError(msg, meta, scope);
+		var base = baseError(msg, meta, scope);
 		return base;
 	};
 	
 	self.NotANumber = function(msg, meta, scope) {
-		var base = new baseError(msg, meta, scope);
+		var base = baseError(msg, meta, scope);
 		return base;
 	};
 	self.AlreadyDefined = function(msg, meta, scope) {
-		var base = new baseError(msg, meta, scope);
+		var base = baseError(msg, meta, scope);
 		return base;
 	};
 	self.InternalError = function(msg, meta, scope) {
-		var base = new baseError(msg, meta, scope);
+		var base = baseError(msg, meta, scope);
 		return base;
 	};
 };
