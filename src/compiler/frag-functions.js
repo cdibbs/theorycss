@@ -45,7 +45,7 @@ var ff = function FFEngine(name, ast) {
 			}
 			
 			if (nextInstruction == null) {
-				console.log("Done!", JSON.stringify(yields, null, 2), JSON.stringify(style, null, 2));
+				//console.log("Done!", JSON.stringify(yields, null, 2), JSON.stringify(style, null, 2));
 				return yields;
 			}
 				

@@ -91,7 +91,8 @@ var Css = function Css(options) {
 		
 		o += space(bn) + self.compactNodeId(ancestors, expr, attrs) + space(1) + '{' + nl(1);
 		for(var i=0, l=cssDicts.length; i<l; i++) {
-			o += dict2css(cssDicts[i], space(n));
+			if (cssDicts[i])
+				o += dict2css(cssDicts[i], space(n));
 		}
 		o += space(bn) + '}' + nl(1);
 		
@@ -119,7 +120,8 @@ var Css = function Css(options) {
 	}
 	
 	function dict2css(dict, spc) {
-		console.log("HEREEREEREREREERR",JSON.stringify(dict, null, 2));
+		if (!dict) return '';
+		
 		var o = '';
 		for (var key in dict[1]) {
 			o += spc + key + ':' + space(1) + renderValue(dict[1][key]) + ";" + nl(1);
