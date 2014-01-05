@@ -49,13 +49,9 @@ var ff = function FFEngine(name, ast) {
 				return yields;
 			}
 				
-			try {
-				nextInstruction.execute(nextTreeNode, nextInstruction, yields, e, actionScope)
-					.spread(instructionComplete);
-				console.log(nextInstruction.instruction[0]);
-			} catch(ex) {
-				console.log(ex.stack);
-			}
+			console.log(nextInstruction.instruction[0]);
+			return nextInstruction.execute(nextTreeNode, nextInstruction, yields, e, actionScope)
+				.spread(instructionComplete);
 		};
 		
 		var qargs = args.map(function(arg) { return e(arg, ffscope, null, true); });
@@ -74,8 +70,9 @@ var ff = function FFEngine(name, ast) {
 			
 			// and kick off tree evaluation... :-)
 			console.log(instruction.instruction[0]);
-			instruction.execute(treeNode, instruction, [], e, ffscope).spread(instructionComplete);
+			return instruction.execute(treeNode, instruction, [], e, ffscope).spread(instructionComplete);
 		});
+		return initScope;
 	};
 };
 
@@ -102,7 +99,6 @@ function InstrLink(instr, list, prev) {
 		return instr[1].apply(this, arguments);
 	};
 	this.prev = function(label) {
-		console.log("here");
 		var node = this;
 		while (node.instruction[2] !== label && node.Prev != null) { node = node.Prev; }
 		return node.instruction[2] !== label ? null : node;
@@ -179,27 +175,63 @@ function reference(label) {
 
 function goto_NextSibling(ffNode) {
 	return ['goto_NextSibling', function goto_NextSibling(treeNode, instruction, args, e, scope) {
-		var ohSibling = treeNode.nextSibling();
-		if (!ohSibling)
-			if (!ffNode.couldRepeat())
+		var nextSib = treeNode.nextSibling();
+		console.log("Next sibling from " + treeNode.getNodeId() + " is " + nextSib);
+		if (!nextSib && !ffNode.couldRepeat())
 				throw new err.IllegalOperation("Frag function does not match tree at node " + ffNode.name() + ".", ffNode.meta(), scope);
-			else
-				return Q([treeNode, instruction.Next, Q.all(args), null]);
 				
-		if (! ffNode.repeat(ohSibling)) {
-			return Q([ohSibling, instruction.Next, Q.all(args), null]);
+		if (! ffNode.repeat(nextSib) && nextSib) {
+				console.log("next sibling choice 0", nextSib.getNodeId());
+				return Q([nextSib, instruction.Next, Q.all(args), null]);
 		} else {
-			return Q([ohSibling, instruction.prev('marker'), Q.all(args), null]);
+			if (nextSib) {
+				if (ffNode.bf()) {
+					console.log("next sibling choice 1a", nextSib.getNodeId(), instruction.prev('marker').instruction[0]);
+					return Q([nextSib, instruction.prev('marker'), Q.all(args), null]);
+				} else {
+					console.log("next sibling choice 1b", nextSib.getNodeId(), instruction.prev('marker').instruction[0]);
+					return Q([nextSib, instruction.prev('marker'), Q.all(args), null]);
+				}
+			} else {
+				if (ffNode.bf()) {
+					// if bf & no next sib, go to descend instr on current node, & exec, descend, repeat
+					console.log("next sibling choice 2a", treeNode.getNodeId(), instruction.Next.instruction[0]);
+					return Q([treeNode, instruction.Next, Q.all(args), null]);
+				} else {
+					// if df & no next sib, go to next instr (prev sib) on current node, & exec and repeat all the way back
+					console.log("next sibling choice 2b", treeNode.getNodeId(), instruction.Next.instruction[0]);
+					return Q([treeNode, instruction.Next, Q.all(args), null]);
+				}
+			}
 		}
 	}];
 }
 
 function goto_PrevSibling(ffNode) {
 	return ['goto_PrevSibling', function goto_PrevSibling(treeNode, instruction, args, e, scope) {
-		if (! ffNode.repeat(treeNode.prevSibling())) {
-			return Q([treeNode.prevSibling(), instruction.Next, Q.all(args), null]);
+		var prevSib = treeNode.prevSibling();
+		if (! ffNode.repeat(prevSib) && prevSib) {
+				return Q([prevSib, instruction.Next, Q.all(args), null]);
 		} else {
-			return Q([treeNode.prevSibling(), instruction.prev('marker'), Q.all(args), null]);
+			if (prevSib) {
+				if (ffNode.df()) {
+					console.log("prev sibling choice 1a", prevSib.getNodeId(), instruction.prev('marker').instruction[0]);
+					return Q([prevSib, instruction.prev('marker'), Q.all(args), null]);
+				} else {
+					console.log("prev sibling choice 1b", prevSib.getNodeId(), instruction.prev('marker').instruction[0]);
+					return Q([prevSib, instruction.prev('marker'), Q.all(args), null]);
+				}
+			} else {
+				if (ffNode.df()) {
+					// if bf & no next sib, go to descend instr on current node, & exec, descend, repeat
+					console.log("prev sibling choice 2a", treeNode.getNodeId(), instruction.instruction[0]);
+					return Q([treeNode, instruction.Next, Q.all(args), null]);
+				} else {
+					// if df & no next sib, go to next instr (prev sib) on current node, & exec and repeat all the way back
+					console.log("prev sibling choice 2b", treeNode.getNodeId(), instruction.Next.instruction[0]);
+					return Q([treeNode, instruction.Next, Q.all(args), null]);
+				}
+			}
 		}
 	}];
 }
@@ -208,14 +240,18 @@ function goto_FirstChild(ffNode) {
 	return ['goto_FirstChild', function goto_FirstChild(treeNode, instruction, args, e, scope) {
 		var ohChild = treeNode.getChildren() ? treeNode.getChildren()[0] : 0;
 		if (!ohChild)
-			if (!ffNode.couldRepeat())
+			if (!ffNode.couldRepeat()) {
 				throw new err.IllegalOperation("Frag function does not match tree at node " + ffNode.name() + ".", ffNode.meta(), scope);
-			else
+			} else {
+				console.log("we are ", instruction.Next.instruction[0], treeNode.getNodeId());
 				return Q([treeNode, instruction.Next, Q.all(args), null]);
+			}
 				
 		if (! ffNode.repeat(ohChild)) {
-			return Q([ohChild, instruction.Next, Q.all(args), null]);
+			console.log("b");
+			return Q([treeNode, instruction.Next, Q.all(args), null]);
 		} else {
+			console.log("c", ohChild.getNodeId());
 			return Q([ohChild, instruction.prev('marker'), Q.all(args), null]);
 		}
 	}];
@@ -228,12 +264,18 @@ function goto_Parent(ffNode) {
 			if (!ffNode.couldRepeat())
 				throw new err.IllegalOperation("Frag function does not match tree at node " + ffNode.name() + ".", ffNode.meta(), scope);
 			else
-				return Q([treeNode, instruction.Next, Q.all(args), null]);
+				return Q([null, null, Q.all(args), null]);
 		
 		if (! ffNode.repeat(treeNode.getParent())) {
 			return Q([parent, instruction.Next, Q.all(args), null]);
 		} else {
-			return Q([parent, instruction.prev('marker'), Q.all(args), null]);
+			if (ffNode.bf()) {
+				console.log("choice 1");
+				return Q([parent, instruction.prev('marker'), Q.all(args), null]);
+			} else {
+				console.log("choice 2", instruction.Next.instruction[0], parent.getNodeId());
+				return Q([parent, instruction.Next, Q.all(args), null]);
+			}
 		}
 	}];
 }

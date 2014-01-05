@@ -1,6 +1,6 @@
 chris
   theory main
-    html is myff(5, this);
+    html is john(5, this);
       div
         a
           span
@@ -12,9 +12,10 @@ chris
         -> { chris: twoChris }
            where twoChris = 2 * start
            yield start = 3 * twoChris;
+        <- { angel: 3.141 };
 
     fn john(a, node) ->
-      if (debug(len(node.children())) > 0) then
-        john(a, node.apply({chris: 'was here'}, node.children()[0]))
+      if (len(node.children()) > 0) then
+        john(a, node.apply({chris: 'was here'}, node.children()))
       else {}
       endif;

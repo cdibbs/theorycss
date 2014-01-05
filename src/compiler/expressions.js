@@ -145,6 +145,7 @@ var Expressions = function Expressions(node) {
 					return ['inst_mem', a, b];
 				}				
 			}
+			console.log(scope.resolve('node'));
 			throw new err.UsageError('Accessors valid only on arrays and objects.', meta, scope);
 		});
 	};
@@ -193,7 +194,8 @@ var Expressions = function Expressions(node) {
 					var nargs = u.clone(args);
 					var name = 'native' + (self.getName(fn) || 'anonymous');
 					nargs.unshift({ meta : meta, name : name, e : e, expr : self, scope : scope, node : node });
-					return fndef.apply(this, nargs);
+					var result = fndef.apply(this, nargs);
+					return result;
 				} else if (typeof fndef === 'object' && fndef.type === 'fn') {
 					var name = self.getName(fn) || 'anonymous';
 					return self.execFn(fndef, args, name, meta, e, scope);

@@ -27,9 +27,9 @@ module.exports = function(native) {
 		return Q.all(args).spread(
 			function() {
 				var results = Array.prototype.slice.call(arguments, 0);
-				results = results.map(function(i) { return i; });
-				console.log.apply(this, arguments);
-		});
+				console.log.apply(this, results);
+				return results[0];
+			});
 	};
 	
 	native.num = function(env, s) {
@@ -98,8 +98,7 @@ module.exports = function(native) {
 	};
 	
 	native.len = function(env, obj) {
-		env.e(obj, env.scope, null, true).then(function(eobj) {
-			console.log(obj, eobj);
+		return env.e(obj, env.scope, null, true).then(function(eobj) {
 			if (eobj instanceof Array) {
 				if (eobj[0] === 'array') {
 					return eobj[1].length;
@@ -132,7 +131,7 @@ function addTreeLib(native) {
 	native.Node.methods['children'] = function(instance, env) {
 		var ld = instance[2]['_leafdict'];
 		var children = ld.getChildren().map(function(c) { return classes.makeInstance("Node", { '_leafdict' : c }); });
-		return ['array', children, env.meta];		
+		return Q(['array', children, env.meta]);		
 	};
 	native.Node.methods['css'] = function(instance, env) {
 		var ld = instance[2]['_leafdict'];
@@ -151,9 +150,11 @@ function addTreeLib(native) {
 		return children.indexOf(ld);
 	};
 	native.Node.methods['apply'] = function(instance, env, dict, retval) {
-		var ld = instance[2]['_leafdict'];
-		ld.apply(dict);
-		return retval; 
+		//return env.e(dict, env.scope, null, true).then(function(edict) {
+			var ld = instance[2]['_leafdict'];
+			ld.apply(dict);
+			return Q(retval); 
+		//});
 	};
 }
 
