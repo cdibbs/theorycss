@@ -8,12 +8,12 @@ expressive language for styling the web. Theory answers this need by providing h
 relational structure between styled elements in a maintainable way.
 
 ##Installation
-Theory relies on Caman for image manipulation, so you will need to install:
+Theory relies on Fabric for image manipulation, so you will need to install:
 
-- Cairo (libcairo2-dev)
-- libjpeg (libjpeg-dev)
-- libgif (libgif-dev)
-- libpng (libpng-dev)
+- Cairo (libcairo2-dev), for canvas tag emulation, as well as
+- libjpeg (libjpeg-dev),
+- libgif (libgif-dev), and
+- libpng (libpng-dev), to support canvas tag features.
 
 ##Tree Fragments
 Akin to nested rules in LESS, these describe rough, in-tree relationships between elements, as well
