@@ -89,13 +89,14 @@ var Css = function Css(options) {
 			bn = n;
 			n = n * 2;
 		}
-		
-		o += space(bn) + self.compactNodeId(ancestors, expr, attrs) + space(1) + '{' + nl(1);
-		for(var i=0, l=cssDicts.length; i<l; i++) {
-			if (cssDicts[i])
-				o += dict2css(cssDicts[i], space(n));
+		if (cssDicts) {
+			o += space(bn) + self.compactNodeId(ancestors, expr, attrs) + space(1) + '{' + nl(1);
+			for(var i=0, l=cssDicts.length; i<l; i++) {
+				if (cssDicts[i])
+					o += dict2css(cssDicts[i], space(n));
+			}
+			o += space(bn) + '}' + nl(1);
 		}
-		o += space(bn) + '}' + nl(1);
 		
 		if (media) output[1][media] = o; else output[0] = o;
 	};

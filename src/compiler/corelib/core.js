@@ -149,13 +149,19 @@ function addTreeLib(native) {
 		var children = ld.getParent().getChildren();
 		return children.indexOf(ld);
 	};
-	native.Node.methods['apply'] = function(instance, env, dict, retval) {
+	native.Node.methods['apply'] = function(instance, env, args) {
 		//return env.e(dict, env.scope, null, true).then(function(edict) {
+		var promArgs = args ? args.map(function(arg) { return env.e(arg, env.scope, true); }) : [];
+		return Q.all(promArgs).then(function(eArgs) {
 			var ld = instance[2]['_leafdict'];
-			ld.apply(dict);
-			return Q(retval); 
-		//});
+			ld.apply(theory2Native(eArgs[0]));
+			return Q(eArgs[1] || null);
+		});
 	};
+	
+	native.NodeContext = classes.makeClass('NodeContext');
+	
+	native.IsRule = classes.makeClass('IsRule');
 }
 
 function addImageLib(native) {

@@ -25,7 +25,7 @@ function LeafDict(nodeId, attrs, isList, parent) {
 					{ media : isdef[1],
 					  mediaString : isdef[1] ? self.evalMediaQuery(isdef[1], scope) : null,
 					  pseudoEl : isdef[3],
-					  dictionaries : self.evalDefList(isdef[2], scope)
+					  dictionaries : self.evalDefList(isdef[2], scope, isdef[1])
 					});
 			return true;
 		});
@@ -34,7 +34,11 @@ function LeafDict(nodeId, attrs, isList, parent) {
 		return css;
 	};
 
-	self.apply = function apply(styleDict) { css.push(styleDict); };
+	self.apply = function apply(styleDict) { css.push({
+		media: null, mediaString: null, pseudoEl: null,
+		dictionaries: [styleDict]
+		});
+	};
 	self.getNodeId = function getNodeId() { return nodeId; };
 	self.getMediaQueries = function getMediaQueries() { return mq; };
 	
@@ -62,7 +66,7 @@ function LeafDict(nodeId, attrs, isList, parent) {
 	self.getAttributes = function() { return attributes; };
 	
 	self.evalMediaQuery = function(mq, scope) {
-		return new Expressions(self)
+		return new Expressions(self, { pseudoEl : null, mq : mq })
 			.evaluate(['id', mq, scope.getMeta()], scope, false);
 	};
 	
@@ -71,8 +75,8 @@ function LeafDict(nodeId, attrs, isList, parent) {
  	 * @param {Array} defList
  	 * @throws Error if any expression does not return a property dictionary.
 	 */
-	self.evalDefList = function evalDefList(defList, scope) {
-		var expr = new Expressions(self);
+	self.evalDefList = function evalDefList(defList, scope, mq) {
+		var expr = new Expressions(self, { pseudoEl : null, mq : mq });
 		var dicts = [];
 		defList.every(function(def) {
 			var result = expr.evaluate(def, scope, false);

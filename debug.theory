@@ -1,10 +1,13 @@
 chris
   theory main
-    html is john(5, this);
+    html is john(5, this.node);
       div
+        @bob is { chris: 'was here' };
         a
           span
         b
+
+    bob = "width < 300px";
 
     ff myff(n)
       where start = n;
@@ -16,6 +19,8 @@ chris
 
     fn john(a, node) ->
       if (len(node.children()) > 0) then
-        john(a, node.apply({chris: 'was here'}, node.children()))
+        john(a, node.apply({chris: 'was here'}, node.children()[0]))
       else {}
       endif;
+      
+    fn recMyFn(i, node) -> if (node.children().length == 0) then i else recMyFn(i+1, node.children()[0]) endif;

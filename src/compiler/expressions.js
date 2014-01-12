@@ -6,9 +6,11 @@ var u = require('../util').u,
 	fragFunctions = require('./frag-functions'),
 	warn = require('./errors').warn;
 	 	
-var Expressions = function Expressions(node) {
+var Expressions = function Expressions(node, nodeContext) {
 	var self = this;
 	var node = node || null;
+	if (!nodeContext)
+		throw Error();
 	
 	self.evaluate = function(ast, scope, asPromise) {
 		if (ast instanceof Array && ast.length > 0) {
@@ -135,17 +137,16 @@ var Expressions = function Expressions(node) {
 		});
 	};	
 	
-	self.accessor = function(expr1, expr2, meta, e, scope) {
+	self.accessor = function(expr1, expr2, meta, e, scope) { 
 		return Q.all([e(expr1, scope, null, true), e(expr2, scope, null, true)])
 		.spread(function(a, b) {
 			if (a instanceof Array) {
 				if (a[0] === 'dict' || a[0] === 'array') {
 					return a[1][b];
 				} else if (a[0] === 'instance') {
-					return ['inst_mem', a, b];
-				}				
+					return classes.getClassMember(a,b);
+				}
 			}
-			console.log(scope.resolve('node'));
 			throw new err.UsageError('Accessors valid only on arrays and objects.', meta, scope);
 		});
 	};
@@ -182,7 +183,7 @@ var Expressions = function Expressions(node) {
 		},
 		'this' : function(meta, e, scope) {
 			if (node) {
-				var wrapped = classes.makeInstance("Node", { '_leafdict' : node });
+				var wrapped = classes.makeInstance("IsRule", { 'node' : node, 'media' : nodeContext.mq, 'pseudoEl' : nodeContext.pseudoEl });
 				return wrapped;
 			}
 		},
@@ -216,8 +217,11 @@ var Expressions = function Expressions(node) {
 						return classes.makeInstance(fndef.name, cnstrArgs);
 					});
 				} else if (fndef instanceof Array) {
-					if (fndef[0] === 'inst_mem') {
+					if (fndef[0] === 'inst_method') {
+						console.log(arguments);
 						return classes.callMethod(fndef[1], fndef[2], { scope : scope, e : e, meta : meta }, args);
+					} else {
+						throw new Error("Unimplemented feature? " + fndef[0]);
 					}
 				} else {
 					console.log("here in there be dragons", fndef);
@@ -503,6 +507,9 @@ var Expressions = function Expressions(node) {
 				arr[i] = e(arr[i], scope, true);
 			}
 			return Q.all(arr).then(function(arr) { return ['array', arr, meta]; });
+		},
+		'inst_mem' : function(a, b, meta, e, scope) {
+			console.log("accessing instance member");
 		},
 		'[]' : self.accessor,
 		'.' : self.accessor,

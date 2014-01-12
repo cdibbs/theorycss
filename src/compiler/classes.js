@@ -15,9 +15,20 @@ var Classes = function Classes() {
 		c.properties = properties || {};
 		c.baseArgs = baseArgs || [];
 		c.callMethod = function callMethod(name, instance, env, args) {
+			var scope = env.scope;
+			
 			return c.methods[name](instance, env, args);
 		};
 		return c;
+	};
+	
+	self.getClassMember = function getClassMember(instance, member) {
+		console.log(instance);
+		if (instance.methods[member]) {
+			return ['inst_method', instance, member]; // to be evaluated by '()' logic
+		} else {
+			return instance.properties[member];
+		}
 	};
 	
 	self.makeInstance = function makeInstance(ofClass, arguments) {
@@ -30,7 +41,8 @@ var Classes = function Classes() {
 	self.callMethod = function callMethod(instance, name, env, args) {
 		var ofClass = env.scope.resolve(instance[1]);
 		if (!ofClass || ofClass === 'undefined' || !ofClass.val) {
-			throw new err.Undefined('Class ' + instance[1] + ' is not defined.');
+			throw new Error();
+			throw new err.Undefined('Class ' + instance[1] + ' is not defined.', env.meta, env.scope);
 		}
 		return ofClass.val.callMethod(name, instance, env, args);
 	};

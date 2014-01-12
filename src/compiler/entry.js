@@ -15,7 +15,6 @@ var defaultOptions = {
 
 var Compiler = function(opts) {
 	var self = this;
-	var expr = new Expressions();
 	var options = _.extend({}, defaultOptions, opts);
 	
 	var rootScope = null;
@@ -180,8 +179,6 @@ var Compiler = function(opts) {
 		theoryScope.setEntry(theoryEntry);
 		return theoryScope;
 	};
-	
-	self.evaluateExpression = new Expressions().evaluate;
 };
 
 function err() { console.log.apply(this, arguments); };
