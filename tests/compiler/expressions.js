@@ -1,6 +1,6 @@
 var assert = require("assert"),
 	Expressions = require("../../src/compiler/expressions").Expressions,
-	Compiler = require("../../src/compiler/entry").Compiler,
+	Compiler = require("../../src/compiler/compiler").Compiler,
 	parser = require("../../lib/theory-parser").parser,
 	err = require("../../src/compiler/errors").err,
 	Q = require("q"),

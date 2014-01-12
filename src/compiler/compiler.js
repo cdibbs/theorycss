@@ -110,6 +110,8 @@ var Compiler = function(opts) {
 					var css = context.dictionaries[index];
 					waitOn(context.dictionaries, index, css);
 				}
+				if (context && context.mediaString)
+					waitOn(context, 'mediaString', context.mediaString);
 			}
 		}
 		return deferred.promise;

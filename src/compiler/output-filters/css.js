@@ -61,7 +61,6 @@ var Css = function Css(options) {
 	
 	this.renderBranch = function renderBranch(ancestors, output, branch, mediaQueries) {
 		// [ {...}, { media :, pseudoEl :, dictionaries :, children :}, ...]
-		console.log(branch);
 		var expr = branch.expression;
 		var contexts = branch.contexts;
 		var children = branch.children;

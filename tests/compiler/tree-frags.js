@@ -1,7 +1,7 @@
 var assert = require("assert"),
 	TreeFrags = require("../../src/compiler/tree-fragments").TreeFragments,
 	LeafDict = require("../../src/compiler/leafdict").LeafDict,
-	Compiler = require("../../src/compiler/entry").Compiler,
+	Compiler = require("../../src/compiler/compiler").Compiler,
 	parser = require("../../lib/theory-parser").parser,
 	StateManager = require('../../src/compiler/state-manager').StateManager;
 	vows = require("vows");

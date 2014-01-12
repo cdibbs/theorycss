@@ -31,7 +31,6 @@ function StateManager(type, name, _ast, parentScope, meta) {
 			}
 		}
 		if (variables[id]) {
-			throw new Error();
 			throw new err.AlreadyDefined("Variable " + id + " already defined within this scope.", {}, scope);
 		}
 		variables[id] = { id : id, val : val, ast : ast, lazy : lazy, type : type, scope : scope };

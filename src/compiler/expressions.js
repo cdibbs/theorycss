@@ -6,11 +6,9 @@ var u = require('../util').u,
 	fragFunctions = require('./frag-functions'),
 	warn = require('./errors').warn;
 	 	
-var Expressions = function Expressions(node, nodeContext) {
+var Expressions = function Expressions(node) {
 	var self = this;
 	var node = node || null;
-	if (!nodeContext)
-		throw Error();
 	
 	self.evaluate = function(ast, scope, asPromise) {
 		if (ast instanceof Array && ast.length > 0) {
@@ -144,7 +142,7 @@ var Expressions = function Expressions(node, nodeContext) {
 				if (a[0] === 'dict' || a[0] === 'array') {
 					return a[1][b];
 				} else if (a[0] === 'instance') {
-					return classes.getClassMember(a,b);
+					return classes.getClassMember(a,b, {e:e,meta:meta,scope:scope});
 				}
 			}
 			throw new err.UsageError('Accessors valid only on arrays and objects.', meta, scope);
@@ -182,10 +180,11 @@ var Expressions = function Expressions(node, nodeContext) {
 			}
 		},
 		'this' : function(meta, e, scope) {
-			if (node) {
-				var wrapped = classes.makeInstance("IsRule", { 'node' : node, 'media' : nodeContext.mq, 'pseudoEl' : nodeContext.pseudoEl });
-				return wrapped;
-			}
+			var t = scope.resolve('this');
+			if (t)
+				return t.val;
+			else
+				throw new err.IllegalOperation("Keyword 'this' has no meaning, in this scope.", meta, scope);
 		},
 		'()' : function(fn, args, meta, e, scope) {
 			return Q(e(fn, scope, null, true))
@@ -218,7 +217,6 @@ var Expressions = function Expressions(node, nodeContext) {
 					});
 				} else if (fndef instanceof Array) {
 					if (fndef[0] === 'inst_method') {
-						console.log(arguments);
 						return classes.callMethod(fndef[1], fndef[2], { scope : scope, e : e, meta : meta }, args);
 					} else {
 						throw new Error("Unimplemented feature? " + fndef[0]);
@@ -507,9 +505,6 @@ var Expressions = function Expressions(node, nodeContext) {
 				arr[i] = e(arr[i], scope, true);
 			}
 			return Q.all(arr).then(function(arr) { return ['array', arr, meta]; });
-		},
-		'inst_mem' : function(a, b, meta, e, scope) {
-			console.log("accessing instance member");
 		},
 		'[]' : self.accessor,
 		'.' : self.accessor,

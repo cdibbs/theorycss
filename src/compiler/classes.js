@@ -15,20 +15,34 @@ var Classes = function Classes() {
 		c.properties = properties || {};
 		c.baseArgs = baseArgs || [];
 		c.callMethod = function callMethod(name, instance, env, args) {
-			var scope = env.scope;
+			var scope = env.scope.base();
+			for(var prop in properties) {
+				
+			}
 			
 			return c.methods[name](instance, env, args);
+		};
+		c.addProperty = function addProperty(def) {
+			if (c.properties[def.name])
+				throw new err.AlreadyDefined('Property ' + name + ' is already defined on ' + c.name + '.');
+				
+			c.properties[def.name] = def;
 		};
 		return c;
 	};
 	
-	self.getClassMember = function getClassMember(instance, member) {
-		console.log(instance);
-		if (instance.methods[member]) {
-			return ['inst_method', instance, member]; // to be evaluated by '()' logic
-		} else {
-			return instance.properties[member];
+	self.getClassMember = function getClassMember(instance, member, env) {
+		var inst = env.scope.resolve(instance[1]);
+		if (inst && inst.val) {
+			inst = inst.val;
+			if (inst.methods[member]) {
+				return ['inst_method', instance, member]; // to be evaluated by '()' logic
+			} else if (inst.properties[member]) {
+				var val = inst.properties[member].getter(instance, env);
+				return val;
+			}
 		}
+		throw new err.Undefined('Class ' + instance[1] + ' is not defined.', env.meta, env.scope);
 	};
 	
 	self.makeInstance = function makeInstance(ofClass, arguments) {
@@ -54,6 +68,14 @@ var Classes = function Classes() {
 	// Given an AST representation of a method, return a function which invokes the method
 	function makeMethod(ast) {
 		
+	};
+	
+	self.makeProperty = function makeProperty(name, type, getter) {
+		return {
+			name : name,
+			type : type,
+			getter : getter
+		};
 	};
 	
 	self.fromAST = function fromAST(ast) {

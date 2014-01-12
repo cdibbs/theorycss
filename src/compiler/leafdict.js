@@ -66,8 +66,12 @@ function LeafDict(nodeId, attrs, isList, parent) {
 	self.getAttributes = function() { return attributes; };
 	
 	self.evalMediaQuery = function(mq, scope) {
-		return new Expressions(self, { pseudoEl : null, mq : mq })
-			.evaluate(['id', mq, scope.getMeta()], scope, false);
+		var mqscope = scope.base().createScope('node/mq', nodeId + "/" + mq, mq, scope.getMeta());
+		var nodeContext = { pseudoEl : null, mq : mq };
+		var wrapped = classes.makeInstance("IsRule", { 'node' : self, 'media' : nodeContext.mq, 'pseudoEl' : nodeContext.pseudoEl });
+		mqscope.addSymbol('this', 'this', wrapped, null, false, null);
+		var e = new Expressions(self);
+		return e.evaluate(['id', mq, scope.getMeta()], mqscope, false);
 	};
 	
 	/**
@@ -76,14 +80,18 @@ function LeafDict(nodeId, attrs, isList, parent) {
  	 * @throws Error if any expression does not return a property dictionary.
 	 */
 	self.evalDefList = function evalDefList(defList, scope, mq) {
-		var expr = new Expressions(self, { pseudoEl : null, mq : mq });
+		var defscope = scope.base().createScope('node', nodeId, mq, scope.getMeta());
+		var nodeContext = { pseudoEl : null, mq : mq };
+		var wrapped = classes.makeInstance("IsRule", { 'node' : self, 'media' : nodeContext.mq, 'pseudoEl' : nodeContext.pseudoEl });
+		defscope.addSymbol('this', 'this', wrapped, null, false, null);
+		var expr = new Expressions(self);
 		var dicts = [];
 		defList.every(function(def) {
-			var result = expr.evaluate(def, scope, false);
+			var result = expr.evaluate(def, defscope, false);
 			if (! result instanceof Object) {
-				throw new Exception("Not a dictionary.");
+				throw new Error("Not a dictionary.");
 			}
-			result = self.finalizeDict(result, scope, expr.evaluate);
+			result = self.finalizeDict(result, defscope, expr.evaluate);
 			dicts.push(result);
 			return true;
 		});
