@@ -62,7 +62,7 @@ module.exports = function(native) {
 		.spread(function(fndef, earr, initial) {
 			if (earr instanceof Array) {
 				if (earr[0] === 'array') {
-					initial = initial || arr[1][0];
+					initial = typeof initial === 'undefined' ? earr[1][0] : initial;
 					var result = earr[1].reduce(function(c, x, i, earr) {
 						return env.expr.execFn(fndef, [c, x, i, earr], env.name, env.meta, env.e, env.scope);
 					}, initial);

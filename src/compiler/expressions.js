@@ -145,6 +145,7 @@ var Expressions = function Expressions(node) {
 					return classes.getClassMember(a,b, {e:e,meta:meta,scope:scope});
 				}
 			}
+			//console.log(scope.resolve('node'));
 			throw new err.UsageError('Accessors valid only on arrays and objects.', meta, scope);
 		});
 	};

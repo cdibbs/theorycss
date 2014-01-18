@@ -18,12 +18,13 @@ chris
         <- { angel: 3.141 };
 
     fn john(a, node) ->
-      if (len(node.children()) > 0) then
-        reduce(
-        	\x,y => john(a, node.apply({chris: 'blue'}, y)),
-        	node.children(),
-        	0)
+      if (node != null) then
+      	node.apply(
+      		{chris: 'blue'},
+      		reduce(
+        		\result,child => john(a, child),
+        		node.children()
+        	)
+        )
       else node.apply({chris: 'base case'}, { 'background-color' : 'sweet' })
       endif;
-      
-    fn recMyFn(i, node) -> if (node.children().length == 0) then i else recMyFn(i+1, node.children()[0]) endif;

@@ -88,7 +88,7 @@ var Css = function Css(options) {
 			bn = n;
 			n = n * 2;
 		}
-		if (cssDicts) {
+		if (cssDicts && cssDicts[0] !== null) {
 			o += space(bn) + self.compactNodeId(ancestors, expr, attrs) + space(1) + '{' + nl(1);
 			for(var i=0, l=cssDicts.length; i<l; i++) {
 				if (cssDicts[i])

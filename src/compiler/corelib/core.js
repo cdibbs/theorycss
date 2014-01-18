@@ -30,6 +30,13 @@ module.exports = function(native) {
 
 function addTreeLib(native) {
 	native.Node = classes.makeClass('Node');
+	native.Node.addProperty(
+		classes.makeProperty('name', 'native',
+			function(instance, env) {
+				return instance[2]['_leafdict'].getNodeId();
+			}
+		)
+	);
 	native.Node.methods['parent'] = function (instance, env) {
 		var ld = instance[2]['_leafdict'];
 		var parent = ld.getParent();
