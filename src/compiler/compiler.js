@@ -171,6 +171,8 @@ var Compiler = function(opts) {
 			if (tdef[0] === '=' || tdef[0] === 'ff' || tdef[0] === 'fn' || tdef[0] === '@=') {
 				// for now, lazily evaluate everything. 
 				theoryScope.addSymbol(tdef[1], tdef[0], null, tdef.slice(2), true);
+			} else if (tdef instanceof Object && tdef.nodeType === 'FF') {
+				theoryScope.addSymbol(tdef.name, 'ff', tdef, null, false);
 			} else {
 				throw new Error("Unimplemented construct " + tdef[0]);
 			}

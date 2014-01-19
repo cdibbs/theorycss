@@ -1,4 +1,5 @@
 var Parser = require("../../lib/theory-parser").Parser,
+	sharedScope = require("../../src/compiler/scope"),
 	assert = require("assert"),
 	fs = require("fs"), path = require("path");
 
@@ -15,6 +16,7 @@ for (var i=0, l=srcs.length; i<l; i++) {
 		return function() {
 			var src = fs.readFileSync(path, "utf8");
 			var parser = new Parser();
+			parser.yy = sharedScope;
 			assert.ok(parser.parse(src));
 		};
 	})(base + srcs[i]);

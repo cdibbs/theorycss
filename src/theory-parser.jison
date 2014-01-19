@@ -224,9 +224,9 @@ tf_is
 	
 fragfunc 
 	: FRAGFUNC id LPAREN RPAREN ffactionblock
-		{ $$ = ['ff', $id, [], $ffactionblock, { loc : @$ }]; } 
+		{ $$ = new yy.FragFn($id, [], $ffactionblock, { loc : @$ }); } 
 	| FRAGFUNC id LPAREN paramlist RPAREN ffactionblock
-		{ $$ = ['ff', $id, $paramlist, $ffactionblock, { loc : @$ }]; };
+		{ $$ = new yy.FragFn($id, $paramlist, $ffactionblock, { loc : @$ }); };
 		
 ffactionblock
 	: INDENT ffaction DEDENT
@@ -237,9 +237,9 @@ ffactionblock
 		
 ffaction
 	: INDENT ffcasetreelist DEDENT
-		{ $$ = ['ffaction', $ffcasetreelist, null, { loc : @$ }]; }
+		{ $$ = new yy.FFAction($ffcasetreelist, null, { loc : @$ }); }
 	| INDENT WHERE assignment_list EOL ffcasetreelist DEDENT
-		{ $$ = ['ffaction', $ffcasetreelist, $assignment_list, { loc : @$ }]; }
+		{ $$ = new yy.FFAction($ffcasetreelist, $assignment_list, { loc : @$ }); }
 	;
 	
 ffcasetreelist
@@ -251,9 +251,9 @@ ffcasetreelist
 	
 ffcasetree
 	: ffnode ffcasetree_nodedefblock
-		{ $$ = ['ffcasetree', $1, $2, { loc : @$ }]; }
+		{ $$ = new yy.FFCaseTree($1, $2, { loc : @$ }); }
 	| ffnode
-		{ $$ = ['ffcasetree', $1, null, { loc : @$ }]; }
+		{ $$ = new yy.FFCaseTree($1, null, { loc : @$ }); }
 	;
 
 ffcasetree_nodedefblock
@@ -265,19 +265,19 @@ ffcasetree_nodedefblock
 
 ffcasetree_nodedef
 	: ffdtfdef ffbtfdef ffcasetreelist
-		{ $$ = ['ffnodedef', $1, $2, $3, 'd', { loc : @$ }]; }
+		{ $$ = new yy.FFNodeDef($1, $2, $3, 'd', { loc : @$ }); }
 	| ffbtfdef ffdtfdef ffcasetreelist
-		{ $$ = ['ffnodedef', $2, $1, $3, 'b', { loc : @$ }]; }
+		{ $$ = new yy.FFNodeDef($2, $1, $3, 'b', { loc : @$ }); }
 	| ffdtfdef ffcasetreelist
-		{ $$ = ['ffnodedef', $1, null, $2, 'd', { loc : @$ }]; }
+		{ $$ = new yy.FFNodeDef($1, null, $2, 'd', { loc : @$ }); }
 	| ffbtfdef ffcasetreelist
-		{ $$ = ['ffnodedef', null, $1, $2, 'b', { loc : @$ }]; }
+		{ $$ = new yy.FFNodeDef(null, $1, $2, 'b', { loc : @$ }); }
 	| ffdtfdef
-		{ $$ = ['ffnodedef', $1, null, null, 'd', { loc : @$ }]; }
+		{ $$ = new yy.FFNodeDef($1, null, null, 'd', { loc : @$ }); }
 	| ffbtfdef
-		{ $$ = ['ffnodedef', null, $1, null, 'b', { loc : @$ }]; }
+		{ $$ = new yy.FFNodeDef(null, $1, null, 'b', { loc : @$ }); }
 	| ffcasetreelist
-		{ $$ = ['ffnodedef', null, $1, null, '', { loc : @$ }]; }
+		{ $$ = new yy.FFNodeDef(null, $1, null, '', { loc : @$ }); }
 	;
 	
 ffnode
@@ -293,43 +293,43 @@ ffid : (leafid | ELLIPSIS)
 // depth traversal functions - the logic to apply before and after the depth-recursive call
 ffdtfdef
 	: IMPLICATION fragexprblock REVIMPLICATION fragexprblock
-		{ $$ = ['nodefn', $2, $4, { loc : @$ }]; }
+		{ $$ = yy.FFNodeFn($2, $4, { loc : @$ }); }
 	| IMPLICATION fragexprblock
-		{ $$ = ['nodefn', $2, null, { loc : @$ }]; }
+		{ $$ = yy.FFNodeFn($2, null, { loc : @$ }); }
 	| REVIMPLICATION fragexprblock
-		{ $$ = ['nodefn', null, $2, { loc : @$ }]; }
+		{ $$ = yy.FFNodeFn(null, $2, { loc : @$ }); }
 	;
 	
 // breadth traversal functions - the logic to apply before and after the breadth-recursive call
 ffbtfdef
 	: DOWN fragexprblock UP fragexprblock
-		{ $$ = ['nodefn', $2, $4, { loc : @$ }]; }
+		{ $$ = yy.FFNodeFn($2, $4, { loc : @$ }); }
 	| UP fragexprblock
-		{ $$ = ['nodefn', $2, null, { loc : @$ }]; }
+		{ $$ = yy.FFNodeFn($2, null, { loc : @$ }); }
 	| DOWN fragexprblock
-		{ $$ = ['nodefn', null, $2, { loc : @$ }]; }
+		{ $$ = yy.FFNodeFn(null, $2, { loc : @$ }); }
 	;
 
 fragexprblock
 	: fragexpr EOL
 		{ $$ = $fragexpr; }
 	| EOL
-		{ $$ = ['s-w-y', null, null, null, { loc : @$ }]; }
+		{ $$ = new yy.SWY(null, null, null, { loc : @$ }); }
 	;
 		
 fragexpr
 	: expression
-		{ $$ = ['s-w-y', $expression, [], [], { loc : @$ }]; }
+		{ $$ = new yy.SWY($expression, [], [], { loc : @$ }); }
 	| expression YIELD assignment_list
-		{ $$ = ['s-w-y', $expression, [], $3, { loc : @$ }]; }
+		{ $$ = new yy.SWY($expression, [], $3, { loc : @$ }); }
 	| expression WHERE assignment_list
-		{ $$ = ['s-w-y', $expression, $3, [], { loc : @$ }]; }
+		{ $$ = new yy.SWY($expression, $3, [], { loc : @$ }); }
 	| expression WHERE assignment_list YIELD assignment_list
-		{ $$ = ['s-w-y', $expression, $3, $5, { loc : @$ }]; }
+		{ $$ = new yy.SWY($expression, $3, $5, { loc : @$ }); }
 	| WHERE assignment_list YIELD assignment_list
-		{ $$ = ['s-w-y', null, $2, $4, { loc : @$ }]; }
+		{ $$ = new yy.SWY(null, $2, $4, { loc : @$ }); }
 	| YIELD assignment_list
-		{ $$ = ['s-w-y', null, [], $2, { loc : @$ }]; };
+		{ $$ = new yy.SWY(null, [], $2, { loc : @$ }); };
 		
 tuplevarlist
 	: id COMMA tuplevarlist

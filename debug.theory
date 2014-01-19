@@ -1,13 +1,13 @@
-chris
+mywebsite
   theory main
-    html is john(5, this.node);
+    html is myff(5);
       div
-        @bob is { chris: 'was here' };
+        @tablet is { chris: 'was here' };
         a
           span
         b
 
-    bob = "width < 300px";
+    tablet = "width < 300px";
 
     ff myff(n)
       where start = n;
