@@ -5,18 +5,8 @@ var u = require('../util').u,
 	classes = require('./classes');
 	
 
-var ff = function FFEngine(name, ast) {
+var ff = function FFEngine(name, ff) {
 	var self = this;
-	var params = ast[0], actionAST = ast[1], meta = ast[2];
-	var root, args, initialWhere;
-	var instructions = new LinkedList(InstrLink);
-	var rootFFNode;
-	
-	self.compile = function() {
-		rootFFNode = nodify(actionAST[1][0]);
-		instructions = go(rootFFNode, 'd', instructions);
-		return self;
-	};
 	
 	/** Assumes instructions contain a list of functions with the following signature:
 	 * function(treeNode, currentInstruction, args, e, scope) {
@@ -24,53 +14,34 @@ var ff = function FFEngine(name, ast) {
 	 * }
 	 */
 	self.evaluate = function(treeNode, args, e, scope) {
-		var node = instructions.root();
-		do {
-			console.log(node.instruction[0], node.instruction[2]);	
-		} while (node = node.Next);
-		//return;
 		var done = false;
-		var instruction = instructions.root();
-		var ffscope = scope.base().createScope('ff.where', name, null, meta);
-		
+		var ffscope;	
 		
 		function instructionComplete(nextTreeNode, nextInstruction, yields, style) {
-			if (style) {
-				nextTreeNode.apply(style);
-			}
+			if (style) nextTreeNode.apply(style);
 			
-			var actionScope = ffscope.createScope('ff.yield', name, null, meta);
-			for(var i=0, l=yields.length; i<l; i++) {
-				actionScope.addSymbol(yields[i][0], 'ff.where', yields[i][1], null, false, ffscope);
-			}
-			
-			if (nextInstruction == null) {
-				//console.log("Done!", JSON.stringify(yields, null, 2), JSON.stringify(style, null, 2));
+			if (nextInstruction != null) {
+				var actionScope = ffscope.createScope('ff.yield', name, null, meta);
+				actionScope.addSymbols(yields, 'ff.yield', null, false, ffscope);
+				return nextInstruction
+						.execute(nextTreeNode, nextInstruction, yields, e, actionScope)
+						.spread(instructionComplete);
+			} else { // we're done!
 				return yields;
 			}
-				
-			console.log(nextInstruction.instruction[0]);
-			return nextInstruction.execute(nextTreeNode, nextInstruction, yields, e, actionScope)
-				.spread(instructionComplete);
 		};
 		
+		// Add parameters to evaluation scope
 		var qargs = args.map(function(arg) { return e(arg, ffscope, null, true); });
 		var initScope = Q.all(qargs).then(function(eargs) {
-			for(var i=0, l=eargs.length; i<l; i++) {
-				ffscope.addSymbol(params[i], 'param', eargs[i], null, false, ffscope);
-			}
-			if (ast[1][2] !== null)
-				return Q.all(ast[1][2].map(function(def) { return Q([def[1], e(def[2], ffscope, null, true)]); }));
-			else
-				return Q([]);
+			ffscope = scope.base().createScope('ff.params', name, null, meta);	
+			ffscope.zipSymbols(params, 'ff.param', eargs);
+				
+			if (ff.action.hasWhere)
+				return Q.all(ff.action.where.map(function(def) { return Q([def[1], e(def[2], ffscope, null, true)]); }));
 		}).then(function(ewhereDefs) {
-			for(var i=0, l=ewhereDefs.length; i<l; i++) {
-				ffscope.addSymbol(ewhereDefs[i][0], 'ff.where', ewhereDefs[i][1], null, false, ffscope);
-			}
-			
-			// and kick off tree evaluation... :-)
-			console.log(instruction.instruction[0]);
-			return instruction.execute(treeNode, instruction, [], e, ffscope).spread(instructionComplete);
+			if (ewhereDefs) ffscope.addSymbols(ewhereDefs, 'ff.where');			
+			return ff.action.execute(treeNode, [], e, ffscope).spread(instructionComplete);
 		});
 		return initScope;
 	};

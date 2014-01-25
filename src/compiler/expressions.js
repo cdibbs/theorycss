@@ -203,7 +203,8 @@ var Expressions = function Expressions(node) {
 				} else if (typeof fndef === 'object' && fndef.type === 'ff') {
 					//fndef.scope
 					//console.log("CANT YET DEAL WITH FRAG FUNCS", fn, args, e(fn, scope));
-					var cff = new fragFunctions.FFEngine(fndef.name, fndef.ast).compile();
+					console.log(fndef);
+					var cff = new fragFunctions.FFEngine(fndef.name, fndef.val);
 					return cff.evaluate(node, args, e, scope);
 				} else if (typeof fndef === 'object' && fndef.type === 'class') { // Class instantiation
 					var eArgProm = args.map(function(a) { return e(a, scope, true); });

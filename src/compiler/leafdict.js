@@ -16,8 +16,8 @@ function LeafDict(nodeId, attrs, isList, parent) {
 	var mq = {};
 	var children = [];
 	var attributes = null; 
-	var index = null;
 	
+	self.index = null;	
 	self.genCSSProperties = function genCSSProperties(scope) {
 		if (!isList) return;
 		isList.every(function(isdef) {

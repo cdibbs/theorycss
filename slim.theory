@@ -17,7 +17,7 @@ Website
 
     ff fraggle()
       div
-        -> style me + bro;
+        -> me + bro;
       
   theory MyContent extends Content
     #content
@@ -43,15 +43,15 @@ Website
 
     ff sepia()
       block
-        -> style bob
+        -> bob
            where bob = 147;
         <- yield bob = bob * 2, janet = bob * 3;
         ...
-          -> style janet;
+          ->  janet;
 
     ff sepia2()
       Colorable
-        <- style { set prop: sepiafy(prop, val) for prop, val in colors }
+        <-  { set prop: sepiafy(prop, val) for prop, val in colors }
 	   where colors = {from this.props keep colorProperties};
     
     
@@ -68,7 +68,7 @@ Website
 
     ff clean()
       ...
-        <- style { set prop:null for prop in this.props.keys };
+        <-  { set prop:null for prop in this.props.keys };
 
   class Font : CssSerializable    
     fn toCSS() -> "";

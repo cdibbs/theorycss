@@ -12,6 +12,25 @@ function StateManager(type, name, _ast, parentScope, meta) {
 		var scope = new StateManager(type, name, ast, self, meta);
 		return scope;
 	};
+	/**
+	 * Same as addSymbols, except from two distinct arrays, rather than one, zipped, 2D array
+	 */
+	self.zipSymbols = function(ids, type, vals) {
+		for(var i=0, l=vals.length; i<l; i++)
+			self.addSymbol(ids[i], type, vals[i]);
+	};
+	/**
+	 * Adds a matrix of symbols. 
+	 * @param {Object} vals - [ ["name", "val"], ["name2", "val2"] ...] 
+	 * @param {Object} type - type of value
+	 * @param {Object} ast - ast from which value derived
+	 * @param {Object} lazy - must evaluate from ast
+	 * @param {Object} scope - scope in which to evaluate
+	 */
+	self.addSymbols = function(vals, type, ast, lazy, scope) {
+		for(var i=0, l=vals.length; i<l; i++)
+			self.addSymbol(vals[i][0], type, vals[i][1], ast, lazy, scope);
+	};
 	self.addSymbol = function(id, type, val, ast, lazy, scope) {
 		if (id instanceof Array) {
 			if (id.length > 1) {
