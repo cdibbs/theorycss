@@ -20,7 +20,10 @@ class FFCaseTree extends GrammarBase
 	  super("FFCaseTree", meta)
 	  
 	apply: (treeNode) ->
+	  
+	  
 	matches: (treeNode) ->
+	  @nodeId == '...' || @nodeId == treeNode.getNodeId()
 	  
 
 class FFNodeDef extends GrammarBase
