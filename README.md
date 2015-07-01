@@ -4,7 +4,7 @@ An expressive, functional CSS metalanguage for maintainable ([and even testable]
 
 # Objective
 The emergence of CSS superset languages such as LESS and SASS prove need for a more
-expressive language for styling the web. Theory answers this need by providing high-level,
+expressive language for styling the web. Theory answers the need by providing high-level,
 relational structure between styled elements in a maintainable way.
 
 ##Installation
@@ -47,7 +47,8 @@ and ordinary properties and methods.
 			...
 ```
 ##Frag Functions
-These are declarative, inherently recursive functions for dealing with TreeFrags more concisely.
+These are declarative, inherently recursive functions for operating over TreeFrags. For this purpose, 
+they are more concise than traditional functions.
 
 
 # Usage
@@ -58,7 +59,7 @@ Hierarchically, Theory files consist first of namespaces, then theories and libr
 frag functions, and traditional functions, properties, and tests.
  
 ##testing
-Theory can test your design logic. Beyond traditional code logic testing, you can even begin to test visual and
+Theory can test your design logic. Beyond traditional code logic testing, you can test visual and
 design requirements, such as asserting that two colors provide sufficient contrast on a particular display, or
 when viewed with certain types of colorblindness. 
 
