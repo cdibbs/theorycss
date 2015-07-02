@@ -1,15 +1,16 @@
 <html>
 	<head>
 		<title>Theory Tests</title>
-		<script type='text/javascript' src='jquery-1.7.1.js'></script>
-		<script type='text/javascript' src='theory.js'></script>
+		<script type='text/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
+        <script type='text/javascript' src='lib/theory-parser.js'></script>
+		<script type='text/javascript' src='web/theory-compiler.js'></script>
 		<script type='text/javascript' src='test.js'></script>
-		<script type='text/javascript' src='compiler.js'></script>
 		<script type='text/javascript'>
 			$(document).ready(function() {
-				theory.yy = theoryCompiler;
+                var theory = parser;
+				theory.yy = new Compiler.Compiler();
 				theory.lexer.options.backtrack_lexer = true;
-				var result = theory.parse($('#best').text());
+				var result = theory.parse($('#slim').text());
 				console.log(result);
 			});
 		</script>
@@ -58,7 +59,7 @@
 					-> doStuffToEnhanceIt()
 			}*/
 		<script type='text/x-theory' id='best'>
-namespace Website
+Website
 	theory Main
 		[[html]]
 			[[body]]
@@ -323,6 +324,61 @@ namespace Website
 					 
 			}
 		</script>
+        <script type='text/x-theory' id='slim'>
+website
+  import "test" into test;
+
+  theory main
+    div
+      #ident
+        is { 'background-image' : toy.toCSS() }, dim(toy);
+        ul
+          li * 8
+            a[href=links[this.index()]]
+        div
+          
+      
+    /* this object should have to be passed into regular functions.
+       Only frag functions receive it, implicitly. Therefore, the
+       this keyword can be used both in classes and tree frags.
+       Exception: frag functions in classes? Need to solve this.
+       Should frag functions be permitted within classes?
+    */
+    
+    mobile = 'width > 800px';
+    chris = John(1,2,3).toString();
+    
+    fg,bg,txt,bord,bread,lnk = red.sixToneCWScheme();
+    toy = Image("src/compiler/corelib/pixastic/sample-images/earth.png")
+    	.edgeEnhance()
+    	.edgeDetect()
+    	;
+
+    testing
+      backgroundColor: red;
+      color: blue;
+      +border(1px, 'solid', red);
+      +dim(earth);
+      +bkgImg(earth);
+
+    ff alex2(a,b)
+      div
+        -> chris where chris = {};
+        block
+          -> chris;
+
+    ff makeColor(c)
+      any
+        -> { 'background-color' : c };
+        #header
+        	...
+              -> {} where a = 5*8 yield janet = 2;
+        div 
+      bob
+      
+  class Img(src) : Image(src)
+    fn toCSS() -> "this is here";
+        </script>
 	</head>
 	<body>
 	<div class='navbar-fixed-top'>

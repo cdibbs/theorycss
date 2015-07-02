@@ -53,15 +53,15 @@ units						(?:[a-zA-Z][a-zA-Z0-9]*|\%)
 "+"				return 'PLUS';
 <FREEDOM>"-"	return 'MINUS'; // this is used in CSS Ids
 ({float})"_"?({units})		%{
-						yytext = { type: 'fl_', val: parseFloat(yy.lexer.matches[1]), units: yy.lexer.matches[4], toString : function() { return this.val + this.units; } };
+						yytext = { type: 'fl_', val: parseFloat(this.matches[1]), units: this.matches[4], toString : function() { return this.val + this.units; } };
 						return 'FLOAT_UNITS';
 						%};
 {float}			%{ yytext = parseFloat(yytext); return 'FLOAT'; %};
 "0x"({hex})			%{ yytext = parseInt(yy.lexer.matches[1], 16); return 'HEXNATLITERAL'; %};
-({int})"_"?({units})	%{ yytext = { type: 'int_', val : parseInt(yy.lexer.matches[1]), units: yy.lexer.matches[4], toString : function() { return this.val + this.units; } }; return 'INT_UNITS'; %};
+({int})"_"?({units})	%{ yytext = { type: 'int_', val : parseInt(this.matches[1]), units: this.matches[4], toString : function() { return this.val + this.units; } }; return 'INT_UNITS'; %};
 {int}				%{ yytext = parseInt(yytext); return 'INTEGER'; %};
-({bin})"b"			%{ yytext = parseInt(yy.lexer.matches[1], 2); return 'BINNATLITERAL'; %};
-<FREEDOM>"#"({hex})			%{ yytext = parseInt(yy.lexer.matches[1]); return 'HEXCOLOR'; %};
+({bin})"b"			%{ yytext = parseInt(this.matches[1], 2); return 'BINNATLITERAL'; %};
+<FREEDOM>"#"({hex})			%{ yytext = parseInt(this.matches[1]); return 'HEXCOLOR'; %};
 "#"					return 'POUND';
 "\\"			return 'LAMBDA';
 "..."			return 'ELLIPSIS';
