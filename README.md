@@ -15,6 +15,18 @@ Theory relies on Fabric for image manipulation, so you will need to install:
 - libgif (libgif-dev), and
 - libpng (libpng-dev), to support canvas tag features.
 
+Use your normal package manager of choice, with command such as `apt-get install libcairo2-dev libjpeg-dev libgif-dev libpng-dev`.
+
+### Windows Installation
+To build Theory for use outside of the browser requires canvas tag support, which requires native libraries. On windows,
+this can be somewhat tricky. In addition to a build environment including Visual Studio 2010, you will need GTK+ 2.22 properly installed.
+ - Download the 2.22 bundle, here: http://www.gtk.org/download/win64.php
+ - Unpack it somewhere convenient, say c:\GTK
+ - In Control Panel, go to Advanced system settings, click "Environment Variables," find the Path variable, and edit it to append "c:\GTK\bin" (or whatever path you used).
+ - Restart any related cmd/powershells
+ - Verify that `gtk-demo` runs
+ - In a fresh shell, trigger the Theory build using `npm install`
+
 ##Tree Fragments
 Akin to nested rules in LESS, these describe rough, in-tree relationships between elements, as well
 as high-level, declarative styling rules.
