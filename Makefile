@@ -3,7 +3,7 @@
 all: theory test
 
 theory:
-	./node_modules/bin/jison src/theory-parser.jison src/theory-parser.jisonlex
+	node ./node_modules/jison/lib/cli.js src/theory-parser.jison src/theory-parser.jisonlex
 	mv theory-parser.js lib/
 	
 web:

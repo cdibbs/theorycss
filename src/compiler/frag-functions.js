@@ -13,7 +13,7 @@ var ff = function FFEngine(name, ff) {
 	 * 	return Q([nextTreeNode, nextInstruction, yieldsPromises, stylePromise]); 
 	 * }
 	 */
-	self.evaluate = function(treeNode, args, e, scope) {
+	self.evaluate = function(treeNode, args, e, scope, meta) {
 		var done = false;
 		var ffscope;	
 		
